@@ -3,7 +3,7 @@ import mongoose, { Schema } from 'mongoose'
 
 const otpSchema = new Schema<IOtpDocument>(
   {
-    user: {
+    userId: {
       type: Schema.Types.ObjectId,
       ref: 'User',
       required: true,
@@ -39,7 +39,7 @@ const otpSchema = new Schema<IOtpDocument>(
 otpSchema.index({ expiresAt: 1 }, { expireAfterSeconds: 0 })
 
 // índice composto para previnir mais de um OTP ativo do mesmo TIPO (verify ou reset)
-otpSchema.index({ user: 1, type: 1 }, { unique: true })
+otpSchema.index({ userId: 1, type: 1 }, { unique: true })
 
 const Otp = mongoose.model<IOtpDocument>('Otp', otpSchema)
 
