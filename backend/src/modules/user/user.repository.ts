@@ -1,9 +1,9 @@
 import type { FilterQuery, ProjectionType, Types } from 'mongoose'
+import type { IUser, IUserDocument, IUserPersistence } from './user.types.js'
 import User from './user.model.js'
-import type { IUser, IUserDocument } from './user.types.js'
 
 interface PaginatedUsers {
-  users: IUser[]
+  users: IUserPersistence[]
   totalElements: number
 }
 
@@ -24,7 +24,7 @@ class UserRepository {
         .sort({ [sortField]: sortOrder }) // Ordenação dinâmica
         .skip(skip)
         .limit(size)
-        .lean<IUser[]>(), // retorna dados puros (Plain Old JavaScript Objects)
+        .lean<IUserPersistence[]>(), // retorna dados puros (Plain Old JavaScript Objects)
       User.countDocuments(),
     ])
 
@@ -34,25 +34,28 @@ class UserRepository {
   async findOne(
     filter: FilterQuery<IUserDocument>,
     projection: ProjectionType<IUserDocument> = {},
-  ): Promise<IUser | null> {
-    return await User.findOne(filter, projection).lean<IUser | null>()
+  ): Promise<IUserPersistence | null> {
+    return await User.findOne(filter, projection).lean<IUserPersistence | null>()
   }
 
-  async findById(id: string | Types.ObjectId): Promise<IUser | null> {
-    return await User.findById(id).lean<IUser | null>()
+  async findById(id: string | Types.ObjectId): Promise<IUserPersistence | null> {
+    return await User.findById(id).lean<IUserPersistence | null>()
   }
 
-  async create(data: Partial<IUser>): Promise<IUser> {
+  async create(data: Partial<IUser>): Promise<IUserPersistence> {
     const user = await User.create(data)
-    return user.toObject() // converte para objeto JS puro
+    return user.toObject() as IUserPersistence // converte para objeto JS puro
   }
 
-  async update(id: string | Types.ObjectId, data: Partial<IUser>): Promise<IUser | null> {
-    return await User.findByIdAndUpdate(id, data, { new: true }).lean<IUser | null>()
+  async update(
+    id: string | Types.ObjectId,
+    data: Partial<IUser>,
+  ): Promise<IUserPersistence | null> {
+    return await User.findByIdAndUpdate(id, data, { new: true }).lean<IUserPersistence | null>()
   }
 
-  async remove(id: string | Types.ObjectId): Promise<any> {
-    return await User.findByIdAndDelete(id).lean<IUser | null>()
+  async remove(id: string | Types.ObjectId): Promise<IUserPersistence | null> {
+    return await User.findByIdAndDelete(id).lean<IUserPersistence | null>()
   }
 }
 
