@@ -1,26 +1,38 @@
+import type { Request, Response } from 'express'
+import type { AuthenticatedRequest } from '../session/session.controller.js'
+import type {
+  RequestResetDTO,
+  ResendCodeDTO,
+  ResetPasswordDTO,
+  VerifyEmailDTO,
+  VerifyResetDTO,
+} from './otp.types.js'
 import otpService from './otp.service.js'
 import throwHttpError from '../../utils/throwHttpError.js'
 
 class OtpController {
-  #otpService
+  #otpService: typeof otpService
 
-  constructor(otpService) {
-    this.#otpService = otpService
+  constructor(otpServiceInstance: typeof otpService) {
+    this.#otpService = otpServiceInstance
   }
 
-  status = async (req, res, next) => {
+  status = async (req: Request, res: Response): Promise<Response> => {
     const status = await this.#otpService.showStatus(req.cookies.passwordToken)
     return res.status(200).json(status)
   }
 
-  requestVerification = async (req, res, next) => {
+  requestVerification = async (req: Request<{ id: string }>, res: Response): Promise<Response> => {
     const { id } = req.params
 
     await this.#otpService.sendVerification(id)
     return res.status(204).end()
   }
 
-  requestReset = async (req, res, next) => {
+  requestReset = async (
+    req: Request<{}, any, RequestResetDTO>,
+    res: Response,
+  ): Promise<Response> => {
     const { email } = req.body
 
     await this.#otpService.sendReset({ email })
@@ -29,9 +41,12 @@ class OtpController {
     })
   }
 
-  resendCode = async (req, res, next) => {
+  resendCode = async (
+    req: AuthenticatedRequest & Request<{}, any, ResendCodeDTO>,
+    res: Response,
+  ): Promise<Response> => {
     const { email, type } = req.body
-    const filter = type === 'VERIFY' ? { _id: req.user.id } : { email }
+    const filter = type === 'VERIFY' ? { _id: req.user.id } : { email: email! }
 
     await this.#otpService.resend(type, filter)
     return res.status(200).json({
@@ -42,7 +57,10 @@ class OtpController {
     })
   }
 
-  verifyEmail = async (req, res, next) => {
+  verifyEmail = async (
+    req: Request<{ id: string }, any, VerifyEmailDTO>,
+    res: Response,
+  ): Promise<Response> => {
     const { id } = req.params
     const { otp } = req.body
 
@@ -50,7 +68,7 @@ class OtpController {
     return res.status(204).end()
   }
 
-  verifyReset = async (req, res, next) => {
+  verifyReset = async (req: Request<{}, any, VerifyResetDTO>, res: Response): Promise<Response> => {
     const { email, otp } = req.body
 
     const passwordToken = await this.#otpService.validateReset(otp, { email })
@@ -58,14 +76,17 @@ class OtpController {
     res.cookie('passwordToken', passwordToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production', // usar TRUE em HTTPS
-      sameSite: 'Lax',
+      sameSite: 'lax',
       maxAge: 15 * 60 * 1000, // 15 minutos
     })
 
     return res.status(204).end()
   }
 
-  resetPassword = async (req, res, next) => {
+  resetPassword = async (
+    req: Request<{}, any, ResetPasswordDTO>,
+    res: Response,
+  ): Promise<Response> => {
     const { email, newPassword } = req.body
 
     const user = await this.#otpService.resetPassword({ email }, newPassword)
@@ -73,7 +94,7 @@ class OtpController {
     res.clearCookie('passwordToken', {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production', // usar TRUE em HTTPS
-      sameSite: 'Lax',
+      sameSite: 'lax',
     })
 
     return res.status(200).json(user)
