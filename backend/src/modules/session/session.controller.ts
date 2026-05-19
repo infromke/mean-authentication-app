@@ -3,7 +3,7 @@ import sessionService from './session.service.js'
 import throwHttpError from '../../utils/throwHttpError.js'
 
 // interface para garantir que o TS reconheça o req.user
-interface AuthenticatedRequest extends Request {
+export interface AuthenticatedRequest extends Request {
   user: {
     id: string
   }
