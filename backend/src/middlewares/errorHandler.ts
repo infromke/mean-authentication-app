@@ -1,17 +1,33 @@
-const HTTP_ERROR = {
+import type { ErrorRequestHandler, Request, Response, NextFunction } from 'express'
+
+// mapeamento dos status HTTP de erros esperados
+const HTTP_ERROR: Record<number, string> = {
   400: 'Bad Request',
   401: 'Unauthorized',
   403: 'Forbidden',
   404: 'Not Found',
-  409: 'Conflict', // indica "conflito" no estado atual de um recurso no servidor (ex.: duplicidade)
+  409: 'Conflict',
   429: 'Too Many Requests',
   500: 'Internal Server Error',
 }
 
+// interface para capturar propriedades específicas do Mongoose e do Zod
+interface CustomError extends Error {
+  status?: number
+  code?: number
+  keyPattern?: Record<string, any>
+  errors?: any // para o array de validações do Zod
+}
+
 /**  Captura qualquer erro inesperado lançado em rotas, middlewares ou controllers.
- * Diferencia entre ambiente de produção e desenvolvimento.
+ * Diferencia entre ambiente de produção e desenvolvimento seguindo a RFC 7807.
  */
-const errorHandler = (err, req, res, next) => {
+const errorHandler: ErrorRequestHandler = (
+  err: CustomError,
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
   let status = err.status || 500
   let detail = err.message || 'An unexpected error occurred. Please try again later.'
 
@@ -30,8 +46,9 @@ const errorHandler = (err, req, res, next) => {
     console.error(err.stack)
   }
 
-  // header adequado conforme o RFC da IETF
+  // header adequado conforme o RFC da IETF (Problem Details)
   res.setHeader('Content-Type', 'application/problem+json')
+
   return res.status(status).json({
     type: 'about:blank', // valor padrão da RFC quando não há link de doc
     title,
@@ -40,7 +57,7 @@ const errorHandler = (err, req, res, next) => {
     instance: req.originalUrl,
     // extensões personalizadas abaixo
     ...(err.errors ? { errors: err.errors } : {}), // para os erros vindos do Zod
-    ...(process.env.NODE_ENV === 'development' ? { stack: err.stack } : null),
+    ...(process.env.NODE_ENV === 'development' ? { stack: err.stack } : {}),
   })
 }
 
