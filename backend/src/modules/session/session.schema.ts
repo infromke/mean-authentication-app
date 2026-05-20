@@ -3,15 +3,12 @@ import { z } from 'zod'
 const loginSchema = z.object({
   body: z.object({
     email: z
-      .string({ required_error: 'Email is required' })
+      .email({ error: 'Provide a valid e-mail address' })
       .trim()
       .toLowerCase()
-      .email('Provide a valid e-mail address')
-      .nonempty('Email cannot be empty'),
+      .min(1, 'Email cannot be empty'),
 
-    password: z
-      .string({ required_error: 'Password is required' })
-      .nonempty('Password cannot be empty'),
+    password: z.string({ error: 'Password is required' }).min(1, 'Password cannot be empty'),
   }),
 })
 

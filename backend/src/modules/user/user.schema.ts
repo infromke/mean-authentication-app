@@ -8,11 +8,7 @@ const userBody = z.object({
     .trim()
     .min(2, 'Name must be at least 2 characters')
     .max(56, 'Name must be between 2 and 56 characters'),
-  email: z
-    .string()
-    .trim()
-    .toLowerCase() // alternativa ao normalizeEmail()
-    .email('Provide a valid e-mail address'),
+  email: z.email({ error: 'Provide a valid e-mail address' }).trim().toLowerCase(), // alternativa ao normalizeEmail()
   password: z.string().min(8, 'Password must be at least 8 characters'),
 })
 
@@ -25,7 +21,7 @@ const registerSchema = z.object({
       confirmPassword: z.string().min(1, 'Confirm your password'),
     })
     .refine((data) => data.password === data.confirmPassword, {
-      message: 'Passwords must match each other',
+      error: 'Passwords must match each other',
       path: ['confirmPassword'], // erro associado ao campo confirmPassword
     }),
 })
@@ -48,7 +44,7 @@ const updateSchema = z.object({
         return true
       },
       {
-        message: 'Passwords must match each other',
+        error: 'Passwords must match each other',
         path: ['confirmPassword'],
       },
     ),

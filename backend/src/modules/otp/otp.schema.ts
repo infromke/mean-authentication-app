@@ -4,12 +4,12 @@ import { idSchema } from '../../utils/common.schema.js'
 
 // REGRAS individuas de base
 const emailRule = z
-  .string({ required_error: 'Email is required' })
+  .email({ error: 'Provide a valid e-mail address' })
   .trim()
   .toLowerCase()
-  .email('Provide a valid e-mail address')
+  .min(1, 'Email cannot be empty')
 
-const otpRule = z.string({ required_error: 'OTP is required' }).nonempty('OTP cannot be empty')
+const otpRule = z.string({ error: 'OTP is required' }).min(1, 'OTP cannot be empty')
 
 // SCHEMAS
 
@@ -38,10 +38,10 @@ const resetPasswordSchema = z.object({
     .object({
       email: emailRule,
       newPassword: z.string().min(8, 'Password must be at least 8 characters'),
-      confirmPassword: z.string().nonempty('Confirm your password'),
+      confirmPassword: z.string().min(1, 'Confirm your password'),
     })
     .refine((data) => data.newPassword === data.confirmPassword, {
-      message: 'Passwords must match each other',
+      error: 'Passwords must match each other',
       path: ['confirmPassword'], // erro associado ao campo confirmPassword
     }),
 })
@@ -51,31 +51,24 @@ const resendOtpSchema = z.object({
   body: z
     .object({
       type: z
-        .string({
-          error: (issue) => {
-            if (issue.input === undefined || typeof issue.input !== 'string') {
-              return { message: 'Type is required' }
-            }
-          },
-        })
+        .string({ error: 'Type is required' })
         .min(1, 'Type is required.')
         .refine((val) => ['VERIFY', 'RESET'].includes(val), {
-          message: 'Invalid OTP type',
+          error: 'Invalid OTP type',
         }),
-      email: emailRule.optional(), // o e-mail apenas é necessário no resend de RESET
+      email: emailRule.optional(),
     })
     .refine(
       (data) => {
         if (data.type === 'RESET') {
-          const emailResult = z.string().email().safeParse(data.email)
-          return emailResult.success // se o e-mail não for válido, retorna false
+          const emailResult = z.email().safeParse(data.email)
+          return emailResult.success
         }
-
         return true
       },
       {
-        message: 'Provide a valid e-mail address for password reset',
-        path: ['email'], // erro associado ao campo email
+        error: 'Provide a valid e-mail address for password reset',
+        path: ['email'],
       },
     ),
 })
