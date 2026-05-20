@@ -27,7 +27,7 @@ const errorHandler: ErrorRequestHandler = (
   req: Request,
   res: Response,
   next: NextFunction,
-) => {
+): Response => {
   let status = err.status || 500
   let detail = err.message || 'An unexpected error occurred. Please try again later.'
 

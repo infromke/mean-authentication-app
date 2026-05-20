@@ -8,7 +8,7 @@ import throwHttpError from '../utils/throwHttpError.js'
  */
 const handleValidation =
   (schema: ZodType): RequestHandler =>
-  (req: Request, res: Response, next: NextFunction) => {
+  (req: Request, res: Response, next: NextFunction): void => {
     try {
       schema.parse({
         body: req.body,
