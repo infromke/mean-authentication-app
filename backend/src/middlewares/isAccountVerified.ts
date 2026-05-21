@@ -1,21 +1,25 @@
-import UserService from '../modules/user/user.service.js'
+import type { Request, Response, NextFunction } from 'express'
+import type { AuthenticatedRequest } from '../modules/session/session.controller.js'
+import userService from '../modules/user/user.service.js'
 import throwHttpError from '../utils/throwHttpError.js'
 
 /**
  * Restringe o acesso apenas a usuários que realizaram a verificação de conta.
  */
-const isAccountVerified = async (req, res, next) => {
+const isAccountVerified = async (
+  req: AuthenticatedRequest & Request,
+  res: Response,
+  next: NextFunction,
+): Promise<void> => {
   const { id } = req.user
 
-  try {
-    const user = await UserService.show(id)
-    if (!user.isAccountVerified)
-      throwHttpError(403, 'Account must be verified to perform this action')
+  const user = await userService.show(id)
 
-    next()
-  } catch (error) {
-    next(error)
+  if (!user.isAccountVerified) {
+    next(throwHttpError(403, 'Account must be verified to perform this action'))
+    return
   }
+  next()
 }
 
 export default isAccountVerified
