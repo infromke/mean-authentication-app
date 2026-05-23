@@ -1,4 +1,4 @@
-const welcomeEmail = `
+const getWelcomeEmailTemplate = (name: string, email: string): string => `
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="pt-br">
   <head>
@@ -55,7 +55,7 @@ const welcomeEmail = `
                   >
                     <tr>
                       <td style="font-size: 16px; line-height: 24px">
-                        Dear {{user}},
+                        Dear ${name},
                       </td>
                     </tr>
                     <tr>
@@ -81,7 +81,7 @@ const welcomeEmail = `
                         You are receiving this message because you have created
                         an account with the following e-mail:
                         <span style="color: #135dfb; font-weight: 600"
-                          >{{email}}</span
+                          >${email}</span
                         >. If you don't know what this is about, you are free to ignore it.
                       </td>
                     </tr>
@@ -137,4 +137,4 @@ const welcomeEmail = `
 </html>
 `
 
-export default welcomeEmail
+export default getWelcomeEmailTemplate

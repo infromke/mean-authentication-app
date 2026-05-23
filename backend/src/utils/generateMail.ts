@@ -1,6 +1,6 @@
 import type { OtpType } from '../modules/otp/otp.types.js'
-import otpEmail from '../templates/otpEmail.js'
-import welcomeEmail from '../templates/welcomeEmail.js'
+import getOtpEmailTemplate from '../templates/otpEmail.js'
+import getWelcomeEmailTemplate from '../templates/welcomeEmail.js'
 
 interface MailOptions {
   from: string
@@ -26,7 +26,7 @@ const getOtpMailOptions = (email: string, code: string, type: OtpType): MailOpti
     to: email,
     subject: `Authentication System code: ${code}`,
     text: `Your ${typeText} code is:\n\n${code}\n\nThis code expires after 15 minutes. If you don't know what this is about, you are free to ignore it.`,
-    html: otpEmail.replace('{{type}}', typeText).replaceAll('{{code}}', code),
+    html: getOtpEmailTemplate(typeText, code),
   }
 }
 
@@ -44,7 +44,7 @@ const getWelcomeMailOptions = (name: string, email: string): MailOptions => {
     to: email,
     subject: 'Welcome to my Authentication System!',
     text: `Dear ${firstName},\n\nWelcome to a very simple website made with MongoDB, Express.js, Angular and Node.js!\n\nYou are receiving this message because you have created an account with the following e-mail: ${email}. If you don't know what this is about, you are free to ignore it.\n\nSincerely,\ninfrmke (https://github.com/infrmke)`,
-    html: welcomeEmail.replace('{{user}}', name).replace('{{email}}', email),
+    html: getWelcomeEmailTemplate(name, email),
   }
 }
 

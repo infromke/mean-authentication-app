@@ -1,9 +1,9 @@
-const otpEmail = `
+const getOtpEmailTemplate = (type: string, code: string): string => `
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="pt-br">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-    <title>Authentication System code: {{code}}</title>
+    <title>Authentication System code: ${code}</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   </head>
   <body style="margin: 0; padding: 0; background-color: #f3f4f6">
@@ -55,7 +55,7 @@ const otpEmail = `
                   >
                     <tr>
                       <td style="font-size: 16px; line-height: 24px">
-                        Your {{type}} code is:
+                        Your ${type} code is:
                       </td>
                     </tr>
                     <tr>
@@ -68,7 +68,7 @@ const otpEmail = `
                           line-height: 24px;
                         "
                       >
-                        {{code}}
+                        ${code}
                       </td>
                     </tr>
                     <tr>
@@ -112,4 +112,4 @@ const otpEmail = `
 </html>
 `
 
-export default otpEmail
+export default getOtpEmailTemplate
