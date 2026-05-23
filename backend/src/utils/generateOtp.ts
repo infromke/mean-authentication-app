@@ -1,8 +1,17 @@
+import type { OtpType } from '../modules/otp/otp.types.js'
+
+interface OtpOptions {
+  userId: string
+  code: string
+  type: OtpType
+  expiresAt: Date
+}
+
 /**
  * Gera uma string de 6 dígitos numéricos aleatórios para ser usada como OTP.
  * @returns {string}
  */
-const generateOtp = () => {
+const generateOtp = (): string => {
   let otp = ''
 
   for (let i = 0; i < 6; i++) {
@@ -17,10 +26,10 @@ const generateOtp = () => {
  * Gera o objeto de opções padrão para um novo documento OTP.
  * @param {string} userId - ID do usuário.
  * @param {'VERIFY' | 'RESET'} type - Tipo do OTP.
- * @returns {Object}
+ * @returns {Object} Documento OTP estruturado.
  */
-const createOtpOptions = (userId, type) => ({
-  user: userId,
+const createOtpOptions = (userId: string, type: OtpType): OtpOptions => ({
+  userId,
   code: generateOtp(),
   type: type,
   expiresAt: new Date(Date.now() + 15 * 60 * 1000), // 15 minutos

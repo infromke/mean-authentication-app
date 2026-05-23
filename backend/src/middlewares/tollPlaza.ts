@@ -1,3 +1,5 @@
+import type { Request, Response, NextFunction } from 'express'
+import type { AuthenticatedRequest } from '../modules/session/session.controller.js'
 import verifyAccessToken from './verifyAccessToken.js'
 import isAccountVerified from './isAccountVerified.js'
 import verifyOwnership from './verifyOwnership.js'
@@ -30,8 +32,9 @@ const fullLock = [
  * Se for do tipo VERIFY, o usuário passa pelo middleware verifyAccessToken.
  * Se for do tipo RESET, o validator verifica e valida o `email` passado.
  */
-const resendOtpFlow = (req, res, next) => {
-  if (req.body.type === 'VERIFY') return verifyAccessToken(req, res, next)
+const resendOtpFlow = (req: Request, res: Response, next: NextFunction): void => {
+  if (req.body.type === 'VERIFY')
+    verifyAccessToken(req as AuthenticatedRequest & Request, res, next)
   next()
 }
 
