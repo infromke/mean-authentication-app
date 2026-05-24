@@ -1,6 +1,6 @@
 import type { IUserDocument } from './user.types.js'
 import mongoose, { Schema } from 'mongoose'
-import { generatePassword } from '../../utils/password.js'
+import { generatePassword } from '../../utils/hash.js'
 
 const userSchema = new Schema<IUserDocument>(
   {
