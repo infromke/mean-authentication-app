@@ -1,4 +1,4 @@
-import type { Request, Response, NextFunction } from 'express'
+import type { Request, Response, NextFunction, RequestHandler } from 'express'
 import type { AuthenticatedRequest } from '../modules/session/session.controller.js'
 import verifyAccessToken from './verifyAccessToken.js'
 import isAccountVerified from './isAccountVerified.js'
@@ -6,25 +6,34 @@ import verifyOwnership from './verifyOwnership.js'
 import handleValidation from './handleValidation.js'
 import { paramsIdSchema } from '../utils/common.schema.js'
 
+// tipo de Request customizável onde "user" (req.user) pode ou não estar presente
+type RouteHandler = RequestHandler<any, any, any, any, Record<string, any>>
+
 /**
  * Verifica se o usuário está logado e se sua conta foi verificada.
  */
-const verifiedOnly = [verifyAccessToken, isAccountVerified]
+const verifiedOnly: RouteHandler[] = [
+  verifyAccessToken as unknown as RouteHandler,
+  isAccountVerified as unknown as RouteHandler,
+]
 
 /**
  * Verifica se o usuário está logado e se é dono da conta que deseja alterar.
  */
-const ownerOnly = [verifyAccessToken, verifyOwnership]
+const ownerOnly: RouteHandler[] = [
+  verifyAccessToken as unknown as RouteHandler,
+  verifyOwnership as unknown as RouteHandler,
+]
 
 /**
  * Verifica se o usuário está logado se o ID (`id`) passado é válido.
  * Também verifica se o usuário logado é dono da conta que deseja alterar e se sua conta está verificada.
  */
-const fullLock = [
-  verifyAccessToken,
-  handleValidation(paramsIdSchema),
-  verifyOwnership,
-  isAccountVerified,
+const fullLock: RouteHandler[] = [
+  verifyAccessToken as unknown as RouteHandler,
+  handleValidation(paramsIdSchema) as unknown as RouteHandler,
+  verifyOwnership as unknown as RouteHandler,
+  isAccountVerified as unknown as RouteHandler,
 ]
 
 /**
