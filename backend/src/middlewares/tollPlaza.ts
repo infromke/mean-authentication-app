@@ -33,8 +33,10 @@ const fullLock = [
  * Se for do tipo RESET, o validator verifica e valida o `email` passado.
  */
 const resendOtpFlow = (req: Request, res: Response, next: NextFunction): void => {
-  if (req.body.type === 'VERIFY')
+  if (req.body.type === 'VERIFY') {
     verifyAccessToken(req as AuthenticatedRequest & Request, res, next)
+    return
+  }
   next()
 }
 
