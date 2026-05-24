@@ -1,14 +1,7 @@
+import type { MailOptions } from '../config/nodemailer.js'
 import type { OtpType } from '../modules/otp/otp.types.js'
 import getOtpEmailTemplate from '../templates/otpEmail.js'
 import getWelcomeEmailTemplate from '../templates/welcomeEmail.js'
-
-interface MailOptions {
-  from: string
-  to: string
-  subject: string
-  text: string
-  html: string
-}
 
 /**
  * Gera o objeto de e-mail para fluxos de OTP (Verify ou Reset).

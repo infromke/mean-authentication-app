@@ -1,5 +1,13 @@
 import nodemailer from 'nodemailer'
 
+export interface MailOptions {
+  from: string
+  to: string
+  subject: string
+  text: string
+  html: string
+}
+
 const transporter = nodemailer.createTransport({
   host: process.env.SMTP_HOST,
   port: Number(process.env.SMTP_PORT),
@@ -13,20 +21,26 @@ const transporter = nodemailer.createTransport({
   },
 })
 
-const verifyConnection = async () => {
+/**
+ * Verifica se a configuração do transportador está correta e a conexão ativa.
+ */
+const verifyConnection = async (): Promise<void> => {
   try {
     await transporter.verify()
     console.log('[NODEMAILER] is ready to take messages')
-  } catch (error) {
+  } catch (error: any) {
     console.log('\n[NODEMAILER] failed to establish connection:', error.message)
   }
 }
 
-const sendEmail = async (mail) => {
+/**
+ * Envia um e-mail com base nas opções estruturadas fornecidas.
+ */
+const sendEmail = async (mail: MailOptions): Promise<void> => {
   try {
     const info = await transporter.sendMail(mail)
     console.log('[NODEMAILER] sent an e-mail:', info.envelope)
-  } catch (error) {
+  } catch (error: any) {
     console.log('\n[NODEMAILER] failed to send e-mail:', error.message)
   }
 }
