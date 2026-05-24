@@ -17,9 +17,11 @@ export interface IUser {
   updatedAt?: Date
 }
 
-// representa o objeto exatamente como ele existe no banco
+// representa o objeto exatamente como ele existe no banco, com _id e datas obrigatórias
 export interface IUserPersistence extends IUser {
-  _id: Types.ObjectId // garante que o service saiba da existência do _id
+  _id: Types.ObjectId
+  createdAt: Date
+  updatedAt: Date
 }
 
 // une os dados do usuário com todas as funções internas do mongoose, como .save(), .populate(), .isModified()
