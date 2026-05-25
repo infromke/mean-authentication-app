@@ -1,13 +1,12 @@
-import express from 'express'
+import express, { type Request, type Response, type NextFunction } from 'express'
 import cookieParser from 'cookie-parser'
 import morgan from 'morgan'
-
 import connectToDb from './config/database.js'
 import cors from './config/cors.js'
 import { verifyConnection } from './config/nodemailer.js'
-
 import GlobalRouter from './modules/index.routes.js'
 import errorHandler from './middlewares/errorHandler.js'
+import throwHttpError from './utils/throwHttpError.js'
 
 //  config
 const app = express()
@@ -29,10 +28,8 @@ if (process.env.NODE_ENV === 'development') {
 app.use(GlobalRouter)
 
 //  middleware para rotas não encontradas (404)
-app.use((req, res, next) => {
-  const error = new Error('Route not found')
-  error.status = 404
-  next(error)
+app.use((req: Request, res: Response, next: NextFunction) => {
+  throw throwHttpError(404, 'Route not found')
 })
 
 //  middleware de erro global
