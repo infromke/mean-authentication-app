@@ -105,9 +105,7 @@ class UserService {
     return formattedUser
   }
 
-  store = async (
-    data: Partial<CreateUserDTO>,
-  ): Promise<{ formattedUser: any; accessToken: string }> => {
+  store = async (data: CreateUserDTO): Promise<{ formattedUser: any; accessToken: string }> => {
     const user = await this.#userRepository.create(data)
 
     const secret = process.env.JWT_ACCESS_SECRET as string
