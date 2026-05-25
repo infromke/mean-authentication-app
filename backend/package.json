@@ -1,13 +1,14 @@
 {
   "name": "auth-server",
   "description": "API Node.js para criação e autenticação de usuários",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "private": true,
   "main": "index.js",
   "type": "module",
   "scripts": {
-    "dev": "node --env-file=.env --watch ./src/server.js",
-    "start": "node ./src/server.js"
+    "dev": "tsx --env-file=.env --watch ./src/server.ts",
+    "build": "tsc",
+    "start": "node --env-file=.env ./dist/server.js"
   },
   "dependencies": {
     "bcrypt": "6.0.0",
@@ -21,5 +22,17 @@
     "node-cache": "5.1.2",
     "nodemailer": "7.0.11",
     "zod": "4.3.6"
+  },
+  "devDependencies": {
+    "@types/bcrypt": "6.0.0",
+    "@types/cookie-parser": "1.4.10",
+    "@types/cors": "2.8.19",
+    "@types/express": "5.0.6",
+    "@types/jsonwebtoken": "9.0.10",
+    "@types/morgan": "1.9.10",
+    "@types/node": "25.8.0",
+    "@types/nodemailer": "8.0.0",
+    "tsx": "4.22.3",
+    "typescript": "6.0.3"
   }
 }
