@@ -137,7 +137,9 @@ class OtpService {
     const user = await this.#getUserByFilter(filter, '+password') // recebe um objeto user não formatado
     const updatedUser = await this.#userService.update(user._id, { password })
 
-    clearUserCache(user._id) // limpa o cache para não retornar dados ultrapassados no próximo GET
+    const userIdString = user._id.toString()
+    clearUserCache(userIdString) // limpa o cache para não retornar dados ultrapassados no próximo GET
+
     return updatedUser
   }
 }
