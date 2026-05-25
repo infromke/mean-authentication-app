@@ -36,7 +36,7 @@ class SessionService {
     if (!(await validatePassword(password, user.password)))
       throwHttpError(400, 'Invalid credentials')
 
-    const secret = process.env.JWT_ACCESS_SECRET
+    const secret = process.env.JWT_ACCESS_SECRET as string
     if (!secret) throwHttpError(500, 'JWT_ACCESS_SECRET is not defined in environment variables')
 
     const userIdString = user._id.toString()

@@ -110,7 +110,7 @@ class UserService {
   ): Promise<{ formattedUser: any; accessToken: string }> => {
     const user = await this.#userRepository.create(data)
 
-    const secret = process.env.JWT_ACCESS_SECRET
+    const secret = process.env.JWT_ACCESS_SECRET as string
     if (!secret) throwHttpError(500, 'JWT_ACCESS_SECRET is not defined in environment variables')
 
     const userIdString = user._id.toString()

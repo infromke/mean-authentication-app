@@ -122,7 +122,7 @@ class OtpService {
 
     const userIdString = user._id.toString()
 
-    const secret = process.env.JWT_RESET_SECRET
+    const secret = process.env.JWT_RESET_SECRET as string
     if (!secret) throwHttpError(500, 'JWT_RESET_SECRET is not defined in environment variables')
 
     return generateToken({ id: userIdString }, secret, '15m')
