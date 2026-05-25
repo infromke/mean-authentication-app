@@ -1,7 +1,7 @@
 {
   "name": "auth-server",
   "description": "API Node.js para criação e autenticação de usuários",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "private": true,
   "main": "index.js",
   "type": "module",
