@@ -42,8 +42,8 @@ class OtpService {
   #validateCode = async (userId: string, otpCode: string, otpType: OtpType): Promise<void> => {
     const otpDocument = await this.#otpRepository.findById(userId, otpType)
 
-    if (!otpDocument) throwHttpError(404, 'Code has expired')
-    if (otpCode !== otpDocument?.code) throwHttpError(403, 'Invalid code')
+    if (!otpDocument) throw throwHttpError(404, 'Code has expired')
+    if (otpCode !== otpDocument?.code) throw throwHttpError(403, 'Invalid code')
 
     await this.#otpRepository.remove(userId, otpType)
   }
@@ -65,13 +65,13 @@ class OtpService {
 
   sendVerification = async (id: string): Promise<void> => {
     const user = await this.#userService.show(id)
-    if (user.isAccountVerified) throwHttpError(403, 'Account has already been verified')
+    if (user.isAccountVerified) throw throwHttpError(403, 'Account has already been verified')
 
     try {
       await this.#sendCodeEmail(user.id, user.email, 'VERIFY')
     } catch (error: any) {
       if (error.code === 11000)
-        throwHttpError(409, 'An active e-mail code has already been sent to this account')
+        throw throwHttpError(409, 'An active e-mail code has already been sent to this account')
       throw error // repassa outros erros inesperados
     }
   }
@@ -84,7 +84,11 @@ class OtpService {
       if (error.status === 400) return // não avisa que o usuário não foi encontrado
 
       if (error.code === 11000)
-        throwHttpError(409, 'An active password reset code has already been sent to this account')
+        throw throwHttpError(
+          409,
+          'An active password reset code has already been sent to this account',
+        )
+
       throw error // repassa outros erros inesperados
     }
   }
@@ -94,7 +98,7 @@ class OtpService {
 
     // verifica se o cooldown de 60s está ativo
     const cooldownKey = `otp_cooldown_${type}_${user.id}`
-    if (cache.has(cooldownKey)) throwHttpError(429, 'Wait 60s before requesting a new code')
+    if (cache.has(cooldownKey)) throw throwHttpError(429, 'Wait 60s before requesting a new code')
 
     // deleta o OTP previamente gerado
     await this.#otpRepository.remove(user.id, type)
@@ -107,7 +111,7 @@ class OtpService {
 
   validateEmail = async (id: string, otpCode: string): Promise<void> => {
     const user = await this.#userService.show(id)
-    if (user.isAccountVerified) throwHttpError(403, 'Account has already been verified')
+    if (user.isAccountVerified) throw throwHttpError(403, 'Account has already been verified')
 
     await this.#validateCode(user.id, otpCode, 'VERIFY')
     await this.#userService.update(user.id, { isAccountVerified: true })
@@ -122,7 +126,8 @@ class OtpService {
     const userIdString = user._id.toString()
 
     const secret = process.env.JWT_RESET_SECRET as string
-    if (!secret) throwHttpError(500, 'JWT_RESET_SECRET is not defined in environment variables')
+    if (!secret)
+      throw throwHttpError(500, 'JWT_RESET_SECRET is not defined in environment variables')
 
     return generateToken({ id: userIdString }, secret, '15m')
   }

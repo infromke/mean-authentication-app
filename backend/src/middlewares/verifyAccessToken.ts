@@ -20,9 +20,7 @@ const verifyAccessToken = (
 ): void => {
   const { accessToken } = req.cookies
 
-  if (!accessToken) {
-    throwHttpError(401, isEnvDev ? 'Token not found' : 'Access denied')
-  }
+  if (!accessToken) throw throwHttpError(401, isEnvDev ? 'Token not found' : 'Access denied')
 
   try {
     const payload = jwt.verify(accessToken, process.env.JWT_ACCESS_SECRET as string) as UserPayload

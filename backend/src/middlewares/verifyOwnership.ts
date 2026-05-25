@@ -12,10 +12,9 @@ const verifyOwnership = (
 ): void => {
   const authenticatedUserId = req.user.id ? req.user.id.toString() : ''
 
-  if (req.params.id !== authenticatedUserId) {
-    next(throwHttpError(403, 'You can only modify your own account'))
-    return
-  }
+  if (req.params.id !== authenticatedUserId)
+    throw throwHttpError(403, 'You can only modify your own account')
+
   next()
 }
 

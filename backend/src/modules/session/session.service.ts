@@ -34,10 +34,11 @@ class SessionService {
   ): Promise<{ user: any; accessToken: string }> => {
     const user = await this.#userService.find(filter, '+password') // recebe um objeto user não formatado
     if (!(await validatePassword(password, user.password)))
-      throwHttpError(400, 'Invalid credentials')
+      throw throwHttpError(400, 'Invalid credentials')
 
     const secret = process.env.JWT_ACCESS_SECRET as string
-    if (!secret) throwHttpError(500, 'JWT_ACCESS_SECRET is not defined in environment variables')
+    if (!secret)
+      throw throwHttpError(500, 'JWT_ACCESS_SECRET is not defined in environment variables')
 
     const userIdString = user._id.toString()
     const accessToken = generateToken({ id: userIdString }, secret, '1d')

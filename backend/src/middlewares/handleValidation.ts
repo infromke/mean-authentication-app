@@ -28,8 +28,7 @@ const handleValidation =
             error: issue.message,
           }
         })
-        next(throwHttpError(400, 'Your request has invalid fields', formattedErrors))
-        return
+        throw throwHttpError(400, 'Your request has invalid fields', formattedErrors)
       }
 
       next(error) // repassa outros erros

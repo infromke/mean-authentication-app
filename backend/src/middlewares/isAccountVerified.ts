@@ -14,11 +14,9 @@ const isAccountVerified = async (
   const { id } = req.user
 
   const user = await userService.show(id)
+  if (!user.isAccountVerified)
+    throw throwHttpError(403, 'Account must be verified to perform this action')
 
-  if (!user.isAccountVerified) {
-    next(throwHttpError(403, 'Account must be verified to perform this action'))
-    return
-  }
   next()
 }
 

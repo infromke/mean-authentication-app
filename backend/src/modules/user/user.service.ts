@@ -109,11 +109,12 @@ class UserService {
     const user = await this.#userRepository.create(data)
 
     const secret = process.env.JWT_ACCESS_SECRET as string
-    if (!secret) throwHttpError(500, 'JWT_ACCESS_SECRET is not defined in environment variables')
+    if (!secret)
+      throw throwHttpError(500, 'JWT_ACCESS_SECRET is not defined in environment variables')
 
     const userIdString = user._id.toString()
-
     const accessToken = generateToken({ id: userIdString }, secret, '1d')
+
     await sendEmail(getWelcomeMailOptions(data.name, data.email))
 
     clearUserCache() // limpa o cache para não retornar dados ultrapassados no próximo GET
@@ -132,7 +133,7 @@ class UserService {
 
   destroy = async (id: string): Promise<void> => {
     const user = await this.#userRepository.remove(id)
-    if (!user) throwHttpError(400, 'User not found')
+    if (!user) throw throwHttpError(400, 'User not found')
 
     clearUserCache(id) // limpa o cache para não retornar dados ultrapassados no próximo GET
   }

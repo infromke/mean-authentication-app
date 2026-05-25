@@ -11,9 +11,7 @@ const isEnvDev = process.env.NODE_ENV === 'dev' || process.env.NODE_ENV === 'dev
 const verifyPasswordToken = (req: Request, res: Response, next: NextFunction): void => {
   const { passwordToken } = req.cookies
 
-  if (!passwordToken) {
-    throwHttpError(401, isEnvDev ? 'Token not found' : 'Access denied')
-  }
+  if (!passwordToken) throw throwHttpError(401, isEnvDev ? 'Token not found' : 'Access denied')
 
   try {
     jwt.verify(passwordToken, process.env.JWT_RESET_SECRET as string)

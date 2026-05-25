@@ -18,7 +18,7 @@ const createLimiter = (
 ): RateLimitRequestHandler => {
   const limitHandler: RateLimitExceededEventHandler = (req, res, next) => {
     try {
-      throwHttpError(429, message)
+      throw throwHttpError(429, message)
     } catch (error) {
       next(error)
     }
