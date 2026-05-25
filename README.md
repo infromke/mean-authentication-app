@@ -8,8 +8,8 @@ O app está hospedado na Render e pode ser acessado [aqui](https://auth-app-web.
 
 O projeto conta com um ecossistema de gestão de identidades (IAM) que lida com o ciclo de vida completo do usuário desde o cadastro e verificação (por OTP) até o controle de acesso. O sistema utiliza camadas de cache em memória para otimizar a performance e limitadores de tráfego que seguem padrões da IETF para garantir a estabilidade sob carga.
 
-- **Front-end**: Angular 19+ (Signals, Observables (RxJS) e Standalone Components);
-- **Back-end**: Node.js 20+ com Express 5+;
+- **Front-end**: Angular 21+ (Signals, Observables (RxJS) e Standalone Components);
+- **Back-end**: Node.js 22+ com Express 5+ totalmente estruturado em TypeScript 6+;
 - **Database**: MongoDB Atlas com indexação TTL e índices compostos.
 
 ## Arquitetura e Padrões de Design
@@ -18,13 +18,16 @@ A aplicação foi estruturada sob o conceito de Monólito Modular com responsabi
 
 - **Modularização por Domínio**: Organização estrita em módulos (User, Session, OTP), onde cada domínio possui seus próprios Controllers, Services, Repositories e Schemas;
 - **Padronização RFC 7807 (Problem Details)**: Implementação do padrão IETF para respostas de erro, fornecendo mensagens consistentes e semânticas;
-- **Middleware-Chain Strategy**: Pipeline de execução para sanitização de inputs, proteção de rotas via interceptores JWT e controle de fluxo;
-- **POJO Persistence Pattern**: Camada de persistência otimizada com .lean(), garantindo que a lógica de negócio lide apenas com objetos JavaScript puros, aumentando a performance e previsibilidade.
+- **Encadeamento de Middlewares**: Pipeline de execução para sanitização de inputs, proteção de rotas via interceptores JWT e controle de fluxo;
+- **POJO Persistence Pattern**: Camada de persistência otimizada com .lean(), garantindo que a lógica de negócio lide apenas com objetos JavaScript puros, aumentando a performance e previsibilidade;
+- **Pipeline Type-Safe para Erros**: União entre o suporte nativo a erros assíncronos do Express 5 e a palavra-chave "throw" do JavaScript, o que permite o encerramento imediato de fluxos.
 
 ## Tech Stack e Bibliotecas
 
-### Back-end (Node.js 22.21 e Express 5.2)
+### Back-end (Node.js 22.21, Express 5.2 e TypeScript 6.0)
 
+- **Runtime & Tooling**: `typescript` para checagem estática estrita de tipos, e `tsx` (EsaBuild-powered) como executor de desenvolvimento;
+- **Security**: `jsonwebtoken` para autenticação Stateless... (continua igual)
 - **Security**: `jsonwebtoken` para autenticação Stateless, `bcrypt` para hashing e validação de senhas e `CORS` para políticas de segurança cross-origin;
 - **Session Management**: `cookie-parser` para a manipulação segura de credenciais em cookies;
 - **Resilience**: `node-cache` para redução de latência em dados de sessão e perfil, e `express-rate-limit` implementando a Internet Draft (draft-ietf-httpapi-ratelimit-headers) para evitar bots, sobrecarregamento e brute-force;
@@ -156,9 +159,10 @@ No final de tudo isso, eu aprendi a...
 - Refatorar e migrar a lógica de uma stack MERN para MEAN (Angular 19+);
 - Gerenciar fluxos assíncronos e reatividade com RxJS e Observables;
 - Utilizar Signals e Standalone Components para uma performance otimizada no Front-end;
+- Refatorar e migrar um ecossistema inteiro de JavaScript puro para TypeScript estrito;
 - Garantir a segurança da API com JWT, CORS, Rate Limiting e HttpOnly Cookies;
 - Construir e-mails XHTML e gerenciar fluxos de e-mail automatizados;
 - Implementar Caching de dados para reduzir a carga no banco de dados e melhorar o tempo de resposta;
-- Utilizar índices compostos no MongoDB;
+- Utilizar índices compostos e índices TTL no MongoDB para automação de ciclo de vida de dados;
 - Implementar logging de requisições com o Morgan para examinar seu tráfego em desenvolvimento;
 - Utilizar o Zod para criar esquemas de validação.
