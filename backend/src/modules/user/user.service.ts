@@ -81,7 +81,7 @@ class UserService {
     projection: ProjectionType<IUserDocument> = {},
   ): Promise<any> => {
     const user = await this.#userRepository.findOne(filter, projection)
-    if (!user) throwHttpError(400, 'User not found')
+    if (!user) throw throwHttpError(400, 'User not found')
 
     if (projection === '+password') return user // retorna o objeto "user" bruto
 
@@ -97,7 +97,7 @@ class UserService {
 
     // se não houver cache, executa a lógica normal abaixo
     const user = await this.#userRepository.findById(id)
-    if (!user) throwHttpError(400, 'User not found')
+    if (!user) throw throwHttpError(400, 'User not found')
 
     const formattedUser = formatUserObject(user)
 
@@ -122,7 +122,7 @@ class UserService {
 
   update = async (id: string, data: Partial<IUser>): Promise<any> => {
     const user = await this.#userRepository.update(id, data)
-    if (!user) throwHttpError(400, 'User not found')
+    if (!user) throw throwHttpError(400, 'User not found')
 
     const formattedUser = formatUserObject(user)
 
