@@ -123,13 +123,11 @@ class OtpService {
     const user = await this.#getUserByFilter(filter)
     await this.#validateCode(user.id, otpCode, 'RESET')
 
-    const userIdString = user._id.toString()
-
     const secret = process.env.JWT_RESET_SECRET as string
     if (!secret)
       throw throwHttpError(500, 'JWT_RESET_SECRET is not defined in environment variables')
 
-    return generateToken({ id: userIdString }, secret, '15m')
+    return generateToken({ id: user.id }, secret, '15m')
   }
 
   resetPassword = async (
