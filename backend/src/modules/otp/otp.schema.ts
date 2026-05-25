@@ -1,5 +1,4 @@
 import z from 'zod'
-import handleValidation from '../../middlewares/handleValidation.js'
 import { idSchema } from '../../utils/common.schema.js'
 
 // REGRAS individuas de base

@@ -1,6 +1,5 @@
 import type { Request, Response } from 'express'
 import sessionService from './session.service.js'
-import throwHttpError from '../../utils/throwHttpError.js'
 
 // interface para garantir que o TS reconheça o req.user
 export interface AuthenticatedRequest extends Request {

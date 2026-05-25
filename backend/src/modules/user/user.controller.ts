@@ -1,7 +1,6 @@
 import type { Request, Response } from 'express'
 import type { CreateUserDTO } from './user.types.js'
 import userService from './user.service.js'
-import throwHttpError from '../../utils/throwHttpError.js'
 
 class UserController {
   #userService: typeof userService

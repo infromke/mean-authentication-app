@@ -8,7 +8,6 @@ import type {
   VerifyResetDTO,
 } from './otp.types.js'
 import otpService from './otp.service.js'
-import throwHttpError from '../../utils/throwHttpError.js'
 
 class OtpController {
   #otpService: typeof otpService
