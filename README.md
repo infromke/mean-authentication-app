@@ -1,8 +1,13 @@
-# [MEAN] Authentication App
+# [MEAN, Legacy] Authentication App
 
-Uma aplicação de autenticação desenvolvida com a stack MongoDB, Express.js, Angular e Node.js, focada em segurança, reatividade e arquitetura escalável.
+> [!CAUTION]
+> ESTA É UMA VERSÃO LEGADO (JAVASCRIPT)
 
-O app está hospedado na Render e pode ser acessado [aqui](https://auth-app-web.onrender.com). Contudo, **leve em consideração** que o servidor pode levar 30 ou 50 segundos para "acordar" no primeiro acesso.
+Este documento e os códigos contidos nesta branch refletem o estado original do sistema antes da reestruturação arquitetural. Para conferir a versão ativa, escalável e tipada da API, acesse a branch [main](https://github.com/infrmke/mean-authentication-system/tree/main).
+
+## Síntese da Transição
+
+A estrutura original mantida nesta branch serviu de fundação para o refinamento de seu ecossistema. Se você deseja analisar a engenharia reversa e o refinamento do projeto, a branch principal introduz, principalmente, a **migração do back-end em JavaScript (CommonJS/ESM) para TypeScript (6+)**.
 
 ## Visão Geral Técnica
 
@@ -67,6 +72,9 @@ Após cumprir com as condições acima, clone o repositório.
 ```shell
     git clone https://github.com/infrmke/mean-authentication-system.git
     cd mean-authentication-system
+
+    # Para rodar esta versão específica (JS), basta mudar para a branch legacy:
+    git checkout legacy/backend-js
 ```
 
 1. Instale as dependências
@@ -123,10 +131,6 @@ As respostas de erro seguem o padrão application/problem+json. Um exemplo de er
 }
 ```
 
-## Planos Futuros
-
-No momento, apenas um: a criação de uma funcionalidade de "Perfil" onde o usuário será capaz de alterar seu nome, definir um avatar, trocar seu e-mail (que precisará ser verificado de novo) e trocar sua senha.
-
 ## Variáveis de Ambiente
 
 Para rodar o projeto, você vai precisar adicionar as seguintes variáveis de ambiente no ".env" do seu back-end:
@@ -143,22 +147,3 @@ Para rodar o projeto, você vai precisar adicionar as seguintes variáveis de am
 - `SMTP_PORT`
 - `SMTP_USER`
 - `SMTP_PWD`
-
-## Créditos
-
-A inspiração inicial para o começo do projeto foi o Youtuber [GreatStack](https://www.youtube.com/@GreatStackDev), por meio do seu próprio projeto de autenticação MERN.
-
-Com essa base, tive a oportunidade de reestruturar o projeto original como um todo e aprimorá-lo. Assim, a transição deste projeto de uma stack MERN para MEAN representa um grande salto técnico.
-
-No final de tudo isso, eu aprendi a...
-
-- Implementar o padrão Controller-Service-Repository;
-- Refatorar e migrar a lógica de uma stack MERN para MEAN (Angular 19+);
-- Gerenciar fluxos assíncronos e reatividade com RxJS e Observables;
-- Utilizar Signals e Standalone Components para uma performance otimizada no Front-end;
-- Garantir a segurança da API com JWT, CORS, Rate Limiting e HttpOnly Cookies;
-- Construir e-mails XHTML e gerenciar fluxos de e-mail automatizados;
-- Implementar Caching de dados para reduzir a carga no banco de dados e melhorar o tempo de resposta;
-- Utilizar índices compostos no MongoDB;
-- Implementar logging de requisições com o Morgan para examinar seu tráfego em desenvolvimento;
-- Utilizar o Zod para criar esquemas de validação.
