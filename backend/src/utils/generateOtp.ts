@@ -1,7 +1,8 @@
+import { Types } from 'mongoose'
 import type { OtpType } from '../modules/otp/otp.types.js'
 
 interface OtpOptions {
-  userId: string
+  userId: Types.ObjectId
   code: string
   type: OtpType
   expiresAt: Date
@@ -29,7 +30,7 @@ const generateOtp = (): string => {
  * @returns {Object} Documento OTP estruturado.
  */
 const createOtpOptions = (userId: string, type: OtpType): OtpOptions => ({
-  userId,
+  userId: new Types.ObjectId(userId),
   code: generateOtp(),
   type: type,
   expiresAt: new Date(Date.now() + 15 * 60 * 1000), // 15 minutos
