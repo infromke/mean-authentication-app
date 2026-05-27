@@ -27,7 +27,6 @@ A aplicação foi estruturada sob o conceito de Monólito Modular com responsabi
 ### Back-end (Node.js 22.21, Express 5.2 e TypeScript 6.0)
 
 - **Runtime & Tooling**: `typescript` para checagem estática estrita de tipos, e `tsx` (EsaBuild-powered) como executor de desenvolvimento;
-- **Security**: `jsonwebtoken` para autenticação Stateless... (continua igual)
 - **Security**: `jsonwebtoken` para autenticação Stateless, `bcrypt` para hashing e validação de senhas e `CORS` para políticas de segurança cross-origin;
 - **Session Management**: `cookie-parser` para a manipulação segura de credenciais em cookies;
 - **Resilience**: `node-cache` para redução de latência em dados de sessão e perfil, e `express-rate-limit` implementando a Internet Draft (draft-ietf-httpapi-ratelimit-headers) para evitar bots, sobrecarregamento e brute-force;
