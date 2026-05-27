@@ -12,14 +12,14 @@ Esta aplicação representa o estágio inicial do projeto, desenvolvido com a st
 Esta branch documenta a implementação original em JavaScript puro e React. Se você deseja ver a evolução deste projeto para uma arquitetura mais escalável, confira as principais mudanças na branch principal:
 
 - **Front-end**: Migração de React 19 (Vite) para Angular 21 (Signals & RxJS);
-- **Linguagem**: Transição de JavaScript (CommonJS/ESM) para TypeScript (em progresso);
+- **Linguagem**: Transição de JavaScript (CommonJS/ESM) para TypeScript 6+;
 - **Estilização**: Evolução de SASS modular para componentes reativos e integrados.
 
 ## Visão Geral Técnica
 
 O projeto implementa um sistema completo de autenticação e autorização que possui foco em estabelecer fluxos seguros de autenticação e gestão de usuários.
 
-- **Front-end**: React 19+;
+- **Front-end**: React 19+ (Vite);
 - **E-mail Service**: SMTP via Brevo para notificações transacionais;
 - **Database**: MongoDB Atlas com indexação TTL para expiração automática de tokens OTP.
 
