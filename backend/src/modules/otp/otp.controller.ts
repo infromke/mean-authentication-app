@@ -16,8 +16,8 @@ class OtpController {
     this.#otpService = otpServiceInstance
   }
 
-  status = async (req: Request, res: Response): Promise<Response> => {
-    const status = await this.#otpService.showStatus(req.cookies.passwordToken)
+  status = (req: Request, res: Response): Response => {
+    const status = this.#otpService.showStatus(req.cookies.passwordToken)
     return res.status(200).json(status)
   }
 

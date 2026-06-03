@@ -48,7 +48,7 @@ class OtpService {
     await this.#otpRepository.remove(userId, otpType)
   }
 
-  showStatus = async (token: string): Promise<any> => {
+  showStatus = (token: string): any => {
     const identifier = token.split('.')[1]
     const cacheKey = `password_reset_${identifier}`
 
