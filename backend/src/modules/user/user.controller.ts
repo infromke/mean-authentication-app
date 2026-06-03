@@ -23,9 +23,7 @@ class UserController {
 
   create = async (req: Request<{}, any, CreateUserDTO>, res: Response): Promise<Response> => {
     const { name, email, password } = req.body
-    const data = { name, email, password }
-
-    const { formattedUser, accessToken } = await this.#userService.store(data)
+    const { formattedUser, accessToken } = await this.#userService.store({ name, email, password })
 
     res.cookie('accessToken', accessToken, {
       httpOnly: true,
