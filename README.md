@@ -3,7 +3,7 @@
 > [!CAUTION]
 > ESTA É UMA VERSÃO LEGADO (MERN STACK)
 
-Este repositório foi preservado para fins de histórico e comparação técnica. A versão atualizada, utilizando Angular 21, TypeScript e práticas de segurança avançadas, encontra-se na branch [main](https://github.com/infrmke/mean-authentication-system/tree/main).
+Este repositório foi preservado para fins de histórico e comparação técnica. A versão atualizada, utilizando Angular 21, TypeScript e práticas de segurança avançadas, encontra-se na branch [main](https://github.com/infromke/mean-authentication-system/tree/main).
 
 Esta aplicação representa o estágio inicial do projeto, desenvolvido com a stack MERN (MongoDB, Express, React e Node.js). Ela serviu como base para o estudo de padrões de design e fluxos de autenticação segura.
 
@@ -69,7 +69,7 @@ Os **pré-requisitos** principais são os seguintes: Node.js (18+), npm ou yarn 
 Após cumprir com as condições acima, clone o repositório.
 
 ```shell
-    git clone https://github.com/infrmke/mean-authentication-system.git
+    git clone https://github.com/infromke/mean-authentication-system.git
     cd mean-authentication-system
 
     # Para rodar esta versão específica (MERN), basta mudar para a branch legacy:
