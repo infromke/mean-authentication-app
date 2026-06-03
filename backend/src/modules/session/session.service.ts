@@ -8,6 +8,12 @@ import formatUserObject from '../../utils/formatUserObject.js'
 import cache from '../../lib/cache.js'
 import clearUserCache from '../../utils/clearUserCache.js'
 
+// interface para os dados de login do usuário
+interface UserCredentials {
+  email: FilterQuery<IUserDocument>
+  password: string
+}
+
 class SessionService {
   #userService: typeof userService
 
@@ -29,11 +35,11 @@ class SessionService {
   }
 
   authenticate = async (
-    password: string,
-    filter: FilterQuery<IUserDocument>,
+    credentials: UserCredentials,
   ): Promise<{ user: any; accessToken: string }> => {
-    const user = await this.#userService.find(filter, '+password') // recebe um objeto user não formatado
-    if (!(await validatePassword(password, user.password)))
+    const user = await this.#userService.find(credentials.email, '+password') // recebe um objeto "user" bruto
+
+    if (!(await validatePassword(credentials.password, user.password)))
       throw throwHttpError(400, 'Invalid credentials')
 
     const secret = process.env.JWT_ACCESS_SECRET as string

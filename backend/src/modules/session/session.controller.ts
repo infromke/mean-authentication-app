@@ -25,7 +25,7 @@ class SessionController {
   login = async (req: Request, res: Response): Promise<Response> => {
     const { email, password } = req.body
 
-    const capsule = await this.#sessionService.authenticate(password, { email })
+    const capsule = await this.#sessionService.authenticate({ email, password })
     const { user, accessToken } = capsule
 
     res.cookie('accessToken', accessToken, {
