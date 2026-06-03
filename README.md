@@ -3,7 +3,7 @@
 > [!CAUTION]
 > ESTA É UMA VERSÃO LEGADO (JAVASCRIPT)
 
-Este documento e os códigos contidos nesta branch refletem o estado original do sistema antes da reestruturação arquitetural. Para conferir a versão ativa, escalável e tipada da API, acesse a branch [main](https://github.com/infrmke/mean-authentication-system/tree/main).
+Este documento e os códigos contidos nesta branch refletem o estado original do sistema antes da reestruturação arquitetural. Para conferir a versão ativa, escalável e tipada da API, acesse a branch [main](https://github.com/infromke/mean-authentication-system/tree/main).
 
 ## Síntese da Transição
 
@@ -70,7 +70,7 @@ Antes de rodar a aplicação, você precisa preparar sua instância ativa do Mon
 Após cumprir com as condições acima, clone o repositório.
 
 ```shell
-    git clone https://github.com/infrmke/mean-authentication-system.git
+    git clone https://github.com/infromke/mean-authentication-system.git
     cd mean-authentication-system
 
     # Para rodar esta versão específica (JS), basta mudar para a branch legacy:
