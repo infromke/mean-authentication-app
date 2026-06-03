@@ -67,7 +67,7 @@ Antes de rodar a aplicação, você precisa preparar sua instância ativa do Mon
 Após cumprir com as condições acima, clone o repositório.
 
 ```shell
-    git clone https://github.com/infrmke/mean-authentication-system.git
+    git clone https://github.com/infromke/mean-authentication-system.git
     cd mean-authentication-system
 ```
 

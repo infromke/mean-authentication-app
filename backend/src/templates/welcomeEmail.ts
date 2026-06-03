@@ -99,14 +99,14 @@ const getWelcomeEmailTemplate = (name: string, email: string): string => `
                     <tr>
                       <td style="font-size: 16px; line-height: 24px">
                         <a
-                          href="https://github.com/infrmke"
+                          href="https://github.com/infromke"
                           target="_blank"
                           style="
                             text-decoration: none;
                             color: #135dfb;
                             font-weight: bold;
                           "
-                          >infrmke</a
+                          >infromke</a
                         >
                       </td>
                     </tr>

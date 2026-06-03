@@ -36,7 +36,7 @@ const getWelcomeMailOptions = (name: string, email: string): MailOptions => {
     from: process.env.SMTP_MAILER as string,
     to: email,
     subject: 'Welcome to my Authentication System!',
-    text: `Dear ${firstName},\n\nWelcome to a very simple website made with MongoDB, Express.js, Angular and Node.js!\n\nYou are receiving this message because you have created an account with the following e-mail: ${email}. If you don't know what this is about, you are free to ignore it.\n\nSincerely,\ninfrmke (https://github.com/infrmke)`,
+    text: `Dear ${firstName},\n\nWelcome to a very simple website made with MongoDB, Express.js, Angular and Node.js!\n\nYou are receiving this message because you have created an account with the following e-mail: ${email}. If you don't know what this is about, you are free to ignore it.\n\nSincerely,\ninfromke (https://github.com/infromke)`,
     html: getWelcomeEmailTemplate(name, email),
   }
 }
