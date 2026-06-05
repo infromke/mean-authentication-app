@@ -28,8 +28,12 @@ const verifyConnection = async (): Promise<void> => {
   try {
     await transporter.verify()
     console.log('[NODEMAILER] is ready to take messages')
-  } catch (error: any) {
-    console.log('\n[NODEMAILER] failed to establish connection:', error.message)
+  } catch (error: unknown) {
+    const errorMessage =
+      error instanceof Error
+        ? error.message
+        : '[NODEMAILER] Unknown error while verifying connection\n'
+    console.log('\n[NODEMAILER] failed to establish connection:', errorMessage)
   }
 }
 
@@ -40,8 +44,10 @@ const sendEmail = async (mail: MailOptions): Promise<void> => {
   try {
     const info = await transporter.sendMail(mail)
     console.log('[NODEMAILER] sent an e-mail:', info.envelope)
-  } catch (error: any) {
-    console.log('\n[NODEMAILER] failed to send e-mail:', error.message)
+  } catch (error: unknown) {
+    const errorMessage =
+      error instanceof Error ? error.message : '[NODEMAILER] Unknown error while sending e-mail\n'
+    console.log('\n[NODEMAILER] failed to send e-mail:', errorMessage)
   }
 }
 

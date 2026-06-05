@@ -69,9 +69,11 @@ class OtpService {
 
     try {
       await this.#sendCodeEmail(user.id, user.email, 'VERIFY')
-    } catch (error: any) {
-      if (error.code === 11000)
+    } catch (error: unknown) {
+      if (error && typeof error === 'object' && 'code' in error && error.code === 11000) {
         throw throwHttpError(409, 'An active e-mail code has already been sent to this account')
+      }
+
       throw error // repassa outros erros inesperados
     }
   }
@@ -80,14 +82,19 @@ class OtpService {
     try {
       const user = await this.#getUserByFilter(filter)
       await this.#sendCodeEmail(user.id, user.email, 'RESET')
-    } catch (error: any) {
-      if (error.status === 400) return // não avisa que o usuário não foi encontrado
+    } catch (error: unknown) {
+      const isObjectError = error && typeof error === 'object'
 
-      if (error.code === 11000)
+      if (isObjectError && 'status' in error && error.status === 400) {
+        return // não avisa que o usuário não foi encontrado
+      }
+
+      if (isObjectError && 'code' in error && error.code === 11000) {
         throw throwHttpError(
           409,
           'An active password reset code has already been sent to this account',
         )
+      }
 
       throw error // repassa outros erros inesperados
     }
