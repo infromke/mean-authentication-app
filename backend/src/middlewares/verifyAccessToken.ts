@@ -2,6 +2,7 @@ import type { Request, Response, NextFunction } from 'express'
 import type { AuthenticatedRequest } from '../modules/session/session.controller.js'
 import jwt from 'jsonwebtoken'
 import throwHttpError from '../utils/throwHttpError.js'
+import normalizeJwtError from '../utils/normalizeJwtError.js'
 
 const isEnvDev = process.env.NODE_ENV === 'dev' || process.env.NODE_ENV === 'development'
 
@@ -25,20 +26,10 @@ const verifyAccessToken = (
   try {
     const payload = jwt.verify(accessToken, process.env.JWT_ACCESS_SECRET as string) as UserPayload
     req.user = { ...req.user, ...payload }
-
     next()
-  } catch (error: any) {
-    // personalizando outros erros para serem estritamente 401 (Unauthorized)
-    error.status = 401
-
-    if (error.name === 'TokenExpiredError') {
-      error.status = 403
-      error.message = isEnvDev ? 'Token has expired' : 'Session expired'
-    } else {
-      error.message = isEnvDev ? 'Invalid token' : 'Access denied'
-    }
-
-    next(error)
+  } catch (error: unknown) {
+    const formattedError = normalizeJwtError(error)
+    next(formattedError)
   }
 }
 
