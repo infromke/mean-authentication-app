@@ -28,7 +28,7 @@ if (process.env.NODE_ENV === 'development') {
 app.use(GlobalRouter)
 
 //  middleware para rotas não encontradas (404)
-app.use((req: Request, res: Response, next: NextFunction) => {
+app.use((_req: Request, _res: Response, _next: NextFunction) => {
   throw throwHttpError(404, 'Route not found')
 })
 

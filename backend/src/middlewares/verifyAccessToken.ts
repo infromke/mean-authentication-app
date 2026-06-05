@@ -15,7 +15,7 @@ interface UserPayload extends jwt.JwtPayload {
  */
 const verifyAccessToken = (
   req: AuthenticatedRequest & Request,
-  res: Response,
+  _res: Response,
   next: NextFunction,
 ): void => {
   const { accessToken } = req.cookies

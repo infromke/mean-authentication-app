@@ -7,7 +7,7 @@ import throwHttpError from '../utils/throwHttpError.js'
  */
 const verifyOwnership = (
   req: AuthenticatedRequest & Request,
-  res: Response,
+  _res: Response,
   next: NextFunction,
 ): void => {
   const authenticatedUserId = req.user.id ? req.user.id.toString() : ''

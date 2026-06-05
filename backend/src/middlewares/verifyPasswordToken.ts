@@ -8,7 +8,7 @@ const isEnvDev = process.env.NODE_ENV === 'dev' || process.env.NODE_ENV === 'dev
  * Middleware para autorizar a redefinição de senha.
  * Verifica se o cookie "passwordToken" (gerado após validar o OTP) é válido.
  */
-const verifyPasswordToken = (req: Request, res: Response, next: NextFunction): void => {
+const verifyPasswordToken = (req: Request, _res: Response, next: NextFunction): void => {
   const { passwordToken } = req.cookies
 
   if (!passwordToken) throw throwHttpError(401, isEnvDev ? 'Token not found' : 'Access denied')

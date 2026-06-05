@@ -8,7 +8,7 @@ import throwHttpError from '../utils/throwHttpError.js'
  */
 const isAccountVerified = async (
   req: AuthenticatedRequest & Request,
-  res: Response,
+  _res: Response,
   next: NextFunction,
 ): Promise<void> => {
   const { id } = req.user
