@@ -15,8 +15,15 @@ import { otpSendLimiter, otpVerifyLimiter } from '../../middlewares/rateLimiter.
 import { isGuest } from '../../middlewares/isLoggedIn.js'
 import verifyAccessToken from '../../middlewares/verifyAccessToken.js'
 
+/* eslint-disable @typescript-eslint/no-explicit-any */
 // tipo de Request customizável onde "user" (req.user) pode ou não estar presente
-type RouteHandler = RequestHandler<any, any, any, any, Record<string, any>>
+type RouteHandler = RequestHandler<
+  any, // Params
+  any, // ResBody
+  any, // ReqBody
+  any, // ReqQuery
+  Record<string, unknown> // ResLocals
+>
 
 const router = Router()
 

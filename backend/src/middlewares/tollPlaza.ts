@@ -6,8 +6,15 @@ import verifyOwnership from './verifyOwnership.js'
 import handleValidation from './handleValidation.js'
 import { paramsIdSchema } from '../utils/common.schema.js'
 
+/* eslint-disable @typescript-eslint/no-explicit-any */
 // tipo de Request customizável onde "user" (req.user) pode ou não estar presente
-type RouteHandler = RequestHandler<any, any, any, any, Record<string, any>>
+type RouteHandler = RequestHandler<
+  any, // Params
+  any, // ResBody
+  any, // ReqBody
+  any, // ReqQuery
+  Record<string, unknown> // ResLocals
+>
 
 /**
  * Verifica se o usuário está logado e se sua conta foi verificada.
