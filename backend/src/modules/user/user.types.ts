@@ -1,11 +1,10 @@
+import type z from 'zod'
+import type { registerBodySchema } from './user.schema.js'
 import { Document, Types } from 'mongoose'
 
-// DTO para a criação de um usuário
-export interface CreateUserDTO {
-  name: string
-  email: string
-  password: string
-}
+// DTOs baseados nos schemas do Zod
+type RawCreateUser = z.infer<typeof registerBodySchema> // contém a propriedade "confirmPassword"
+export type CreateUserDTO = Omit<RawCreateUser, 'confirmPassword'>
 
 // esqueleto da entidade
 export interface IUser {
