@@ -1,31 +1,26 @@
+import z from 'zod'
+import type {
+  checkResetBodySchema,
+  requestResetBodySchema,
+  resendOtpBodySchema,
+  resetPasswordBodySchema,
+  verifyEmailBodySchema,
+} from './otp.schema.js'
 import { Document, Types } from 'mongoose'
 
 // os tipos literais permitidos para operações de OTP
 export type OtpType = 'VERIFY' | 'RESET'
 
-// interfaces para requisições
-export interface RequestResetDTO {
-  email: string
-}
+// DTOs baseados nos schemas do Zod
+export type VerifyEmailDTO = z.infer<typeof verifyEmailBodySchema>
+export type VerifyResetDTO = z.infer<typeof checkResetBodySchema>
 
-export interface ResendCodeDTO {
-  email?: string
-  type: OtpType
-}
+export type RequestResetDTO = z.infer<typeof requestResetBodySchema>
 
-export interface VerifyEmailDTO {
-  otp: string
-}
+type RawResetPasswordDTO = z.infer<typeof resetPasswordBodySchema> // contém a propriedade "confirmPassword"
+export type ResetPasswordDTO = Omit<RawResetPasswordDTO, 'confirmPassword'>
 
-export interface VerifyResetDTO {
-  email: string
-  otp: string
-}
-
-export interface ResetPasswordDTO {
-  email: string
-  newPassword: string
-}
+export type ResendCodeDTO = z.infer<typeof resendOtpBodySchema>
 
 // esqueleto da entidade
 export interface IOtp {
