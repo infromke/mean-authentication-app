@@ -16,6 +16,13 @@ export default tseslint.config(
       '@typescript-eslint/no-explicit-any': 'error', // força a remoção de qualquer "any" explícito
       '@typescript-eslint/consistent-type-imports': 'error',
       '@typescript-eslint/no-empty-function': 'warn',
+      '@typescript-eslint/no-unused-vars': [
+        'error',
+        {
+          argsIgnorePattern: '^_',
+          varsIgnorePattern: '^_',
+        },
+      ],
     },
   },
 
