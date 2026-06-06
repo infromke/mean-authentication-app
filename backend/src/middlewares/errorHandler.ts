@@ -15,8 +15,8 @@ const HTTP_ERROR: Record<number, string> = {
 interface CustomError extends Error {
   status?: number
   code?: number
-  keyPattern?: Record<string, any>
-  errors?: any // para o array de validações do Zod
+  keyPattern?: Record<string, unknown>
+  errors?: unknown // para o array de validações do Zod
 }
 
 /**  Captura qualquer erro inesperado lançado em rotas, middlewares ou controllers.
