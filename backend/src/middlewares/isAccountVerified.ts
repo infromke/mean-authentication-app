@@ -1,11 +1,11 @@
-import type { Request, Response, NextFunction } from 'express'
+import type { Request, Response, NextFunction, RequestHandler } from 'express'
 import userService from '../modules/user/user.service.js'
 import throwHttpError from '../utils/throwHttpError.js'
 
 /**
  * Restringe o acesso apenas a usuários que realizaram a verificação de conta.
  */
-const isAccountVerified = async (
+const isAccountVerified: RequestHandler = async (
   req: Request,
   _res: Response,
   next: NextFunction,

@@ -1,10 +1,14 @@
-import type { Request, Response, NextFunction } from 'express'
+import type { Request, Response, NextFunction, RequestHandler } from 'express'
 import throwHttpError from '../utils/throwHttpError.js'
 
 /**
  * Verifica se o usuário autenticado é o proprietário da conta passada pelo ID na URL.
  */
-const verifyOwnership = (req: Request, _res: Response, next: NextFunction): void => {
+const verifyOwnership: RequestHandler = (
+  req: Request,
+  _res: Response,
+  next: NextFunction,
+): void => {
   const authenticatedUserId = req.user.id ? req.user.id.toString() : ''
 
   if (req.params.id !== authenticatedUserId)

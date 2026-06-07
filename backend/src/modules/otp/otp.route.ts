@@ -1,4 +1,4 @@
-import { Router, type RequestHandler } from 'express'
+import { Router } from 'express'
 import otpController from './otp.controller.js'
 import verifyPasswordToken from '../../middlewares/verifyPasswordToken.js'
 import handleValidation from '../../middlewares/handleValidation.js'
@@ -15,16 +15,6 @@ import { otpSendLimiter, otpVerifyLimiter } from '../../middlewares/rateLimiter.
 import { isGuest } from '../../middlewares/isLoggedIn.js'
 import verifyAccessToken from '../../middlewares/verifyAccessToken.js'
 
-/* eslint-disable @typescript-eslint/no-explicit-any */
-// tipo de Request customizável onde "user" (req.user) pode ou não estar presente
-type RouteHandler = RequestHandler<
-  any, // Params
-  any, // ResBody
-  any, // ReqBody
-  any, // ReqQuery
-  Record<string, unknown> // ResLocals
->
-
 const router = Router()
 
 //  --- PUBLIC ROUTES ---
@@ -34,7 +24,7 @@ router.post(
   '/password-reset/request',
   isGuest,
   handleValidation(requestResetSchema),
-  otpController.requestReset as RouteHandler,
+  otpController.requestReset,
 )
 
 // @route POST /otps/password-reset/check
@@ -42,7 +32,7 @@ router.post(
   '/password-reset/check/',
   otpVerifyLimiter,
   handleValidation(checkResetSchema),
-  otpController.verifyReset as RouteHandler,
+  otpController.verifyReset,
 )
 
 //  --- PRIVATE ROUTES ---
@@ -50,7 +40,7 @@ router.post(
 // @route POST /otps/email-verification/:id
 router.post(
   '/email-verification/:id',
-  verifyAccessToken as unknown as RouteHandler,
+  verifyAccessToken,
   handleValidation(paramsIdSchema),
   otpController.requestVerification,
 )
@@ -58,21 +48,21 @@ router.post(
 // @route POST /otps/email-verification/check/:id
 router.post(
   '/email-verification/check/:id',
-  verifyAccessToken as unknown as RouteHandler,
+  verifyAccessToken,
   otpVerifyLimiter,
   handleValidation(checkVerificationSchema),
   otpController.verifyEmail,
 )
 
 // @route GET /otps/password-reset/status
-router.get('/password-reset/status', verifyPasswordToken, otpController.status as RouteHandler)
+router.get('/password-reset/status', verifyPasswordToken, otpController.status)
 
 // @route PATCH /password-reset
 router.patch(
   '/password-reset',
   verifyPasswordToken,
   handleValidation(resetPasswordSchema),
-  otpController.resetPassword as RouteHandler,
+  otpController.resetPassword,
 )
 
 // @route POST /otps/resend
@@ -81,7 +71,7 @@ router.post(
   otpSendLimiter,
   resendOtpFlow,
   handleValidation(resendOtpSchema),
-  otpController.resendCode as unknown as RouteHandler,
+  otpController.resendCode,
 )
 
 export default router
