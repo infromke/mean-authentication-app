@@ -37,7 +37,7 @@ class SessionService {
   authenticate = async (
     credentials: UserCredentials,
   ): Promise<{ user: any; accessToken: string }> => {
-    const user = await this.#userService.find(credentials.email, '+password') // recebe um objeto "user" bruto
+    const user = await this.#userService.find({ email: credentials.email }, '+password') // recebe um objeto "user" bruto
 
     if (!(await validatePassword(credentials.password, user.password)))
       throw throwHttpError(400, 'Invalid credentials')
