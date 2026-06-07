@@ -1,15 +1,10 @@
 import type { Request, Response, NextFunction } from 'express'
-import type { AuthenticatedRequest } from '../modules/session/session.controller.js'
 import throwHttpError from '../utils/throwHttpError.js'
 
 /**
  * Verifica se o usuário autenticado é o proprietário da conta passada pelo ID na URL.
  */
-const verifyOwnership = (
-  req: AuthenticatedRequest & Request,
-  _res: Response,
-  next: NextFunction,
-): void => {
+const verifyOwnership = (req: Request, _res: Response, next: NextFunction): void => {
   const authenticatedUserId = req.user.id ? req.user.id.toString() : ''
 
   if (req.params.id !== authenticatedUserId)

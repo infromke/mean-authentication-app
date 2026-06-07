@@ -1,5 +1,4 @@
 import type { Request, Response } from 'express'
-import type { AuthenticatedRequest } from '../session/session.controller.js'
 import type {
   RequestResetDTO,
   ResendCodeDTO,
@@ -40,12 +39,9 @@ class OtpController {
     })
   }
 
-  resendCode = async (
-    req: AuthenticatedRequest & Request<{}, any, ResendCodeDTO>,
-    res: Response,
-  ): Promise<Response> => {
+  resendCode = async (req: Request<{}, any, ResendCodeDTO>, res: Response): Promise<Response> => {
     const { email, type } = req.body
-    const filter = type === 'VERIFY' ? { _id: req.user.id } : { email: email! }
+    const filter = type === 'VERIFY' ? { _id: req.user.id } : { email: email }
 
     await this.#otpService.resend(type, filter)
     return res.status(200).json({

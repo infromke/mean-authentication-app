@@ -1,13 +1,6 @@
 import type { Request, Response } from 'express'
 import sessionService from './session.service.js'
 
-// interface para garantir que o TS reconheça o req.user
-export interface AuthenticatedRequest extends Request {
-  user: {
-    id: string
-  }
-}
-
 class SessionController {
   #sessionService: typeof sessionService
 
@@ -15,7 +8,7 @@ class SessionController {
     this.#sessionService = sessionServiceInstance
   }
 
-  status = async (req: AuthenticatedRequest, res: Response): Promise<Response> => {
+  status = async (req: Request, res: Response): Promise<Response> => {
     const { id } = req.user
 
     const user = await this.#sessionService.showStatus(id)
@@ -38,7 +31,7 @@ class SessionController {
     return res.status(200).json(user)
   }
 
-  logout = async (req: AuthenticatedRequest, res: Response): Promise<Response> => {
+  logout = async (req: Request, res: Response): Promise<Response> => {
     this.#sessionService.terminate(req.user.id)
 
     res.clearCookie('accessToken', {
