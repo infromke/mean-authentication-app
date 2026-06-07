@@ -1,6 +1,7 @@
 import type { FilterQuery, ProjectionType } from 'mongoose'
 import type { IUserDocument, IUserPersistence } from '../user/user.types.js'
 import type { OtpType } from './otp.types.js'
+import env from '../../config/env.js'
 import userService from '../user/user.service.js'
 import otpRepository from './otp.repository.js'
 import throwHttpError from '../../utils/throwHttpError.js'
@@ -130,7 +131,7 @@ class OtpService {
     const user = await this.#getUserByFilter(filter)
     await this.#validateCode(user.id, otpCode, 'RESET')
 
-    const secret = process.env.JWT_RESET_SECRET as string
+    const secret = env.JWT_RESET_SECRET
     if (!secret)
       throw throwHttpError(500, 'JWT_RESET_SECRET is not defined in environment variables')
 

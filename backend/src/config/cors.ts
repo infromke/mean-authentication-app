@@ -1,9 +1,10 @@
 import cors, { type CorsOptions } from 'cors'
+import env from './env.js'
 
 const allowedOrigins = [
-  process.env.CLIENT_PORT ? `http://localhost:${process.env.CLIENT_PORT}` : null,
-  process.env.FRONTEND_URL || null, // o render irá injetar essa variável
-].filter(Boolean) // filtra apenas os valores que não são "undefined"
+  `http://localhost:${env.CLIENT_PORT}`, // front-end local
+  env.FRONTEND_URL, // URL de produção injetada pelo Render
+].filter((origin): origin is string => Boolean(origin))
 
 const corsOptions: CorsOptions = {
   origin: (origin, callback) => {

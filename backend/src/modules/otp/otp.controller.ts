@@ -7,6 +7,7 @@ import type {
   VerifyResetDTO,
 } from './otp.types.js'
 import otpService from './otp.service.js'
+import env from '../../config/env.js'
 
 class OtpController {
   #otpService: typeof otpService
@@ -70,7 +71,7 @@ class OtpController {
 
     res.cookie('passwordToken', passwordToken, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production', // usar TRUE em HTTPS
+      secure: env.NODE_ENV === 'production', // usar TRUE em HTTPS
       sameSite: 'lax',
       maxAge: 15 * 60 * 1000, // 15 minutos
     })
@@ -88,7 +89,7 @@ class OtpController {
 
     res.clearCookie('passwordToken', {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production', // usar TRUE em HTTPS
+      secure: env.NODE_ENV === 'production', // usar TRUE em HTTPS
       sameSite: 'lax',
     })
 

@@ -1,4 +1,5 @@
 import type { ErrorRequestHandler, Request, Response, NextFunction } from 'express'
+import env from '../config/env.js'
 
 // mapeamento dos status HTTP de erros esperados
 const HTTP_ERROR: Record<number, string> = {
@@ -42,7 +43,7 @@ const errorHandler: ErrorRequestHandler = (
   const title = HTTP_ERROR[status] || 'Error'
 
   //  log de erro no console
-  if (process.env.NODE_ENV === 'development') {
+  if (env.NODE_ENV === 'development') {
     console.error(err.stack)
   }
 
@@ -57,7 +58,7 @@ const errorHandler: ErrorRequestHandler = (
     instance: req.originalUrl,
     // extensões personalizadas abaixo
     ...(err.errors ? { errors: err.errors } : {}), // para os erros vindos do Zod
-    ...(process.env.NODE_ENV === 'development' ? { stack: err.stack } : {}),
+    ...(env.NODE_ENV === 'development' ? { stack: err.stack } : {}),
   })
 }
 

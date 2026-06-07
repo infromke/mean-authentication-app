@@ -1,5 +1,6 @@
 import type { FilterQuery } from 'mongoose'
 import type { IUserDocument } from '../user/user.types.js'
+import env from '../../config/env.js'
 import userService from '../user/user.service.js'
 import throwHttpError from '../../utils/throwHttpError.js'
 import generateToken from '../../utils/generateToken.js'
@@ -42,7 +43,7 @@ class SessionService {
     if (!(await validatePassword(credentials.password, user.password)))
       throw throwHttpError(400, 'Invalid credentials')
 
-    const secret = process.env.JWT_ACCESS_SECRET as string
+    const secret = env.JWT_ACCESS_SECRET
     if (!secret)
       throw throwHttpError(500, 'JWT_ACCESS_SECRET is not defined in environment variables')
 

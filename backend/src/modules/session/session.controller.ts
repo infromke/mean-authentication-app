@@ -1,4 +1,5 @@
 import type { Request, Response } from 'express'
+import env from '../../config/env.js'
 import sessionService from './session.service.js'
 
 class SessionController {
@@ -23,7 +24,7 @@ class SessionController {
 
     res.cookie('accessToken', accessToken, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production', // usar TRUE em HTTPS
+      secure: env.NODE_ENV === 'production', // usar TRUE em HTTPS
       sameSite: 'lax',
       maxAge: 24 * 60 * 60 * 1000, // 1 dia
     })
@@ -36,7 +37,7 @@ class SessionController {
 
     res.clearCookie('accessToken', {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production', // usar TRUE em HTTPS
+      secure: env.NODE_ENV === 'production', // usar TRUE em HTTPS
       sameSite: 'lax',
     })
 

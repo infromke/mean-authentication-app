@@ -1,9 +1,10 @@
 import type { Request, Response, NextFunction, RequestHandler } from 'express'
+import env from '../config/env.js'
 import jwt from 'jsonwebtoken'
 import throwHttpError from '../utils/throwHttpError.js'
 import normalizeJwtError from '../utils/normalizeJwtError.js'
 
-const isEnvDev = process.env.NODE_ENV === 'dev' || process.env.NODE_ENV === 'development'
+const isEnvDev = env.NODE_ENV === 'dev' || env.NODE_ENV === 'development'
 
 /**
  * Middleware para autorizar a redefinição de senha.
@@ -19,7 +20,7 @@ const verifyPasswordToken: RequestHandler = (
   if (!passwordToken) throw throwHttpError(401, isEnvDev ? 'Token not found' : 'Access denied')
 
   try {
-    jwt.verify(passwordToken, process.env.JWT_RESET_SECRET as string)
+    jwt.verify(passwordToken, env.JWT_RESET_SECRET)
     next()
   } catch (error: unknown) {
     const formattedError = normalizeJwtError(error)

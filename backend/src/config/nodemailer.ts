@@ -1,4 +1,5 @@
 import nodemailer from 'nodemailer'
+import env from './env.js'
 
 export interface MailOptions {
   from: string
@@ -9,12 +10,12 @@ export interface MailOptions {
 }
 
 const transporter = nodemailer.createTransport({
-  host: process.env.SMTP_HOST,
-  port: Number(process.env.SMTP_PORT),
-  secure: Number(process.env.SMTP_PORT) === 465,
+  host: env.SMTP_HOST,
+  port: env.SMTP_PORT,
+  secure: env.SMTP_PORT === 465,
   auth: {
-    user: process.env.SMTP_USER,
-    pass: process.env.SMTP_PWD,
+    user: env.SMTP_USER,
+    pass: env.SMTP_PWD,
   },
   tls: {
     rejectUnauthorized: false, // força o nodemailer a confiar no servidor

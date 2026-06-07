@@ -1,10 +1,11 @@
 import type { Request, Response, NextFunction, RequestHandler } from 'express'
 import type { TokenUserPayload } from '../types/auth.types.js'
+import env from '../config/env.js'
 import jwt from 'jsonwebtoken'
 import throwHttpError from '../utils/throwHttpError.js'
 import normalizeJwtError from '../utils/normalizeJwtError.js'
 
-const isEnvDev = process.env.NODE_ENV === 'dev' || process.env.NODE_ENV === 'development'
+const isEnvDev = env.NODE_ENV === 'dev' || env.NODE_ENV === 'development'
 
 /**
  * Verifica a integridade de um web token json lendo-o do cookie httpOnly de acordo com o ambiente.
@@ -19,10 +20,7 @@ const verifyAccessToken: RequestHandler = (
   if (!accessToken) throw throwHttpError(401, isEnvDev ? 'Token not found' : 'Access denied')
 
   try {
-    const payload = jwt.verify(
-      accessToken,
-      process.env.JWT_ACCESS_SECRET as string,
-    ) as TokenUserPayload
+    const payload = jwt.verify(accessToken, env.JWT_ACCESS_SECRET) as TokenUserPayload
 
     req.user = { id: payload.id }
 

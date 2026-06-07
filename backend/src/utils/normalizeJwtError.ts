@@ -1,4 +1,6 @@
-const isEnvDev = process.env.NODE_ENV === 'dev' || process.env.NODE_ENV === 'development'
+import env from '../config/env.js'
+
+const isEnvDev = env.NODE_ENV === 'dev' || env.NODE_ENV === 'development'
 
 interface CustomHttpError extends Error {
   status?: number
