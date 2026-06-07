@@ -11,6 +11,8 @@ const emailRule = z
 
 const otpRule = z.string({ error: 'OTP is required' }).min(1, 'OTP cannot be empty')
 
+const OTP_TYPES = ['VERIFY', 'RESET'] as const
+
 /* ESTRUTURAS ISOLADAS (para o z.infer) */
 
 // POST /otps/email-verification/check/:id
@@ -37,12 +39,9 @@ export const resetPasswordBodySchema = z
 // POST /otps/resend
 export const resendOtpBodySchema = z
   .object({
-    type: z
-      .string({ error: 'Type is required' })
-      .min(1, 'Type is required.')
-      .refine((val) => ['VERIFY', 'RESET'].includes(val), {
-        error: 'Invalid OTP type',
-      }),
+    type: z.enum(OTP_TYPES, {
+      error: 'Invalid OTP type',
+    }),
     email: emailRule.optional(),
   })
   .refine(

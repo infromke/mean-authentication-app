@@ -8,10 +8,9 @@ import type {
 } from './otp.schema.js'
 import { Document, Types } from 'mongoose'
 
-// os tipos literais permitidos para operações de OTP
-export type OtpType = 'VERIFY' | 'RESET'
-
 // DTOs baseados nos schemas do Zod
+export type OtpType = z.infer<typeof resendOtpBodySchema>['type'] // literais permitidos para operações de OTP
+
 export type VerifyEmailDTO = z.infer<typeof verifyEmailBodySchema>
 export type VerifyResetDTO = z.infer<typeof checkResetBodySchema>
 
