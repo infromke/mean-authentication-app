@@ -10,7 +10,7 @@ const isAccountVerified: RequestHandler = async (
   _res: Response,
   next: NextFunction,
 ): Promise<void> => {
-  const { id } = req.user
+  const { id } = req.user!
 
   const user = await userService.show(id)
   if (!user.isAccountVerified)

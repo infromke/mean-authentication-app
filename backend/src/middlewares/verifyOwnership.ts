@@ -9,7 +9,7 @@ const verifyOwnership: RequestHandler = (
   _res: Response,
   next: NextFunction,
 ): void => {
-  const authenticatedUserId = req.user.id ? req.user.id.toString() : ''
+  const authenticatedUserId = req.user!.id ? req.user!.id.toString() : ''
 
   if (req.params.id !== authenticatedUserId)
     throw throwHttpError(403, 'You can only modify your own account')

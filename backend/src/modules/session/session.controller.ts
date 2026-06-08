@@ -10,8 +10,7 @@ class SessionController {
   }
 
   status = async (req: Request, res: Response): Promise<Response> => {
-    const { id } = req.user
-
+    const { id } = req.user!
     const user = await this.#sessionService.showStatus(id)
     return res.status(200).json(user)
   }
@@ -33,7 +32,7 @@ class SessionController {
   }
 
   logout = async (req: Request, res: Response): Promise<Response> => {
-    this.#sessionService.terminate(req.user.id)
+    this.#sessionService.terminate(req.user!.id)
 
     res.clearCookie('accessToken', {
       httpOnly: true,

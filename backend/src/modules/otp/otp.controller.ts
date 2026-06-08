@@ -6,8 +6,8 @@ import type {
   VerifyEmailDTO,
   VerifyResetDTO,
 } from './otp.types.js'
-import otpService from './otp.service.js'
 import env from '../../config/env.js'
+import otpService from './otp.service.js'
 
 class OtpController {
   #otpService: typeof otpService
@@ -42,7 +42,7 @@ class OtpController {
 
   resendCode = async (req: Request<{}, any, ResendCodeDTO>, res: Response): Promise<Response> => {
     const { email, type } = req.body
-    const filter = type === 'VERIFY' ? { _id: req.user.id } : { email: email }
+    const filter = type === 'VERIFY' ? { _id: req.user!.id } : { email: email }
 
     await this.#otpService.resend(type, filter)
     return res.status(200).json({
