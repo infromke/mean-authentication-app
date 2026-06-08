@@ -1,5 +1,25 @@
-import type { IOtpDocument } from './otp.types.js'
-import mongoose, { Schema } from 'mongoose'
+import mongoose, { Document, Schema, Types } from 'mongoose'
+import type { OtpType } from './otp.types.js'
+
+// esqueleto da entidade
+export interface IOtp {
+  userId: Types.ObjectId
+  code: string
+  type: OtpType
+  expiresAt: Date
+  createdAt?: Date
+  updatedAt?: Date
+}
+
+// representa o objeto exatamente como ele existe no banco
+export interface IOtpPersistence extends IOtp {
+  _id: Types.ObjectId // garante que o service saiba da existência do _id
+}
+
+// une os dados do OTP com todas as funções internas do mongoose, como .save(), .populate(), .isModified()
+export interface IOtpDocument extends IOtp, Document {
+  _id: Types.ObjectId
+}
 
 const otpSchema = new Schema<IOtpDocument>(
   {

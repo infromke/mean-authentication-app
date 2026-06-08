@@ -1,6 +1,6 @@
 import type { Types } from 'mongoose'
-import type { IOtp, IOtpPersistence, OtpType } from './otp.types.js'
-import Otp from './otp.model.js'
+import Otp, { type IOtp, type IOtpPersistence } from './otp.model.js'
+import type { OtpType } from './otp.types.js'
 
 // para operações de deleção
 interface DeleteResult {
