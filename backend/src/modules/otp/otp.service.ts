@@ -1,6 +1,7 @@
 import type { FilterQuery, ProjectionType } from 'mongoose'
-import type { IUserDocument, IUserPersistence } from '../user/user.types.js'
 import type { OtpType } from './otp.types.js'
+import type { IUser, IUserDocument, IUserPersistence } from '../user/user.model.js'
+import env from '../../config/env.js'
 import userService from '../user/user.service.js'
 import otpRepository from './otp.repository.js'
 import throwHttpError from '../../utils/throwHttpError.js'
@@ -25,7 +26,7 @@ class OtpService {
 
   // utilitário para busca avançada de usuário
   #getUserByFilter = async (
-    filter: FilterQuery<IUserDocument>,
+    filter: FilterQuery<IUser>,
     projection: ProjectionType<IUserDocument> | {} = {},
   ): Promise<any> => {
     return await this.#userService.find(filter, projection)
@@ -69,9 +70,11 @@ class OtpService {
 
     try {
       await this.#sendCodeEmail(user.id, user.email, 'VERIFY')
-    } catch (error: any) {
-      if (error.code === 11000)
+    } catch (error: unknown) {
+      if (error && typeof error === 'object' && 'code' in error && error.code === 11000) {
         throw throwHttpError(409, 'An active e-mail code has already been sent to this account')
+      }
+
       throw error // repassa outros erros inesperados
     }
   }
@@ -80,14 +83,19 @@ class OtpService {
     try {
       const user = await this.#getUserByFilter(filter)
       await this.#sendCodeEmail(user.id, user.email, 'RESET')
-    } catch (error: any) {
-      if (error.status === 400) return // não avisa que o usuário não foi encontrado
+    } catch (error: unknown) {
+      const isObjectError = error && typeof error === 'object'
 
-      if (error.code === 11000)
+      if (isObjectError && 'status' in error && error.status === 400) {
+        return // não avisa que o usuário não foi encontrado
+      }
+
+      if (isObjectError && 'code' in error && error.code === 11000) {
         throw throwHttpError(
           409,
           'An active password reset code has already been sent to this account',
         )
+      }
 
       throw error // repassa outros erros inesperados
     }
@@ -123,7 +131,7 @@ class OtpService {
     const user = await this.#getUserByFilter(filter)
     await this.#validateCode(user.id, otpCode, 'RESET')
 
-    const secret = process.env.JWT_RESET_SECRET as string
+    const secret = env.JWT_RESET_SECRET
     if (!secret)
       throw throwHttpError(500, 'JWT_RESET_SECRET is not defined in environment variables')
 

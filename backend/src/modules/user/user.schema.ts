@@ -1,7 +1,8 @@
 import { z } from 'zod'
 import { idSchema } from '../../utils/common.schema.js'
 
-// REGRAS de base (compartilhadas entre register e update)
+/* REGRAS de base (compartilhadas entre register e update) */
+
 const userBody = z.object({
   name: z
     .string()
@@ -12,18 +13,22 @@ const userBody = z.object({
   password: z.string().min(8, 'Password must be at least 8 characters'),
 })
 
-// SCHEMAS
+/* ESTRUTURAS ISOLADAS (para o z.infer) */
+
+export const registerBodySchema = userBody
+  .extend({
+    confirmPassword: z.string().min(1, 'Confirm your password'),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    error: 'Passwords must match each other',
+    path: ['confirmPassword'], // erro associado ao campo confirmPassword
+  })
+
+/* SCHEMAS (para o Express consumir) */
 
 // POST /users
 const registerSchema = z.object({
-  body: userBody
-    .extend({
-      confirmPassword: z.string().min(1, 'Confirm your password'),
-    })
-    .refine((data) => data.password === data.confirmPassword, {
-      error: 'Passwords must match each other',
-      path: ['confirmPassword'], // erro associado ao campo confirmPassword
-    }),
+  body: registerBodySchema,
 })
 
 // PATCH /users/:id

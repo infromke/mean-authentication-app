@@ -1,13 +1,10 @@
-import { Router, type RequestHandler } from 'express'
+import { Router } from 'express'
 import sessionController from './session.controller.js'
 import { sessionLimiter } from '../../middlewares/rateLimiter.js'
 import handleValidation from '../../middlewares/handleValidation.js'
 import loginSchema from './session.schema.js'
 import verifyAccessToken from '../../middlewares/verifyAccessToken.js'
 import { isAuthenticated } from '../../middlewares/isLoggedIn.js'
-
-// tipo de Request customizável onde "user" (req.user) pode ou não estar presente
-type RouteHandler = RequestHandler<any, any, any, any, Record<string, any>>
 
 const router = Router()
 
@@ -19,23 +16,15 @@ router.post(
   isAuthenticated,
   sessionLimiter,
   handleValidation(loginSchema),
-  sessionController.login as RouteHandler,
+  sessionController.login,
 )
 
 //  --- PRIVATE ROUTES ---
 
 // @route GET /sessions/me
-router.get(
-  '/me',
-  verifyAccessToken as unknown as RouteHandler,
-  sessionController.status as unknown as RouteHandler,
-)
+router.get('/me', verifyAccessToken, sessionController.status)
 
 // @route POST /sessions/logout
-router.post(
-  '/logout',
-  verifyAccessToken as unknown as RouteHandler,
-  sessionController.logout as unknown as RouteHandler,
-)
+router.post('/logout', verifyAccessToken, sessionController.logout)
 
 export default router

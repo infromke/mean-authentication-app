@@ -1,20 +1,14 @@
+import type { MailOptions } from '../types/mail.types.js'
 import nodemailer from 'nodemailer'
-
-export interface MailOptions {
-  from: string
-  to: string
-  subject: string
-  text: string
-  html: string
-}
+import env from './env.js'
 
 const transporter = nodemailer.createTransport({
-  host: process.env.SMTP_HOST,
-  port: Number(process.env.SMTP_PORT),
-  secure: Number(process.env.SMTP_PORT) === 465,
+  host: env.SMTP_HOST,
+  port: env.SMTP_PORT,
+  secure: env.SMTP_PORT === 465,
   auth: {
-    user: process.env.SMTP_USER,
-    pass: process.env.SMTP_PWD,
+    user: env.SMTP_USER,
+    pass: env.SMTP_PWD,
   },
   tls: {
     rejectUnauthorized: false, // força o nodemailer a confiar no servidor
@@ -28,8 +22,12 @@ const verifyConnection = async (): Promise<void> => {
   try {
     await transporter.verify()
     console.log('[NODEMAILER] is ready to take messages')
-  } catch (error: any) {
-    console.log('\n[NODEMAILER] failed to establish connection:', error.message)
+  } catch (error: unknown) {
+    const errorMessage =
+      error instanceof Error
+        ? error.message
+        : '[NODEMAILER] Unknown error while verifying connection\n'
+    console.log('\n[NODEMAILER] failed to establish connection:', errorMessage)
   }
 }
 
@@ -40,8 +38,10 @@ const sendEmail = async (mail: MailOptions): Promise<void> => {
   try {
     const info = await transporter.sendMail(mail)
     console.log('[NODEMAILER] sent an e-mail:', info.envelope)
-  } catch (error: any) {
-    console.log('\n[NODEMAILER] failed to send e-mail:', error.message)
+  } catch (error: unknown) {
+    const errorMessage =
+      error instanceof Error ? error.message : '[NODEMAILER] Unknown error while sending e-mail\n'
+    console.log('\n[NODEMAILER] failed to send e-mail:', errorMessage)
   }
 }
 

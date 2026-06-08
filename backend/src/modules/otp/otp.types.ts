@@ -1,48 +1,21 @@
-import { Document, Types } from 'mongoose'
+import z from 'zod'
+import type {
+  checkResetBodySchema,
+  requestResetBodySchema,
+  resendOtpBodySchema,
+  resetPasswordBodySchema,
+  verifyEmailBodySchema,
+} from './otp.schema.js'
 
-// os tipos literais permitidos para operações de OTP
-export type OtpType = 'VERIFY' | 'RESET'
+// DTOs baseados nos schemas do Zod
+export type OtpType = z.infer<typeof resendOtpBodySchema>['type'] // literais permitidos para operações de OTP
 
-// interfaces para requisições
-export interface RequestResetDTO {
-  email: string
-}
+export type VerifyEmailDTO = z.infer<typeof verifyEmailBodySchema>
+export type VerifyResetDTO = z.infer<typeof checkResetBodySchema>
 
-export interface ResendCodeDTO {
-  email?: string
-  type: OtpType
-}
+export type RequestResetDTO = z.infer<typeof requestResetBodySchema>
 
-export interface VerifyEmailDTO {
-  otp: string
-}
+type RawResetPasswordDTO = z.infer<typeof resetPasswordBodySchema> // contém a propriedade "confirmPassword"
+export type ResetPasswordDTO = Omit<RawResetPasswordDTO, 'confirmPassword'>
 
-export interface VerifyResetDTO {
-  email: string
-  otp: string
-}
-
-export interface ResetPasswordDTO {
-  email: string
-  newPassword: string
-}
-
-// esqueleto da entidade
-export interface IOtp {
-  userId: Types.ObjectId
-  code: string
-  type: OtpType
-  expiresAt: Date
-  createdAt?: Date
-  updatedAt?: Date
-}
-
-// representa o objeto exatamente como ele existe no banco
-export interface IOtpPersistence extends IOtp {
-  _id: Types.ObjectId // garante que o service saiba da existência do _id
-}
-
-// une os dados do OTP com todas as funções internas do mongoose, como .save(), .populate(), .isModified()
-export interface IOtpDocument extends IOtp, Document {
-  _id: Types.ObjectId
-}
+export type ResendCodeDTO = z.infer<typeof resendOtpBodySchema>

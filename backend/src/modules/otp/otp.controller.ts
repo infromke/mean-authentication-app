@@ -1,5 +1,4 @@
 import type { Request, Response } from 'express'
-import type { AuthenticatedRequest } from '../session/session.controller.js'
 import type {
   RequestResetDTO,
   ResendCodeDTO,
@@ -7,6 +6,7 @@ import type {
   VerifyEmailDTO,
   VerifyResetDTO,
 } from './otp.types.js'
+import env from '../../config/env.js'
 import otpService from './otp.service.js'
 
 class OtpController {
@@ -40,12 +40,9 @@ class OtpController {
     })
   }
 
-  resendCode = async (
-    req: AuthenticatedRequest & Request<{}, any, ResendCodeDTO>,
-    res: Response,
-  ): Promise<Response> => {
+  resendCode = async (req: Request<{}, any, ResendCodeDTO>, res: Response): Promise<Response> => {
     const { email, type } = req.body
-    const filter = type === 'VERIFY' ? { _id: req.user.id } : { email: email! }
+    const filter = type === 'VERIFY' ? { _id: req.user!.id } : { email: email }
 
     await this.#otpService.resend(type, filter)
     return res.status(200).json({
@@ -74,7 +71,7 @@ class OtpController {
 
     res.cookie('passwordToken', passwordToken, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production', // usar TRUE em HTTPS
+      secure: env.NODE_ENV === 'production', // usar TRUE em HTTPS
       sameSite: 'lax',
       maxAge: 15 * 60 * 1000, // 15 minutos
     })
@@ -92,7 +89,7 @@ class OtpController {
 
     res.clearCookie('passwordToken', {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production', // usar TRUE em HTTPS
+      secure: env.NODE_ENV === 'production', // usar TRUE em HTTPS
       sameSite: 'lax',
     })
 

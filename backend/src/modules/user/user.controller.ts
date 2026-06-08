@@ -1,5 +1,6 @@
 import type { Request, Response } from 'express'
 import type { CreateUserDTO } from './user.types.js'
+import env from '../../config/env.js'
 import userService from './user.service.js'
 
 class UserController {
@@ -27,7 +28,7 @@ class UserController {
 
     res.cookie('accessToken', accessToken, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production', // usar TRUE em HTTPS
+      secure: env.NODE_ENV === 'production', // usar TRUE em HTTPS
       sameSite: 'lax',
       maxAge: 24 * 60 * 60 * 1000, // 1 dia
     })
@@ -57,7 +58,7 @@ class UserController {
 
     res.clearCookie('accessToken', {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production', // usar TRUE em HTTPS
+      secure: env.NODE_ENV === 'production', // usar TRUE em HTTPS
       sameSite: 'lax',
     })
 

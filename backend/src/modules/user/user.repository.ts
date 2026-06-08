@@ -1,18 +1,10 @@
 import type { FilterQuery, ProjectionType, Types } from 'mongoose'
-import type { IUser, IUserDocument, IUserPersistence } from './user.types.js'
-import User from './user.model.js'
+import type { FindAllParams } from '../../types/pagination.types.js'
+import User, { type IUser, type IUserDocument, type IUserPersistence } from './user.model.js'
 
 interface PaginatedUsers {
   users: IUserPersistence[]
   totalElements: number
-}
-
-// para os parâmetros de busca
-interface FindAllParams {
-  page: number
-  size: number
-  sortField: string
-  sortOrder: 1 | -1
 }
 
 class UserRepository {

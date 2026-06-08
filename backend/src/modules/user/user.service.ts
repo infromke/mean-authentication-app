@@ -1,3 +1,8 @@
+import type { FilterQuery, ProjectionType } from 'mongoose'
+import type { ListQuery, PaginationResult } from '../../types/pagination.types.js'
+import type { IUser, IUserDocument } from './user.model.js'
+import type { CreateUserDTO } from './user.types.js'
+import env from '../../config/env.js'
 import userRepository from './user.repository.js'
 import formatUserObject from '../../utils/formatUserObject.js'
 import generateToken from '../../utils/generateToken.js'
@@ -6,27 +11,6 @@ import { getWelcomeMailOptions } from '../../utils/generateMail.js'
 import clearUserCache from '../../utils/clearUserCache.js'
 import cache from '../../lib/cache.js'
 import throwHttpError from '../../utils/throwHttpError.js'
-import type { FilterQuery, ProjectionType } from 'mongoose'
-import type { CreateUserDTO, IUser, IUserDocument } from './user.types.js'
-
-// query de listagem
-interface ListQuery {
-  page?: string
-  size?: string
-  sort?: string
-}
-
-// para o objeto de paginação
-interface PaginationResult {
-  content: any[] // Substitua por seu tipo de retorno do formatUserObject se houver
-  first: boolean
-  last: boolean
-  number: number
-  numberOfElements: number
-  size: number
-  totalElements: number
-  totalPages: number
-}
 
 class UserService {
   #userRepository: typeof userRepository
@@ -108,7 +92,7 @@ class UserService {
   store = async (data: CreateUserDTO): Promise<{ formattedUser: any; accessToken: string }> => {
     const user = await this.#userRepository.create(data)
 
-    const secret = process.env.JWT_ACCESS_SECRET as string
+    const secret = env.JWT_ACCESS_SECRET
     if (!secret)
       throw throwHttpError(500, 'JWT_ACCESS_SECRET is not defined in environment variables')
 

@@ -1,21 +1,18 @@
-import type { Request, Response, NextFunction } from 'express'
-import type { AuthenticatedRequest } from '../modules/session/session.controller.js'
+import type { Request, Response, NextFunction, RequestHandler } from 'express'
+import type { TokenUserPayload } from '../types/auth.types.js'
+import env from '../config/env.js'
 import jwt from 'jsonwebtoken'
 import throwHttpError from '../utils/throwHttpError.js'
+import normalizeJwtError from '../utils/normalizeJwtError.js'
 
-const isEnvDev = process.env.NODE_ENV === 'dev' || process.env.NODE_ENV === 'development'
-
-// interface para os dados do usuário advém do token
-interface UserPayload extends jwt.JwtPayload {
-  id?: string
-}
+const isEnvDev = env.NODE_ENV === 'dev' || env.NODE_ENV === 'development'
 
 /**
  * Verifica a integridade de um web token json lendo-o do cookie httpOnly de acordo com o ambiente.
  */
-const verifyAccessToken = (
-  req: AuthenticatedRequest & Request,
-  res: Response,
+const verifyAccessToken: RequestHandler = (
+  req: Request,
+  _res: Response,
   next: NextFunction,
 ): void => {
   const { accessToken } = req.cookies
@@ -23,22 +20,14 @@ const verifyAccessToken = (
   if (!accessToken) throw throwHttpError(401, isEnvDev ? 'Token not found' : 'Access denied')
 
   try {
-    const payload = jwt.verify(accessToken, process.env.JWT_ACCESS_SECRET as string) as UserPayload
-    req.user = { ...req.user, ...payload }
+    const payload = jwt.verify(accessToken, env.JWT_ACCESS_SECRET) as TokenUserPayload
+
+    req.user = { id: payload.id }
 
     next()
-  } catch (error: any) {
-    // personalizando outros erros para serem estritamente 401 (Unauthorized)
-    error.status = 401
-
-    if (error.name === 'TokenExpiredError') {
-      error.status = 403
-      error.message = isEnvDev ? 'Token has expired' : 'Session expired'
-    } else {
-      error.message = isEnvDev ? 'Invalid token' : 'Access denied'
-    }
-
-    next(error)
+  } catch (error: unknown) {
+    const formattedError = normalizeJwtError(error)
+    next(formattedError)
   }
 }
 

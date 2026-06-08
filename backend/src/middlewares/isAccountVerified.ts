@@ -1,17 +1,16 @@
-import type { Request, Response, NextFunction } from 'express'
-import type { AuthenticatedRequest } from '../modules/session/session.controller.js'
+import type { Request, Response, NextFunction, RequestHandler } from 'express'
 import userService from '../modules/user/user.service.js'
 import throwHttpError from '../utils/throwHttpError.js'
 
 /**
  * Restringe o acesso apenas a usuários que realizaram a verificação de conta.
  */
-const isAccountVerified = async (
-  req: AuthenticatedRequest & Request,
-  res: Response,
+const isAccountVerified: RequestHandler = async (
+  req: Request,
+  _res: Response,
   next: NextFunction,
 ): Promise<void> => {
-  const { id } = req.user
+  const { id } = req.user!
 
   const user = await userService.show(id)
   if (!user.isAccountVerified)

@@ -7,6 +7,7 @@ import { verifyConnection } from './config/nodemailer.js'
 import GlobalRouter from './modules/index.routes.js'
 import errorHandler from './middlewares/errorHandler.js'
 import throwHttpError from './utils/throwHttpError.js'
+import env from './config/env.js'
 
 //  config
 const app = express()
@@ -20,7 +21,7 @@ app.use(express.json())
 app.use(cors)
 app.use(cookieParser())
 
-if (process.env.NODE_ENV === 'development') {
+if (env.NODE_ENV === 'development') {
   app.use(morgan('dev'))
 }
 
@@ -28,7 +29,7 @@ if (process.env.NODE_ENV === 'development') {
 app.use(GlobalRouter)
 
 //  middleware para rotas não encontradas (404)
-app.use((req: Request, res: Response, next: NextFunction) => {
+app.use((_req: Request, _res: Response, _next: NextFunction) => {
   throw throwHttpError(404, 'Route not found')
 })
 

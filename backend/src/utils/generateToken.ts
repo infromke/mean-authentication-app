@@ -8,7 +8,7 @@ import jwt, { type SignOptions } from 'jsonwebtoken'
  * @returns {string} Token JSON para o usuário especificado.
  */
 const generateToken = (
-  user: Record<string, any>,
+  user: Record<string, string>,
   secret: string,
   expirationTime: NonNullable<SignOptions['expiresIn']>,
 ): string => {
