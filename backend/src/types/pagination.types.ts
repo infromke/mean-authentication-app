@@ -15,7 +15,7 @@ export interface FindAllParams {
 
 // para o objeto de paginação
 export interface PaginationResult {
-  content: any[]
+  content: unknown[]
   first: boolean
   last: boolean
   number: number
