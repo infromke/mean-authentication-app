@@ -1,5 +1,6 @@
 import type { FilterQuery, ProjectionType } from 'mongoose'
 import type { CreateUserDTO, IUser, IUserDocument } from './user.types.js'
+import type { ListQuery, PaginationResult } from '../../types/pagination.types.js'
 import env from '../../config/env.js'
 import userRepository from './user.repository.js'
 import formatUserObject from '../../utils/formatUserObject.js'
@@ -9,25 +10,6 @@ import { getWelcomeMailOptions } from '../../utils/generateMail.js'
 import clearUserCache from '../../utils/clearUserCache.js'
 import cache from '../../lib/cache.js'
 import throwHttpError from '../../utils/throwHttpError.js'
-
-// query de listagem
-interface ListQuery {
-  page?: string
-  size?: string
-  sort?: string
-}
-
-// para o objeto de paginação
-interface PaginationResult {
-  content: any[] // Substitua por seu tipo de retorno do formatUserObject se houver
-  first: boolean
-  last: boolean
-  number: number
-  numberOfElements: number
-  size: number
-  totalElements: number
-  totalPages: number
-}
 
 class UserService {
   #userRepository: typeof userRepository
