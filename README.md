@@ -20,17 +20,19 @@ A aplicação foi estruturada sob o conceito de Monólito Modular com responsabi
 - **Padronização RFC 7807 (Problem Details)**: Implementação do padrão IETF para respostas de erro, fornecendo mensagens consistentes e semânticas;
 - **Encadeamento de Middlewares**: Pipeline de execução para sanitização de inputs, proteção de rotas via interceptores JWT e controle de fluxo;
 - **POJO Persistence Pattern**: Camada de persistência otimizada com .lean(), garantindo que a lógica de negócio lide apenas com objetos JavaScript puros, aumentando a performance e previsibilidade;
-- **Pipeline Type-Safe para Erros**: União entre o suporte nativo a erros assíncronos do Express 5 e a palavra-chave "throw" do JavaScript, o que permite o encerramento imediato de fluxos.
+- **Pipeline Type-Safe para Erros**: União entre o suporte nativo a erros assíncronos do Express 5 e a palavra-chave "throw" do JavaScript, o que permite o encerramento imediato de fluxos;
+- **Sistema de Tipos Estrito e Defensivo**: Arquitetura configurada sem o uso de "any" e sim "unknown" com Type Narrowing para manipulação dados. Ainda, contratos de dados concentrados em arquivos de definição específicos ou análogos ao seu domínio;
+- **Validação de Infraestrutura Fail-Fast**: Centralização e validação das variáveis de ambiente (process.env) logo na inicialização da API, garantindo que o servidor sequer suba caso falte alguma.
 
 ## Tech Stack e Bibliotecas
 
 ### Back-end (Node.js 22.21, Express 5.2 e TypeScript 6.0)
 
-- **Runtime & Tooling**: `typescript` para checagem estática estrita de tipos, e `tsx` (EsaBuild-powered) como executor de desenvolvimento;
+- **Runtime & Tooling**: `typescript` para checagem estática estrita de tipos, `tsx` para execução em desenvolvimento, além de padronização de código automatizada com `ESLint` e diretrizes de formatação cross-editor via `EditorConfig`;
 - **Security**: `jsonwebtoken` para autenticação Stateless, `bcrypt` para hashing e validação de senhas e `CORS` para políticas de segurança cross-origin;
 - **Session Management**: `cookie-parser` para a manipulação segura de credenciais em cookies;
 - **Resilience**: `node-cache` para redução de latência em dados de sessão e perfil, e `express-rate-limit` implementando a Internet Draft (draft-ietf-httpapi-ratelimit-headers) para evitar bots, sobrecarregamento e brute-force;
-- **Data Validation**: Contratos de interface e validação de esquemas utilizando `Zod` para integridade de dados desde a entrada (HTTP) até a persistência;
+- **Data Validation & Type Inference**: Validação de esquemas e contratos HTTP utilizando `Zod`, com uso estendido para a inferência automática de DTOs nativos via z.infer;
 - **Communication**: `nodemailer` integrado ao SMTP da Brevo para fluxos transacionais de OTP;
 - **Observability**: Logging de tráfego para monitoramento de requisições HTTP com `morgan`.
 
@@ -44,7 +46,7 @@ A aplicação foi estruturada sob o conceito de Monólito Modular com responsabi
 
 ## Funcionalidades
 
-- **Autenticação Stateless**: Login com persistência segura via Cookies HttpOnly e Secure, mitigando ataques de XSS;
+- **Autenticação Stateless**: Login com persistência segura via Cookies HttpOnly/Secure. Implementação de Declaration Merging para acoplar o ciclo de vida do usuário autenticado diretamente ao objeto Request do Express de forma nativa;
 - **Fluxo de Confiança (OTP)**: Verificação de conta e recuperação de senha via One-Time Password, com expiração automática via MongoDB TTL;
 - **Paginação Dinâmica**: Listagem de dados com suporte a size, page e sort, inspirado pelo padrão Spring Data JPA;
 - **Caching Estruturado**: Sistema de cache inteligente que armazena dados já sanitizados e formatados para otimizar a listagem de usuários e busca por ID, verificação de integridade da sessão ativa e validação de status do token de redefinição de senha;
