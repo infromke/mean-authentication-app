@@ -1,13 +1,6 @@
+import type { MailOptions } from '../types/mail.types.js'
 import nodemailer from 'nodemailer'
 import env from './env.js'
-
-export interface MailOptions {
-  from: string
-  to: string
-  subject: string
-  text: string
-  html: string
-}
 
 const transporter = nodemailer.createTransport({
   host: env.SMTP_HOST,

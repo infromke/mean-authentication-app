@@ -1,4 +1,4 @@
-import type { MailOptions } from '../config/nodemailer.js'
+import type { MailOptions } from '../types/mail.types.js'
 import type { OtpType } from '../modules/otp/otp.types.js'
 import env from '../config/env.js'
 import getOtpEmailTemplate from '../templates/otpEmail.js'
