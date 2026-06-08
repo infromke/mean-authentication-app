@@ -1,6 +1,6 @@
 import type { FilterQuery, ProjectionType } from 'mongoose'
-import type { IUserDocument, IUserPersistence } from '../user/user.types.js'
 import type { OtpType } from './otp.types.js'
+import type { IUser, IUserDocument, IUserPersistence } from '../user/user.model.js'
 import env from '../../config/env.js'
 import userService from '../user/user.service.js'
 import otpRepository from './otp.repository.js'
@@ -26,7 +26,7 @@ class OtpService {
 
   // utilitário para busca avançada de usuário
   #getUserByFilter = async (
-    filter: FilterQuery<IUserDocument>,
+    filter: FilterQuery<IUser>,
     projection: ProjectionType<IUserDocument> | {} = {},
   ): Promise<any> => {
     return await this.#userService.find(filter, projection)

@@ -1,6 +1,7 @@
 import type { FilterQuery, ProjectionType } from 'mongoose'
-import type { CreateUserDTO, IUser, IUserDocument } from './user.types.js'
 import type { ListQuery, PaginationResult } from '../../types/pagination.types.js'
+import type { IUser, IUserDocument } from './user.model.js'
+import type { CreateUserDTO } from './user.types.js'
 import env from '../../config/env.js'
 import userRepository from './user.repository.js'
 import formatUserObject from '../../utils/formatUserObject.js'

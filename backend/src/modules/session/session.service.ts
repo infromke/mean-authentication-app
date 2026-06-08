@@ -1,5 +1,5 @@
 import type { FilterQuery } from 'mongoose'
-import type { IUserDocument } from '../user/user.types.js'
+import type { IUserDocument } from '../user/user.model.js'
 import env from '../../config/env.js'
 import userService from '../user/user.service.js'
 import throwHttpError from '../../utils/throwHttpError.js'
