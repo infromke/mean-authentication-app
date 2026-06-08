@@ -1,4 +1,5 @@
 import type { ErrorRequestHandler, Request, Response, NextFunction } from 'express'
+import type { AppError } from '../types/error.types.js'
 import env from '../config/env.js'
 
 // mapeamento dos status HTTP de erros esperados
@@ -12,19 +13,11 @@ const HTTP_ERROR: Record<number, string> = {
   500: 'Internal Server Error',
 }
 
-// interface para capturar propriedades específicas do Mongoose e do Zod
-interface CustomError extends Error {
-  status?: number
-  code?: number
-  keyPattern?: Record<string, unknown>
-  errors?: unknown // para o array de validações do Zod
-}
-
 /**  Captura qualquer erro inesperado lançado em rotas, middlewares ou controllers.
  * Diferencia entre ambiente de produção e desenvolvimento seguindo a RFC 7807.
  */
 const errorHandler: ErrorRequestHandler = (
-  err: CustomError,
+  err: AppError,
   req: Request,
   res: Response,
   _next: NextFunction,

@@ -1,19 +1,16 @@
 import env from '../config/env.js'
+import type { AppError } from '../types/error.types.js'
 
 const isEnvDev = env.NODE_ENV === 'dev' || env.NODE_ENV === 'development'
-
-interface CustomHttpError extends Error {
-  status?: number
-}
 
 /**
  * Normaliza erros disparados pela biblioteca jsonwebtoken, adicionando status HTTP
  * e mensagens semânticas baseadas no ambiente.
  */
-const normalizeJwtError = (error: unknown): CustomHttpError => {
+const normalizeJwtError = (error: unknown): AppError => {
   // se já for uma instância de Error (que o jsonwebtoken lança)
   if (error instanceof Error) {
-    const jwtError = error as CustomHttpError
+    const jwtError = error as AppError
 
     // config generalizada
     jwtError.status = 401
