@@ -1,16 +1,16 @@
 import type { FilterQuery, ProjectionType } from 'mongoose'
-import type { ListQuery, PaginationResult } from '../../types/pagination.types.js'
+import type { ListQuery, PaginationResult } from '../../shared/types/pagination.types.js'
 import type { IUser, IUserDocument } from './user.model.js'
 import type { CreateUserDTO } from './user.types.js'
 import env from '../../config/env.js'
 import userRepository from './user.repository.js'
-import formatUserObject from '../../utils/formatUserObject.js'
-import generateToken from '../../utils/generateToken.js'
+import formatUserObject from './utils/formatUserObject.js'
+import generateToken from '../../shared/utils/generateToken.js'
 import { sendEmail } from '../../config/nodemailer.js'
-import { getWelcomeMailOptions } from '../../utils/generateMail.js'
-import clearUserCache from '../../utils/clearUserCache.js'
-import cache from '../../lib/cache.js'
-import throwHttpError from '../../utils/throwHttpError.js'
+import { getWelcomeMailOptions } from '../otp/utils/generateMail.js'
+import clearUserCache from '../../shared/utils/clearUserCache.js'
+import cache from '../../shared/lib/cache.js'
+import throwHttpError from '../../shared/utils/throwHttpError.js'
 
 class UserService {
   #userRepository: typeof userRepository

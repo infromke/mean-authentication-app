@@ -1,5 +1,5 @@
 import type { Request, Response, NextFunction, RequestHandler } from 'express'
-import throwHttpError from '../utils/throwHttpError.js'
+import throwHttpError from '../../../shared/utils/throwHttpError.js'
 
 /**
  * Impede que usuários já autenticados acessem a rota POST `/sessions/login`.

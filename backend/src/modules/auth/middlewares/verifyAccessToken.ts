@@ -1,9 +1,9 @@
 import type { Request, Response, NextFunction, RequestHandler } from 'express'
-import type { TokenUserPayload } from '../types/auth.types.js'
-import env from '../config/env.js'
+import type { TokenUserPayload } from '../../../shared/types/auth.types.js'
+import env from '../../../config/env.js'
 import jwt from 'jsonwebtoken'
-import throwHttpError from '../utils/throwHttpError.js'
-import normalizeJwtError from '../utils/normalizeJwtError.js'
+import throwHttpError from '../../../shared/utils/throwHttpError.js'
+import normalizeJwtError from '../../../shared/utils/normalizeJwtError.js'
 
 const isEnvDev = env.NODE_ENV === 'dev' || env.NODE_ENV === 'development'
 

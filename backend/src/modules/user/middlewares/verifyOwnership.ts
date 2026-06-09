@@ -1,5 +1,5 @@
 import type { Request, Response, NextFunction, RequestHandler } from 'express'
-import throwHttpError from '../utils/throwHttpError.js'
+import throwHttpError from '../../../shared/utils/throwHttpError.js'
 
 /**
  * Verifica se o usuário autenticado é o proprietário da conta passada pelo ID na URL.

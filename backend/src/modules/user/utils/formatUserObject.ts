@@ -1,4 +1,4 @@
-import type { IUser, IUserPersistence } from '../modules/user/user.model.js'
+import type { IUser, IUserPersistence } from '../user.model.js'
 
 // IUser sem "password", mas com "id" obrigatoriamente
 type FormattedUser = Omit<IUser, 'password'> & {

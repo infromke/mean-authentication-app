@@ -1,5 +1,5 @@
 import { Types } from 'mongoose'
-import type { OtpType } from '../modules/otp/otp.types.js'
+import type { OtpType } from '../otp.types.js'
 
 interface OtpOptions {
   userId: Types.ObjectId

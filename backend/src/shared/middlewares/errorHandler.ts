@@ -1,6 +1,6 @@
 import type { ErrorRequestHandler, Request, Response, NextFunction } from 'express'
 import type { AppError } from '../types/error.types.js'
-import env from '../config/env.js'
+import env from '../../config/env.js'
 
 // mapeamento dos status HTTP de erros esperados
 const HTTP_ERROR: Record<number, string> = {

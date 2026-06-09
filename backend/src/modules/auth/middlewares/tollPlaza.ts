@@ -1,9 +1,9 @@
 import type { Request, Response, NextFunction, RequestHandler } from 'express'
 import verifyAccessToken from './verifyAccessToken.js'
-import isAccountVerified from './isAccountVerified.js'
-import verifyOwnership from './verifyOwnership.js'
-import handleValidation from './handleValidation.js'
-import { paramsIdSchema } from '../utils/common.schema.js'
+import isAccountVerified from '../../user/middlewares/isAccountVerified.js'
+import verifyOwnership from '../../user/middlewares/verifyOwnership.js'
+import handleValidation from '../../../shared/middlewares/handleValidation.js'
+import { paramsIdSchema } from '../../../shared/schemas/common.schema.js'
 
 /**
  * Verifica se o usuário está logado e se sua conta foi verificada.

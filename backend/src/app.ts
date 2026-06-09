@@ -4,9 +4,9 @@ import morgan from 'morgan'
 import connectToDb from './config/database.js'
 import cors from './config/cors.js'
 import { verifyConnection } from './config/nodemailer.js'
-import GlobalRouter from './modules/index.routes.js'
-import errorHandler from './middlewares/errorHandler.js'
-import throwHttpError from './utils/throwHttpError.js'
+import GlobalRouter from './modules/routes.js'
+import errorHandler from './shared/middlewares/errorHandler.js'
+import throwHttpError from './shared/utils/throwHttpError.js'
 import env from './config/env.js'
 
 //  config

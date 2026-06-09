@@ -4,7 +4,7 @@
     // File Layout
     "rootDir": "./src",
     "outDir": "./dist",
-    "typeRoots": ["./node_modules/@types", "./src/types"],
+    "typeRoots": ["./node_modules/@types", "src/shared/types"],
 
     // Environment Settings
     // See also https://aka.ms/tsconfig/module
@@ -44,5 +44,5 @@
     // Else
     "esModuleInterop": true
   },
-  "include": ["src/**/*.ts", "src/types/**/*.d.ts"]
+  "include": ["src/**/*.ts", "src/shared/types/**/*.d.ts"]
 }

@@ -1,6 +1,6 @@
 import type { Request, Response, NextFunction, RequestHandler } from 'express'
-import userService from '../modules/user/user.service.js'
-import throwHttpError from '../utils/throwHttpError.js'
+import userService from '../user.service.js'
+import throwHttpError from '../../../shared/utils/throwHttpError.js'
 
 /**
  * Restringe o acesso apenas a usuários que realizaram a verificação de conta.

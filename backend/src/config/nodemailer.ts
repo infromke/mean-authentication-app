@@ -1,4 +1,4 @@
-import type { MailOptions } from '../types/mail.types.js'
+import type { MailOptions } from '../shared/types/mail.types.js'
 import nodemailer from 'nodemailer'
 import env from './env.js'
 

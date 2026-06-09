@@ -1,5 +1,5 @@
 import z from 'zod'
-import { idSchema } from '../../utils/common.schema.js'
+import { idSchema } from '../../shared/schemas/common.schema.js'
 
 /* REGRAS individuas de base */
 

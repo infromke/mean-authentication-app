@@ -4,13 +4,13 @@ import type { IUser, IUserDocument, IUserPersistence } from '../user/user.model.
 import env from '../../config/env.js'
 import userService from '../user/user.service.js'
 import otpRepository from './otp.repository.js'
-import throwHttpError from '../../utils/throwHttpError.js'
-import generateToken from '../../utils/generateToken.js'
-import { createOtpOptions } from '../../utils/generateOtp.js'
-import { getOtpMailOptions } from '../../utils/generateMail.js'
+import throwHttpError from '../../shared/utils/throwHttpError.js'
+import generateToken from '../../shared/utils/generateToken.js'
+import { createOtpOptions } from './utils/generateOtp.js'
+import { getOtpMailOptions } from './utils/generateMail.js'
 import { sendEmail } from '../../config/nodemailer.js'
-import cache from '../../lib/cache.js'
-import clearUserCache from '../../utils/clearUserCache.js'
+import cache from '../../shared/lib/cache.js'
+import clearUserCache from '../../shared/utils/clearUserCache.js'
 
 class OtpService {
   #otpRepository: typeof otpRepository

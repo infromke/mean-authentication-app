@@ -1,6 +1,6 @@
 import type { Request, Response } from 'express'
 import env from '../../config/env.js'
-import sessionService from './session.service.js'
+import sessionService from './auth.service.js'
 
 class SessionController {
   #sessionService: typeof sessionService

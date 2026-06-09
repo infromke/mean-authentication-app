@@ -1,5 +1,5 @@
 import mongoose, { Document, Schema, Types } from 'mongoose'
-import { generatePassword } from '../../utils/hash.js'
+import { generatePassword } from '../../shared/utils/hash.js'
 
 // esqueleto da entidade
 export interface IUser {

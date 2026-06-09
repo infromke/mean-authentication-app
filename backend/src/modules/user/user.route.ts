@@ -1,11 +1,11 @@
 import { Router } from 'express'
 import userController from './user.controller.js'
-import { authLimiter } from '../../middlewares/rateLimiter.js'
-import handleValidation from '../../middlewares/handleValidation.js'
-import { fullLock, ownerOnly } from '../../middlewares/tollPlaza.js'
+import { authLimiter } from '../../shared/middlewares/rateLimiter.js'
+import handleValidation from '../../shared/middlewares/handleValidation.js'
+import { fullLock, ownerOnly } from '../auth/middlewares/tollPlaza.js'
 import { registerSchema, updateSchema } from './user.schema.js'
-import { paramsIdSchema } from '../../utils/common.schema.js'
-import { isGuest } from '../../middlewares/isLoggedIn.js'
+import { paramsIdSchema } from '../../shared/schemas/common.schema.js'
+import { isGuest } from '../auth/middlewares/isLoggedIn.js'
 
 const router = Router()
 
