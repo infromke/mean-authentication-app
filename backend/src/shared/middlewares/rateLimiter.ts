@@ -10,7 +10,7 @@ const globalLimiter = createLimiter(
 // limitação para criação de usuários (POST users/users)
 const authLimiter = createLimiter(60, 5, 'Too many accounts created. Please try again in 1 hour')
 
-// limitação para tentativas de login (POST sessions/login)
+// limitação para tentativas de login (POST auth/login)
 const sessionLimiter = createLimiter(
   15,
   5,

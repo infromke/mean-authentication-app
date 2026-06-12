@@ -2,7 +2,7 @@ import type { Request, Response, NextFunction, RequestHandler } from 'express'
 import AppError from '../../../shared/errors/AppError.js'
 
 /**
- * Impede que usuários já autenticados acessem a rota POST `/sessions/login`.
+ * Impede que usuários já autenticados acessem a rota POST `/auth/login`.
  */
 const isAuthenticated: RequestHandler = (
   req: Request,

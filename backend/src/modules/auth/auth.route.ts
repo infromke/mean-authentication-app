@@ -1,5 +1,5 @@
 import { Router } from 'express'
-import sessionController from './auth.controller.js'
+import authController from './auth.controller.js'
 import { sessionLimiter } from '../../shared/middlewares/rateLimiter.js'
 import handleValidation from '../../shared/middlewares/handleValidation.js'
 import loginSchema from './auth.schema.js'
@@ -10,21 +10,21 @@ const router = Router()
 
 //  --- PUBLIC ROUTES ---
 
-// @route POST /sessions/login
+// @route POST /auth/login
 router.post(
   '/login',
   isAuthenticated,
   sessionLimiter,
   handleValidation(loginSchema),
-  sessionController.login,
+  authController.login,
 )
 
 //  --- PRIVATE ROUTES ---
 
-// @route GET /sessions/me
-router.get('/me', verifyAccessToken, sessionController.status)
+// @route GET /auth/me
+router.get('/me', verifyAccessToken, authController.status)
 
-// @route POST /sessions/logout
-router.post('/logout', verifyAccessToken, sessionController.logout)
+// @route POST /auth/logout
+router.post('/logout', verifyAccessToken, authController.logout)
 
 export default router

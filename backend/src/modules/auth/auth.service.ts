@@ -13,14 +13,14 @@ interface UserCredentials {
   password: string
 }
 
-class SessionService {
+class AuthService {
   #userService: typeof userService
 
   constructor(userServiceInstance: typeof userService) {
     this.#userService = userServiceInstance
   }
 
-  showStatus = async (id: string): Promise<any> => {
+  getAuthenticatedUser = async (id: string): Promise<any> => {
     const cacheKey = `user_session_${id}`
 
     // tenta buscar o resultado da requisição no cache primeiro
@@ -60,9 +60,9 @@ class SessionService {
     return { user: formatUserObject(user), accessToken } // formata o objeto user para não expor a senha
   }
 
-  terminate = (id: string): void => {
+  disconnect = (id: string): void => {
     if (id) clearUserCache(id)
   }
 }
 
-export default new SessionService(userService)
+export default new AuthService(userService)
