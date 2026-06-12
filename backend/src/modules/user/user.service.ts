@@ -12,6 +12,8 @@ import clearUserCache from '../../shared/utils/clearUserCache.js'
 import cache from '../../shared/lib/cache.js'
 import AppError from '../../shared/errors/AppError.js'
 
+const isEnvDev = env.NODE_ENV === 'dev' || env.NODE_ENV === 'development'
+
 class UserService {
   #userRepository: typeof userRepository
 
@@ -65,11 +67,18 @@ class UserService {
     projection: ProjectionType<IUserDocument> = {},
   ): Promise<any> => {
     const user = await this.#userRepository.findOne(filter, projection)
-    if (!user) throw new AppError(400, 'User not found')
+    if (!user) throw new AppError(404, 'User not found')
 
     if (projection === '+password') return user // retorna o objeto "user" bruto
 
     return formatUserObject(user)
+  }
+
+  findByEmail = async (
+    email: string,
+    projection: ProjectionType<IUserDocument> = {},
+  ): Promise<any | null> => {
+    return await this.#userRepository.findOne({ email }, projection)
   }
 
   show = async (id: string): Promise<any> => {
@@ -81,7 +90,8 @@ class UserService {
 
     // se não houver cache, executa a lógica normal abaixo
     const user = await this.#userRepository.findById(id)
-    if (!user) throw new AppError(400, 'User not found')
+    if (!user)
+      throw new AppError(404, isEnvDev ? `User with ID '${id}' not found` : 'User not found')
 
     const formattedUser = formatUserObject(user)
 
@@ -107,7 +117,8 @@ class UserService {
 
   update = async (id: string, data: Partial<IUser>): Promise<any> => {
     const user = await this.#userRepository.update(id, data)
-    if (!user) throw new AppError(400, 'User not found')
+    if (!user)
+      throw new AppError(404, isEnvDev ? `User with ID '${id}' not found` : 'User not found')
 
     const formattedUser = formatUserObject(user)
 
@@ -117,7 +128,8 @@ class UserService {
 
   destroy = async (id: string): Promise<void> => {
     const user = await this.#userRepository.remove(id)
-    if (!user) throw new AppError(400, 'User not found')
+    if (!user)
+      throw new AppError(404, isEnvDev ? `User with ID '${id}' not found` : 'User not found')
 
     clearUserCache(id) // limpa o cache para não retornar dados ultrapassados no próximo GET
   }

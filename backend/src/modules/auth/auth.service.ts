@@ -1,5 +1,3 @@
-import type { FilterQuery } from 'mongoose'
-import type { IUserDocument } from '../user/user.model.js'
 import env from '../../config/env.js'
 import userService from '../user/user.service.js'
 import AppError from '../../shared/errors/AppError.js'
@@ -11,7 +9,7 @@ import clearUserCache from '../../shared/utils/clearUserCache.js'
 
 // interface para os dados de login do usuário
 interface UserCredentials {
-  email: FilterQuery<IUserDocument>
+  email: string
   password: string
 }
 
@@ -38,10 +36,18 @@ class SessionService {
   authenticate = async (
     credentials: UserCredentials,
   ): Promise<{ user: any; accessToken: string }> => {
-    const user = await this.#userService.find({ email: credentials.email }, '+password') // recebe um objeto "user" bruto
+    const user = await this.#userService.findByEmail(credentials.email, '+password') // pode retornar null
 
-    if (!(await validatePassword(credentials.password, user.password)))
+    // usa a senha do usuário mesmo ou uma falsa (para gastar o mesmo tempo computacional)
+    const passwordToValidate = user
+      ? user.password
+      : '$2a$10$EBj1t.NspLYcG8p/Qts4Bue35p1NCIR29jNwtF0P29eVKxRV2s5cm'
+
+    const isPasswordValid = await validatePassword(credentials.password, passwordToValidate)
+
+    if (!user || !isPasswordValid) {
       throw new AppError(400, 'Invalid credentials')
+    }
 
     const secret = env.JWT_ACCESS_SECRET
     if (!secret)
