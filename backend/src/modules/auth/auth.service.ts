@@ -28,7 +28,7 @@ class SessionService {
     if (cachedData) return cachedData
 
     // se não houver cache, executa a lógica normal abaixo
-    const user = await this.#userService.show(id)
+    const user = await this.#userService.findById(id)
     cache.set(cacheKey, user, 120) // salva os dados no cache com TTL de 2 min
     return user
   }

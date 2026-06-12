@@ -21,7 +21,7 @@ class UserService {
     this.#userRepository = userRepositoryInstance
   }
 
-  list = async (query: ListQuery): Promise<PaginationResult> => {
+  findAllUsers = async (query: ListQuery): Promise<PaginationResult> => {
     const cacheKey = `users_list_${JSON.stringify(query)}`
 
     // tenta buscar o resultado da requisição no cache primeiro
@@ -62,7 +62,7 @@ class UserService {
     return paginationData
   }
 
-  find = async (
+  findByFilter = async (
     filter: FilterQuery<IUserDocument>,
     projection: ProjectionType<IUserDocument> = {},
   ): Promise<any> => {
@@ -81,7 +81,7 @@ class UserService {
     return await this.#userRepository.findOne({ email }, projection)
   }
 
-  show = async (id: string): Promise<any> => {
+  findById = async (id: string): Promise<any> => {
     const cacheKey = `user_id_${id}`
 
     // tenta buscar o resultado da requisição no cache primeiro
@@ -99,7 +99,9 @@ class UserService {
     return formattedUser
   }
 
-  store = async (data: CreateUserDTO): Promise<{ formattedUser: any; accessToken: string }> => {
+  createUser = async (
+    data: CreateUserDTO,
+  ): Promise<{ formattedUser: any; accessToken: string }> => {
     const user = await this.#userRepository.create(data)
 
     const secret = env.JWT_ACCESS_SECRET
@@ -115,8 +117,8 @@ class UserService {
     return { formattedUser: formatUserObject(user), accessToken }
   }
 
-  update = async (id: string, data: Partial<IUser>): Promise<any> => {
-    const user = await this.#userRepository.update(id, data)
+  updateUser = async (id: string, data: Partial<IUser>): Promise<any> => {
+    const user = await this.#userRepository.updateById(id, data)
     if (!user)
       throw new AppError(404, isEnvDev ? `User with ID '${id}' not found` : 'User not found')
 
@@ -126,8 +128,8 @@ class UserService {
     return formattedUser
   }
 
-  destroy = async (id: string): Promise<void> => {
-    const user = await this.#userRepository.remove(id)
+  deleteUser = async (id: string): Promise<void> => {
+    const user = await this.#userRepository.deleteById(id)
     if (!user)
       throw new AppError(404, isEnvDev ? `User with ID '${id}' not found` : 'User not found')
 

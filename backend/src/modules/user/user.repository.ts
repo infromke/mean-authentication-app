@@ -39,14 +39,14 @@ class UserRepository {
     return user.toObject() as IUserPersistence // converte para objeto JS puro
   }
 
-  async update(
+  async updateById(
     id: string | Types.ObjectId,
     data: Partial<IUser>,
   ): Promise<IUserPersistence | null> {
     return await User.findByIdAndUpdate(id, data, { new: true }).lean<IUserPersistence | null>()
   }
 
-  async remove(id: string | Types.ObjectId): Promise<IUserPersistence | null> {
+  async deleteById(id: string | Types.ObjectId): Promise<IUserPersistence | null> {
     return await User.findByIdAndDelete(id).lean<IUserPersistence | null>()
   }
 }

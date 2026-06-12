@@ -26,6 +26,6 @@ router.get('/:id', handleValidation(paramsIdSchema), userController.getById)
 router.patch('/:id', ownerOnly, handleValidation(updateSchema), userController.update)
 
 // @route DELETE /users/:id
-router.delete('/:id', fullLock, userController.destroy)
+router.delete('/:id', fullLock, userController.remove)
 
 export default router

@@ -11,20 +11,24 @@ class UserController {
   }
 
   getAll = async (req: Request, res: Response): Promise<Response> => {
-    const users = await this.#userService.list(req.query)
+    const users = await this.#userService.findAllUsers(req.query)
     return res.status(200).json(users)
   }
 
   getById = async (req: Request<{ id: string }>, res: Response): Promise<Response> => {
     const { id } = req.params
 
-    const user = await this.#userService.show(id)
+    const user = await this.#userService.findById(id)
     return res.status(200).json(user)
   }
 
   create = async (req: Request<{}, any, CreateUserDTO>, res: Response): Promise<Response> => {
     const { name, email, password } = req.body
-    const { formattedUser, accessToken } = await this.#userService.store({ name, email, password })
+    const { formattedUser, accessToken } = await this.#userService.createUser({
+      name,
+      email,
+      password,
+    })
 
     res.cookie('accessToken', accessToken, {
       httpOnly: true,
@@ -47,14 +51,14 @@ class UserController {
     if (req.body.email !== undefined) updates.email = req.body.email
     if (req.body.password !== undefined) updates.password = req.body.password
 
-    const user = await this.#userService.update(id, updates)
+    const user = await this.#userService.updateUser(id, updates)
     return res.status(200).json(user)
   }
 
-  destroy = async (req: Request<{ id: string }>, res: Response): Promise<Response> => {
+  remove = async (req: Request<{ id: string }>, res: Response): Promise<Response> => {
     const { id } = req.params
 
-    await this.#userService.destroy(id)
+    await this.#userService.deleteUser(id)
 
     res.clearCookie('accessToken', {
       httpOnly: true,

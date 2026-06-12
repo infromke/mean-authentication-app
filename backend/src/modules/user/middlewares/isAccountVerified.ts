@@ -12,7 +12,7 @@ const isAccountVerified: RequestHandler = async (
 ): Promise<void> => {
   const { id } = req.user!
 
-  const user = await userService.show(id)
+  const user = await userService.findById(id)
   if (!user.isAccountVerified)
     throw new AppError(403, 'Account must be verified to perform this action')
 

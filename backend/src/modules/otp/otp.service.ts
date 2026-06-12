@@ -29,7 +29,7 @@ class OtpService {
     filter: FilterQuery<IUser>,
     projection: ProjectionType<IUserDocument> | {} = {},
   ): Promise<any> => {
-    return await this.#userService.find(filter, projection)
+    return await this.#userService.findByFilter(filter, projection)
   }
 
   // utilitário para envio de e-mail
@@ -65,7 +65,7 @@ class OtpService {
   }
 
   sendVerification = async (id: string): Promise<void> => {
-    const user = await this.#userService.show(id)
+    const user = await this.#userService.findById(id)
     if (user.isAccountVerified) throw new AppError(403, 'Account has already been verified')
 
     try {
@@ -118,11 +118,11 @@ class OtpService {
   }
 
   validateEmail = async (id: string, otpCode: string): Promise<void> => {
-    const user = await this.#userService.show(id)
+    const user = await this.#userService.findById(id)
     if (user.isAccountVerified) throw new AppError(403, 'Account has already been verified')
 
     await this.#validateCode(user.id, otpCode, 'VERIFY')
-    await this.#userService.update(user.id, { isAccountVerified: true })
+    await this.#userService.updateUser(user.id, { isAccountVerified: true })
 
     clearUserCache(user.id) // limpa o cache para não retornar dados ultrapassados no próximo GET
   }
@@ -142,7 +142,7 @@ class OtpService {
     password: string,
   ): Promise<IUserPersistence> => {
     const user = await this.#getUserByFilter(filter, '+password') // recebe um objeto user não formatado
-    const updatedUser = await this.#userService.update(user._id, { password })
+    const updatedUser = await this.#userService.updateUser(user._id, { password })
 
     const userIdString = user._id.toString()
     clearUserCache(userIdString) // limpa o cache para não retornar dados ultrapassados no próximo GET
