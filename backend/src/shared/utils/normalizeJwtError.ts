@@ -1,5 +1,5 @@
 import env from '../../config/env.js'
-import type { AppError } from '../types/error.types.js'
+import AppError from '../errors/AppError.js'
 
 const isEnvDev = env.NODE_ENV === 'dev' || env.NODE_ENV === 'development'
 
@@ -8,29 +8,30 @@ const isEnvDev = env.NODE_ENV === 'dev' || env.NODE_ENV === 'development'
  * e mensagens semânticas baseadas no ambiente.
  */
 const normalizeJwtError = (error: unknown): AppError => {
+  let status = 401
+  let message = 'Access denied'
+
   // se já for uma instância de Error (que o jsonwebtoken lança)
   if (error instanceof Error) {
-    const jwtError = error as AppError
+    if (isEnvDev) {
+      message = 'Invalid token'
 
-    // config generalizada
-    jwtError.status = 401
-    jwtError.message = isEnvDev ? 'Invalid token' : 'Access denied'
-
-    // específica para o erro de validade
-    if (error.name === 'TokenExpiredError') {
-      jwtError.status = 403
-      jwtError.message = isEnvDev ? 'Token has expired' : 'Session expired'
+      if (error.name === 'TokenExpiredError') {
+        status = 403
+        message = 'Token has expired'
+      }
+    } else {
+      if (error.name === 'TokenExpiredError') {
+        status = 403
+        message = 'Session expired'
+      }
     }
 
-    return jwtError
+    return new AppError(status, message)
   }
 
   // padrão para erros que não são instância de Error
-  return {
-    name: 'UnknownJwtError',
-    message: isEnvDev ? 'Unknown error while validating token' : 'Access denied',
-    status: 401,
-  }
+  return new AppError(401, isEnvDev ? 'Unknown error while validating token' : 'Access denied')
 }
 
 export default normalizeJwtError

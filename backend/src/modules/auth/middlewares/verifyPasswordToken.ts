@@ -1,7 +1,7 @@
 import type { Request, Response, NextFunction, RequestHandler } from 'express'
 import env from '../../../config/env.js'
 import jwt from 'jsonwebtoken'
-import throwHttpError from '../../../shared/utils/throwHttpError.js'
+import AppError from '../../../shared/errors/AppError.js'
 import normalizeJwtError from '../../../shared/utils/normalizeJwtError.js'
 
 const isEnvDev = env.NODE_ENV === 'dev' || env.NODE_ENV === 'development'
@@ -17,7 +17,7 @@ const verifyPasswordToken: RequestHandler = (
 ): void => {
   const { passwordToken } = req.cookies
 
-  if (!passwordToken) throw throwHttpError(401, isEnvDev ? 'Token not found' : 'Access denied')
+  if (!passwordToken) throw new AppError(401, isEnvDev ? 'Token not found' : 'Access denied')
 
   try {
     jwt.verify(passwordToken, env.JWT_RESET_SECRET)

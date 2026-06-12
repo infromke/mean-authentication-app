@@ -6,7 +6,7 @@ import cors from './config/cors.js'
 import { verifyConnection } from './config/nodemailer.js'
 import GlobalRouter from './modules/routes.js'
 import errorHandler from './shared/middlewares/errorHandler.js'
-import throwHttpError from './shared/utils/throwHttpError.js'
+import AppError from './shared/errors/AppError.js'
 import env from './config/env.js'
 
 //  config
@@ -30,7 +30,7 @@ app.use(GlobalRouter)
 
 //  middleware para rotas não encontradas (404)
 app.use((_req: Request, _res: Response, _next: NextFunction) => {
-  throw throwHttpError(404, 'Route not found')
+  throw new AppError(404, 'Route not found')
 })
 
 //  middleware de erro global

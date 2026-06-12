@@ -2,7 +2,7 @@ import rateLimit, {
   type RateLimitExceededEventHandler,
   type RateLimitRequestHandler,
 } from 'express-rate-limit'
-import throwHttpError from './throwHttpError.js'
+import AppError from '../errors/AppError.js'
 
 /**
  * Cria uma instância configurada de rate-limit do Express.
@@ -18,7 +18,7 @@ const createLimiter = (
 ): RateLimitRequestHandler => {
   const limitHandler: RateLimitExceededEventHandler = (_req, _res, next) => {
     try {
-      throw throwHttpError(429, message)
+      throw new AppError(429, message)
     } catch (error) {
       next(error)
     }

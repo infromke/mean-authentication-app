@@ -1,6 +1,6 @@
 import type { Request, Response, NextFunction, RequestHandler } from 'express'
 import userService from '../user.service.js'
-import throwHttpError from '../../../shared/utils/throwHttpError.js'
+import AppError from '../../../shared/errors/AppError.js'
 
 /**
  * Restringe o acesso apenas a usuários que realizaram a verificação de conta.
@@ -14,7 +14,7 @@ const isAccountVerified: RequestHandler = async (
 
   const user = await userService.show(id)
   if (!user.isAccountVerified)
-    throw throwHttpError(403, 'Account must be verified to perform this action')
+    throw new AppError(403, 'Account must be verified to perform this action')
 
   next()
 }

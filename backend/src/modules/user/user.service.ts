@@ -10,7 +10,7 @@ import { sendEmail } from '../../config/nodemailer.js'
 import { getWelcomeMailOptions } from '../otp/utils/generateMail.js'
 import clearUserCache from '../../shared/utils/clearUserCache.js'
 import cache from '../../shared/lib/cache.js'
-import throwHttpError from '../../shared/utils/throwHttpError.js'
+import AppError from '../../shared/errors/AppError.js'
 
 class UserService {
   #userRepository: typeof userRepository
@@ -65,7 +65,7 @@ class UserService {
     projection: ProjectionType<IUserDocument> = {},
   ): Promise<any> => {
     const user = await this.#userRepository.findOne(filter, projection)
-    if (!user) throw throwHttpError(400, 'User not found')
+    if (!user) throw new AppError(400, 'User not found')
 
     if (projection === '+password') return user // retorna o objeto "user" bruto
 
@@ -81,7 +81,7 @@ class UserService {
 
     // se não houver cache, executa a lógica normal abaixo
     const user = await this.#userRepository.findById(id)
-    if (!user) throw throwHttpError(400, 'User not found')
+    if (!user) throw new AppError(400, 'User not found')
 
     const formattedUser = formatUserObject(user)
 
@@ -94,7 +94,7 @@ class UserService {
 
     const secret = env.JWT_ACCESS_SECRET
     if (!secret)
-      throw throwHttpError(500, 'JWT_ACCESS_SECRET is not defined in environment variables')
+      throw new AppError(500, 'JWT_ACCESS_SECRET is not defined in environment variables')
 
     const userIdString = user._id.toString()
     const accessToken = generateToken({ id: userIdString }, secret, '1d')
@@ -107,7 +107,7 @@ class UserService {
 
   update = async (id: string, data: Partial<IUser>): Promise<any> => {
     const user = await this.#userRepository.update(id, data)
-    if (!user) throw throwHttpError(400, 'User not found')
+    if (!user) throw new AppError(400, 'User not found')
 
     const formattedUser = formatUserObject(user)
 
@@ -117,7 +117,7 @@ class UserService {
 
   destroy = async (id: string): Promise<void> => {
     const user = await this.#userRepository.remove(id)
-    if (!user) throw throwHttpError(400, 'User not found')
+    if (!user) throw new AppError(400, 'User not found')
 
     clearUserCache(id) // limpa o cache para não retornar dados ultrapassados no próximo GET
   }

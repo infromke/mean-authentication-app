@@ -2,7 +2,7 @@ import type { FilterQuery } from 'mongoose'
 import type { IUserDocument } from '../user/user.model.js'
 import env from '../../config/env.js'
 import userService from '../user/user.service.js'
-import throwHttpError from '../../shared/utils/throwHttpError.js'
+import AppError from '../../shared/errors/AppError.js'
 import generateToken from '../../shared/utils/generateToken.js'
 import { validatePassword } from '../../shared/utils/hash.js'
 import formatUserObject from '../user/utils/formatUserObject.js'
@@ -41,11 +41,11 @@ class SessionService {
     const user = await this.#userService.find({ email: credentials.email }, '+password') // recebe um objeto "user" bruto
 
     if (!(await validatePassword(credentials.password, user.password)))
-      throw throwHttpError(400, 'Invalid credentials')
+      throw new AppError(400, 'Invalid credentials')
 
     const secret = env.JWT_ACCESS_SECRET
     if (!secret)
-      throw throwHttpError(500, 'JWT_ACCESS_SECRET is not defined in environment variables')
+      throw new AppError(500, 'JWT_ACCESS_SECRET is not defined in environment variables')
 
     const userIdString = user._id.toString()
     const accessToken = generateToken({ id: userIdString }, secret, '1d')
