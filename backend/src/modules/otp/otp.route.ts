@@ -42,11 +42,11 @@ router.post(
  */
 
 /**
- * @route   GET /otps/password-reset/status
+ * @route   GET /otps/password-reset/me
  * @desc    Verifica a integridade e expiração do cookie de sessão de redefinição de senha.
  * @access  Privado (Requer cookie `passwordToken` ativo)
  */
-router.get('/password-reset/status', verifyPasswordToken, otpController.checkResetSession)
+router.get('/password-reset/me', verifyPasswordToken, otpController.checkResetSession)
 
 /**
  * @route   POST /otps/resend
