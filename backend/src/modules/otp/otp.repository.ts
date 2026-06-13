@@ -22,7 +22,7 @@ class OtpRepository {
     }).lean<IOtpPersistence | null>()
   }
 
-  async remove(userId: string | Types.ObjectId, type: OtpType): Promise<DeleteResult> {
+  async deleteOne(userId: string | Types.ObjectId, type: OtpType): Promise<DeleteResult> {
     return await Otp.deleteOne({ userId, type })
   }
 }

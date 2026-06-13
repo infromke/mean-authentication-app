@@ -46,10 +46,10 @@ class OtpService {
     if (!otpDocument) throw new AppError(404, 'Code has expired')
     if (otpCode !== otpDocument?.code) throw new AppError(403, 'Invalid code')
 
-    await this.#otpRepository.remove(userId, otpType)
+    await this.#otpRepository.deleteOne(userId, otpType)
   }
 
-  showStatus = (token: string): any => {
+  getPasswordResetStatus = (token: string): any => {
     const identifier = token.split('.')[1]
     const cacheKey = `password_reset_${identifier}`
 
@@ -64,7 +64,23 @@ class OtpService {
     return resetStatus
   }
 
-  sendVerification = async (id: string): Promise<void> => {
+  resendOtpCode = async (type: OtpType, filter: FilterQuery<IUserDocument>): Promise<void> => {
+    const user = await this.#getUserByFilter(filter)
+
+    // verifica se o cooldown de 60s está ativo
+    const cooldownKey = `otp_cooldown_${type}_${user.id}`
+    if (cache.has(cooldownKey)) throw new AppError(429, 'Wait 60s before requesting a new code')
+
+    // deleta o OTP previamente gerado
+    await this.#otpRepository.deleteOne(user.id, type)
+
+    if (type === 'VERIFY') await this.sendEmailVerificationCode(user.id)
+    else await this.sendPasswordResetCode({ email: user.email })
+
+    cache.set(cooldownKey, true, 60) // ativa o cooldown no cache
+  }
+
+  sendEmailVerificationCode = async (id: string): Promise<void> => {
     const user = await this.#userService.findById(id)
     if (user.isAccountVerified) throw new AppError(403, 'Account has already been verified')
 
@@ -79,7 +95,17 @@ class OtpService {
     }
   }
 
-  sendReset = async (filter: FilterQuery<IUserDocument>): Promise<void> => {
+  confirmEmailVerification = async (id: string, otpCode: string): Promise<void> => {
+    const user = await this.#userService.findById(id)
+    if (user.isAccountVerified) throw new AppError(403, 'Account has already been verified')
+
+    await this.#validateCode(user.id, otpCode, 'VERIFY')
+    await this.#userService.updateUser(user.id, { isAccountVerified: true })
+
+    clearUserCache(user.id) // limpa o cache para não retornar dados ultrapassados no próximo GET
+  }
+
+  sendPasswordResetCode = async (filter: FilterQuery<IUserDocument>): Promise<void> => {
     try {
       const user = await this.#getUserByFilter(filter)
       await this.#sendCodeEmail(user.id, user.email, 'RESET')
@@ -101,33 +127,10 @@ class OtpService {
     }
   }
 
-  resend = async (type: OtpType, filter: FilterQuery<IUserDocument>): Promise<void> => {
-    const user = await this.#getUserByFilter(filter)
-
-    // verifica se o cooldown de 60s está ativo
-    const cooldownKey = `otp_cooldown_${type}_${user.id}`
-    if (cache.has(cooldownKey)) throw new AppError(429, 'Wait 60s before requesting a new code')
-
-    // deleta o OTP previamente gerado
-    await this.#otpRepository.remove(user.id, type)
-
-    if (type === 'VERIFY') await this.sendVerification(user.id)
-    else await this.sendReset({ email: user.email })
-
-    cache.set(cooldownKey, true, 60) // ativa o cooldown no cache
-  }
-
-  validateEmail = async (id: string, otpCode: string): Promise<void> => {
-    const user = await this.#userService.findById(id)
-    if (user.isAccountVerified) throw new AppError(403, 'Account has already been verified')
-
-    await this.#validateCode(user.id, otpCode, 'VERIFY')
-    await this.#userService.updateUser(user.id, { isAccountVerified: true })
-
-    clearUserCache(user.id) // limpa o cache para não retornar dados ultrapassados no próximo GET
-  }
-
-  validateReset = async (otpCode: string, filter: FilterQuery<IUserDocument>): Promise<string> => {
+  confirmPasswordResetCode = async (
+    otpCode: string,
+    filter: FilterQuery<IUserDocument>,
+  ): Promise<string> => {
     const user = await this.#getUserByFilter(filter)
     await this.#validateCode(user.id, otpCode, 'RESET')
 
@@ -137,7 +140,7 @@ class OtpService {
     return generateToken({ id: user.id }, secret, '15m')
   }
 
-  resetPassword = async (
+  resetUserPassword = async (
     filter: FilterQuery<IUserDocument>,
     password: string,
   ): Promise<IUserPersistence> => {

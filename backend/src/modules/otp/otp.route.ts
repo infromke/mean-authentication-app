@@ -24,7 +24,7 @@ router.post(
   '/password-reset/request',
   isGuest,
   handleValidation(requestResetSchema),
-  otpController.requestReset,
+  otpController.requestPasswordReset,
 )
 
 // @route POST /otps/password-reset/check
@@ -32,7 +32,7 @@ router.post(
   '/password-reset/check/',
   otpVerifyLimiter,
   handleValidation(checkResetSchema),
-  otpController.verifyReset,
+  otpController.verifyPasswordResetCode,
 )
 
 //  --- PRIVATE ROUTES ---
@@ -42,7 +42,7 @@ router.post(
   '/email-verification/:id',
   verifyAccessToken,
   handleValidation(paramsIdSchema),
-  otpController.requestVerification,
+  otpController.requestEmailVerification,
 )
 
 // @route POST /otps/email-verification/check/:id
@@ -51,11 +51,11 @@ router.post(
   verifyAccessToken,
   otpVerifyLimiter,
   handleValidation(checkVerificationSchema),
-  otpController.verifyEmail,
+  otpController.verifyEmailAccount,
 )
 
 // @route GET /otps/password-reset/status
-router.get('/password-reset/status', verifyPasswordToken, otpController.status)
+router.get('/password-reset/status', verifyPasswordToken, otpController.checkResetSession)
 
 // @route PATCH /password-reset
 router.patch(
@@ -71,7 +71,7 @@ router.post(
   otpSendLimiter,
   resendOtpFlow,
   handleValidation(resendOtpSchema),
-  otpController.resendCode,
+  otpController.resendOtpCode,
 )
 
 export default router
