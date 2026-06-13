@@ -4,7 +4,6 @@ import verifyAccessToken from '../auth/middlewares/verifyAccessToken.js'
 import verifyResetEmailToken from '../auth/middlewares/verifyResetEmailToken.js'
 import verifyPasswordToken from '../auth/middlewares/verifyPasswordToken.js'
 import handleValidation from '../../shared/middlewares/handleValidation.js'
-import { paramsIdSchema } from '../../shared/schemas/common.schema.js'
 import {
   checkResetSchema,
   checkVerificationSchema,
@@ -30,17 +29,12 @@ router.post(
 
 //  --- PRIVATE ROUTES ---
 
-// @route POST /otps/email-verification/:id
-router.post(
-  '/email-verification/:id',
-  verifyAccessToken,
-  handleValidation(paramsIdSchema),
-  otpController.requestEmailVerification,
-)
+// @route POST /otps/email-verification
+router.post('/email-verification', verifyAccessToken, otpController.requestEmailVerification)
 
-// @route POST /otps/email-verification/check/:id
+// @route POST /otps/email-verification/check
 router.post(
-  '/email-verification/check/:id',
+  '/email-verification/check',
   verifyAccessToken,
   otpVerifyLimiter,
   handleValidation(checkVerificationSchema),
@@ -59,7 +53,7 @@ router.post(
   otpController.verifyPasswordResetCode,
 )
 
-// @route PATCH /password-reset
+// @route PATCH otps/password-reset
 router.patch(
   '/password-reset',
   verifyPasswordToken,

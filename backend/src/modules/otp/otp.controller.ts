@@ -38,23 +38,18 @@ class OtpController {
     })
   }
 
-  requestEmailVerification = async (
-    req: Request<{ id: string }>,
-    res: Response,
-  ): Promise<Response> => {
-    const { id } = req.params
-
+  requestEmailVerification = async (req: Request, res: Response): Promise<Response> => {
+    const { id } = req.user!
     await this.#otpService.sendEmailVerificationCode(id)
     return res.status(204).end()
   }
 
   verifyEmailAccount = async (
-    req: Request<{ id: string }, any, VerifyEmailDTO>,
+    req: Request<any, any, VerifyEmailDTO>,
     res: Response,
   ): Promise<Response> => {
-    const { id } = req.params
+    const { id } = req.user!
     const { otp } = req.body
-
     await this.#otpService.confirmEmailVerification(id, otp)
     return res.status(204).end()
   }

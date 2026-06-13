@@ -1,5 +1,4 @@
 import z from 'zod'
-import { idSchema } from '../../shared/schemas/common.schema.js'
 
 /* REGRAS individuas de base */
 
@@ -45,7 +44,6 @@ export const resendOtpBodySchema = z.object({
 /* SCHEMAS (para o Express consumir) */
 
 const checkVerificationSchema = z.object({
-  params: z.object({ id: idSchema }),
   body: verifyEmailBodySchema,
 })
 
