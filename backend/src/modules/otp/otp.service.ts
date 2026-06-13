@@ -24,7 +24,9 @@ class OtpService {
     this.#userService = userServiceInstance
   }
 
-  // utilitário para busca avançada de usuário
+  /**
+   * Encapsula a busca de usuários.
+   */
   #getUserByFilter = async (
     filter: FilterQuery<IUser>,
     projection: ProjectionType<IUserDocument> | {} = {},
@@ -32,14 +34,18 @@ class OtpService {
     return await this.#userService.findByFilter(filter, projection)
   }
 
-  // utilitário para envio de e-mail
+  /**
+   * Cria o documento OTP no banco e despacha o e-mail contendo o código de forma assíncrona.
+   */
   #sendCodeEmail = async (userId: string, userEmail: string, otpType: OtpType): Promise<void> => {
     const otpOptions = createOtpOptions(userId, otpType)
     const newOtp = await this.#otpRepository.create(otpOptions)
     await sendEmail(getOtpMailOptions(userEmail, newOtp.code, otpType))
   }
 
-  // utilitário para validação de otp
+  /**
+   * Valida a integridade do código fornecido e deleta seu registro logo em seguida.
+   */
   #validateCode = async (userId: string, otpCode: string, otpType: OtpType): Promise<void> => {
     const otpDocument = await this.#otpRepository.findById(userId, otpType)
 
@@ -49,6 +55,9 @@ class OtpService {
     await this.#otpRepository.deleteOne(userId, otpType)
   }
 
+  /**
+   * Retorna o status da sessão de redefinição de senha, lendo e salvando o estado em cache.
+   */
   getPasswordResetStatus = (token: string): any => {
     const identifier = token.split('.')[1]
     const cacheKey = `password_reset_${identifier}`
@@ -64,6 +73,10 @@ class OtpService {
     return resetStatus
   }
 
+  /**
+   * Reenvia o código OTP controlando concorrência através de trava curta de cooldown (60 segundos).
+   * Silencia falhas de enumeração caso o fluxo em andamento seja o de redefinição de senha.
+   */
   resendOtpCode = async (type: OtpType, filter: FilterQuery<IUserDocument>): Promise<void> => {
     try {
       const user = await this.#getUserByFilter(filter)
@@ -87,8 +100,13 @@ class OtpService {
     }
   }
 
+  /**
+   * Envia o código de verificação para o usuário, somente desconsiderando a operação
+   * se o e-mail já estiver verificado.
+   */
   sendEmailVerificationCode = async (id: string): Promise<void> => {
     const user = await this.#userService.findById(id)
+
     if (user.isAccountVerified) throw new AppError(403, 'Account has already been verified')
 
     try {
@@ -102,6 +120,9 @@ class OtpService {
     }
   }
 
+  /**
+   * Confirma a verificação do e-mail, altera o estado do usuário no banco e limpa caches de sessão antigos.
+   */
   confirmEmailVerification = async (id: string, otpCode: string): Promise<void> => {
     const user = await this.#userService.findById(id)
     if (user.isAccountVerified) throw new AppError(403, 'Account has already been verified')
@@ -112,6 +133,11 @@ class OtpService {
     clearUserCache(user.id) // limpa o cache para não retornar dados ultrapassados no próximo GET
   }
 
+  /**
+   * Envia o código de redefinição para o usuário e gera o token `resetEmailToken` (de 5 min).
+   * Caso necessário, cria tokens fantasmas (shadow tokens) com um e-mail fictício para
+   * camuflar o tempo de resposta da API.
+   */
   sendPasswordResetCode = async (filter: FilterQuery<IUserDocument>): Promise<any> => {
     try {
       const user = await this.#getUserByFilter(filter)
@@ -146,6 +172,9 @@ class OtpService {
     }
   }
 
+  /**
+   * Valida o código OTP e gera o token `passwordToken` (de 15 min) que libera a troca de senha.
+   */
   confirmPasswordResetCode = async (
     filter: FilterQuery<IUserDocument>,
     otpCode: string,
@@ -159,6 +188,9 @@ class OtpService {
     return generateToken({ email: user.email }, secret, '15m')
   }
 
+  /**
+   * Persiste as novas credenciais do usuário e invalida imediatamente todos os caches vinculados ao ID.
+   */
   resetUserPassword = async (
     filter: FilterQuery<IUserDocument>,
     password: string,

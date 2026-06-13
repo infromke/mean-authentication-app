@@ -17,9 +17,17 @@ import { isGuest } from '../auth/middlewares/isLoggedIn.js'
 
 const router = Router()
 
-//  --- PUBLIC ROUTES ---
+/**
+ * -----------------------------------------------------------------------------
+ * PUBLIC ROUTES
+ * -----------------------------------------------------------------------------
+ */
 
-// @route POST /otps/password-reset/request
+/**
+ * @route   POST /otps/password-reset/request
+ * @desc    Inicia o fluxo de recuperação de senha gerando e enviando o primeiro OTP por e-mail.
+ * @access  Público (Apenas convidados)
+ */
 router.post(
   '/password-reset/request',
   isGuest,
@@ -27,12 +35,44 @@ router.post(
   otpController.requestPasswordReset,
 )
 
-//  --- PRIVATE ROUTES ---
+/**
+ * -----------------------------------------------------------------------------
+ * PRIVATE ROUTES
+ * -----------------------------------------------------------------------------
+ */
 
-// @route POST /otps/email-verification
+/**
+ * @route   GET /otps/password-reset/status
+ * @desc    Verifica a integridade e expiração do cookie de sessão de redefinição de senha.
+ * @access  Privado (Requer cookie `passwordToken` ativo)
+ */
+router.get('/password-reset/status', verifyPasswordToken, otpController.checkResetSession)
+
+/**
+ * @route   POST /otps/resend
+ * @desc    Reenvia o código OTP de forma dinâmica, baseando-se no contexto atual do fluxo.
+ * @access  Dinâmico (Protegido por rate limiter e cooldown por cache de 60s)
+ */
+router.post(
+  '/resend',
+  otpSendLimiter,
+  resendOtpFlow,
+  handleValidation(resendOtpSchema),
+  otpController.resendOtpCode,
+)
+
+/**
+ * @route   POST /otps/email-verification
+ * @desc    Solicita a geração e envio de um código de verificação para a conta logada.
+ * @access  Privado (Requer token de acesso válido)
+ */
 router.post('/email-verification', verifyAccessToken, otpController.requestEmailVerification)
 
-// @route POST /otps/email-verification/check
+/**
+ * @route   POST /otps/email-verification/check
+ * @desc    Valida o código OTP de verificação enviado ao e-mail para marcar a conta como verificada.
+ * @access  Privado (Requer token de acesso válido / Protegido por Rate Limiter)
+ */
 router.post(
   '/email-verification/check',
   verifyAccessToken,
@@ -41,10 +81,11 @@ router.post(
   otpController.verifyEmailAccount,
 )
 
-// @route GET /otps/password-reset/status
-router.get('/password-reset/status', verifyPasswordToken, otpController.checkResetSession)
-
-// @route POST /otps/password-reset/check
+/**
+ * @route   POST /otps/password-reset/check
+ * @desc    Valida o código OTP de recuperação de senha e gera o cookie autorizador de alteração final.
+ * @access  Privado (Requer cookie resetEmailToken ativo / Protegido por Rate Limiter)
+ */
 router.post(
   '/password-reset/check/',
   otpVerifyLimiter,
@@ -53,21 +94,16 @@ router.post(
   otpController.verifyPasswordResetCode,
 )
 
-// @route PATCH otps/password-reset
+/**
+ * @route   PATCH /otps/password-reset
+ * @desc    Aplica a substituição da senha do usuário utilizando a sessão validada.
+ * @access  Privado (Requer cookie `passwordToken` ativo)
+ */
 router.patch(
   '/password-reset',
   verifyPasswordToken,
   handleValidation(resetPasswordSchema),
   otpController.resetPassword,
-)
-
-// @route POST /otps/resend
-router.post(
-  '/resend',
-  otpSendLimiter,
-  resendOtpFlow,
-  handleValidation(resendOtpSchema),
-  otpController.resendOtpCode,
 )
 
 export default router

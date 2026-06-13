@@ -16,11 +16,18 @@ class OtpController {
     this.#otpService = otpServiceInstance
   }
 
+  /**
+   * Checa o status da sessão de redefinição de senha de acordo com a validade
+   * do token `passwordToken` (`200 OK`).
+   */
   checkResetSession = (req: Request, res: Response): Response => {
     const status = this.#otpService.getPasswordResetStatus(req.cookies.passwordToken)
     return res.status(200).json(status)
   }
 
+  /**
+   * Reenvia o código OTP (`200 OK`).
+   */
   resendOtpCode = async (
     req: Request<{}, any, ResendCodeDTO>,
     res: Response,
@@ -38,6 +45,9 @@ class OtpController {
     })
   }
 
+  /**
+   * Solicita a verificação de e-mail e retorna o hiperlink para o próximo passo do fluxo (`200 OK`).
+   */
   requestEmailVerification = async (req: Request, res: Response): Promise<Response> => {
     const { id } = req.user!
     await this.#otpService.sendEmailVerificationCode(id)
@@ -50,6 +60,9 @@ class OtpController {
     })
   }
 
+  /**
+   * Valida a conta do usuário logado (`200 OK`).
+   */
   verifyEmailAccount = async (
     req: Request<any, any, VerifyEmailDTO>,
     res: Response,
@@ -60,6 +73,9 @@ class OtpController {
     return res.status(204).end()
   }
 
+  /**
+   * Solicita a redefinição de senha por e-mail e gera o cookie temporário `resetEmailToken` (de 5 min).
+   */
   requestPasswordReset = async (
     req: Request<{}, any, RequestResetDTO>,
     res: Response,
@@ -80,6 +96,10 @@ class OtpController {
     })
   }
 
+  /**
+   * Valida o código OTP, gera o cookie autorizador `passwordToken` (de 15 min)
+   * e retorna o hiperlink para o próximo passo do fluxo (`200 OK`).
+   */
   verifyPasswordResetCode = async (
     req: Request<{}, any, VerifyResetDTO>,
     res: Response,
@@ -110,6 +130,9 @@ class OtpController {
     })
   }
 
+  /**
+   * Atualiza a senha do usuário, limpa a sessão de cookies e retorna os dados atualizados (`200 OK`).
+   */
   resetPassword = async (
     req: Request<{}, any, ResetPasswordDTO>,
     res: Response,
