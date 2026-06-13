@@ -8,9 +8,17 @@ import { isAuthenticated } from './middlewares/isLoggedIn.js'
 
 const router = Router()
 
-//  --- PUBLIC ROUTES ---
+/**
+ * -----------------------------------------------------------------------------
+ * PUBLIC ROUTES
+ * -----------------------------------------------------------------------------
+ */
 
-// @route POST /auth/login
+/**
+ * @route   POST /auth/login
+ * @desc    Autentica as credenciais do usuário e anexa o cookie de acesso à sessão.
+ * @access  Público (Bloqueia usuários já logados / Protegido por Rate Limiter)
+ */
 router.post(
   '/login',
   isAuthenticated,
@@ -19,12 +27,24 @@ router.post(
   authController.login,
 )
 
-//  --- PRIVATE ROUTES ---
+/**
+ * -----------------------------------------------------------------------------
+ * PRIVATE ROUTES
+ * -----------------------------------------------------------------------------
+ */
 
-// @route GET /auth/me
+/**
+ * @route   GET /auth/me
+ * @desc    Retorna os dados do perfil do usuário atualmente autenticado na sessão.
+ * @access  Privado (Requer token de acesso válido)
+ */
 router.get('/me', verifyAccessToken, authController.status)
 
-// @route POST /auth/logout
+/**
+ * @route   POST /auth/logout
+ * @desc    Revoga a sessão ativa do usuário limpando o cookie de acesso do navegador.
+ * @access  Privado (Apenas para sessões autenticadas)
+ */
 router.post('/logout', verifyAccessToken, authController.logout)
 
 export default router

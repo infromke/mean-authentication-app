@@ -20,6 +20,9 @@ class AuthService {
     this.#userService = userServiceInstance
   }
 
+  /**
+   * Busca os detalhes da sessão ativa do usuário com TTL curto de cache (2 minutos).
+   */
   getAuthenticatedUser = async (id: string): Promise<any> => {
     const cacheKey = `user_session_${id}`
 
@@ -33,6 +36,10 @@ class AuthService {
     return user
   }
 
+  /**
+   * Executa a autenticação e mitiga ataques de temporização (Timing Attacks) gerando
+   * um delay artificial com uma hash fixa quando o usuário não existe no banco.
+   */
   authenticate = async (
     credentials: UserCredentials,
   ): Promise<{ user: any; accessToken: string }> => {
@@ -60,6 +67,9 @@ class AuthService {
     return { user: formatUserObject(user), accessToken } // formata o objeto user para não expor a senha
   }
 
+  /**
+   * Remove e invalida as entradas de cache ativas associadas ao ID do usuário.
+   */
   disconnect = (id: string): void => {
     if (id) clearUserCache(id)
   }
