@@ -41,7 +41,13 @@ class OtpController {
   requestEmailVerification = async (req: Request, res: Response): Promise<Response> => {
     const { id } = req.user!
     await this.#otpService.sendEmailVerificationCode(id)
-    return res.status(204).end()
+
+    return res.status(200).json({
+      nextStep: {
+        href: '/otps/email-verification/check',
+        method: 'POST',
+      },
+    })
   }
 
   verifyEmailAccount = async (
@@ -96,7 +102,12 @@ class OtpController {
       maxAge: 15 * 60 * 1000, // 15 minutos
     })
 
-    return res.status(204).end()
+    return res.status(200).json({
+      nextStep: {
+        href: '/otps/password-reset',
+        method: 'PATCH',
+      },
+    })
   }
 
   resetPassword = async (
