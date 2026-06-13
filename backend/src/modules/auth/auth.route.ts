@@ -38,7 +38,7 @@ router.post(
  * @desc    Retorna os dados do perfil do usuário atualmente autenticado na sessão.
  * @access  Privado (Requer token de acesso válido)
  */
-router.get('/me', verifyAccessToken, authController.status)
+router.get('/me', verifyAccessToken, authController.checkUserSession)
 
 /**
  * @route   POST /auth/logout

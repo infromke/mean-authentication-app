@@ -12,7 +12,7 @@ class AuthController {
   /**
    * Obtém os dados da sessão do usuário autenticado via req.user (`200 OK`).
    */
-  status = async (req: Request, res: Response): Promise<Response> => {
+  checkUserSession = async (req: Request, res: Response): Promise<Response> => {
     const { id } = req.user!
     const user = await this.#authService.getAuthenticatedUser(id)
     return res.status(200).json(user)
