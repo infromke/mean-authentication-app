@@ -10,11 +10,17 @@ class UserController {
     this.#userService = userServiceInstance
   }
 
+  /**
+   * Retorna uma lista de usuários filtrada ou paginada (`200 OK`).
+   */
   getAll = async (req: Request, res: Response): Promise<Response> => {
     const users = await this.#userService.findAllUsers(req.query)
     return res.status(200).json(users)
   }
 
+  /**
+   * Retorna os dados de um usuário específico por ID (`200 OK`).
+   */
   getById = async (req: Request<{ id: string }>, res: Response): Promise<Response> => {
     const { id } = req.params
 
@@ -22,6 +28,9 @@ class UserController {
     return res.status(200).json(user)
   }
 
+  /**
+   * Registra um novo usuário e injeta o `accessToken` nos cookies HTTP (`201 CREATED`).
+   */
   create = async (req: Request<{}, any, CreateUserDTO>, res: Response): Promise<Response> => {
     const { name, email, password } = req.body
     const { formattedUser, accessToken } = await this.#userService.createUser({
@@ -40,6 +49,9 @@ class UserController {
     return res.status(201).json(formattedUser)
   }
 
+  /**
+   * Atualiza parcialmente os dados cadastrais do usuário (`200 OK`).
+   */
   update = async (
     req: Request<{ id: string }, any, Partial<CreateUserDTO>>,
     res: Response,
@@ -55,6 +67,9 @@ class UserController {
     return res.status(200).json(user)
   }
 
+  /**
+   * Exclui o usuário do sistema e limpa o cookie `accessToken` do navegador (`204 No Content`).
+   */
   remove = async (req: Request<{ id: string }>, res: Response): Promise<Response> => {
     const { id } = req.params
 
