@@ -21,9 +21,7 @@ const verifyAccessToken: RequestHandler = (
 
   try {
     const payload = jwt.verify(accessToken, env.JWT_ACCESS_SECRET) as TokenUserPayload
-
     req.user = { id: payload.id }
-
     next()
   } catch (error: unknown) {
     const formattedError = normalizeJwtError(error)
