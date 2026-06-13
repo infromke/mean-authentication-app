@@ -65,19 +65,26 @@ class OtpService {
   }
 
   resendOtpCode = async (type: OtpType, filter: FilterQuery<IUserDocument>): Promise<void> => {
-    const user = await this.#getUserByFilter(filter)
+    try {
+      const user = await this.#getUserByFilter(filter)
 
-    // verifica se o cooldown de 60s está ativo
-    const cooldownKey = `otp_cooldown_${type}_${user.id}`
-    if (cache.has(cooldownKey)) throw new AppError(429, 'Wait 60s before requesting a new code')
+      // verifica se o cooldown de 60s está ativo
+      const cooldownKey = `otp_cooldown_${type}_${user.id}`
+      if (cache.has(cooldownKey)) throw new AppError(429, 'Wait 60s before requesting a new code')
 
-    // deleta o OTP previamente gerado
-    await this.#otpRepository.deleteOne(user.id, type)
+      // deleta o OTP previamente gerado
+      await this.#otpRepository.deleteOne(user.id, type)
 
-    if (type === 'VERIFY') await this.sendEmailVerificationCode(user.id)
-    else await this.sendPasswordResetCode({ email: user.email })
+      if (type === 'VERIFY') await this.sendEmailVerificationCode(user.id)
+      else await this.sendPasswordResetCode({ email: user.email })
 
-    cache.set(cooldownKey, true, 60) // ativa o cooldown no cache
+      cache.set(cooldownKey, true, 60) // ativa o cooldown no cache
+    } catch (error: unknown) {
+      if (type === 'RESET' && error instanceof AppError && error.status === 404) {
+        return // silencia o erro caso o usuário não for encontrado
+      }
+      throw error // repassa outros erros
+    }
   }
 
   sendEmailVerificationCode = async (id: string): Promise<void> => {
@@ -105,15 +112,27 @@ class OtpService {
     clearUserCache(user.id) // limpa o cache para não retornar dados ultrapassados no próximo GET
   }
 
-  sendPasswordResetCode = async (filter: FilterQuery<IUserDocument>): Promise<void> => {
+  sendPasswordResetCode = async (filter: FilterQuery<IUserDocument>): Promise<any> => {
     try {
       const user = await this.#getUserByFilter(filter)
       await this.#sendCodeEmail(user.id, user.email, 'RESET')
+
+      const secret = env.JWT_RESET_SECRET
+      if (!secret)
+        throw new AppError(500, 'JWT_RESET_SECRET is not defined in environment variables')
+
+      return generateToken({ email: user.email }, secret, '5m')
     } catch (error: unknown) {
       const isObjectError = error && typeof error === 'object'
 
-      if (isObjectError && 'status' in error && error.status === 400) {
-        return // não avisa que o usuário não foi encontrado
+      if (isObjectError && 'status' in error && error.status === 404) {
+        const secret = env.JWT_RESET_SECRET
+
+        if (!secret)
+          throw new AppError(500, 'JWT_RESET_SECRET is not defined in environment variables')
+
+        // gera um token falso pra gastar o mesmo tempo computacional
+        return generateToken({ email: 'for_security@example.com' }, secret, '5m')
       }
 
       if (isObjectError && 'code' in error && error.code === 11000) {
@@ -128,8 +147,8 @@ class OtpService {
   }
 
   confirmPasswordResetCode = async (
-    otpCode: string,
     filter: FilterQuery<IUserDocument>,
+    otpCode: string,
   ): Promise<string> => {
     const user = await this.#getUserByFilter(filter)
     await this.#validateCode(user.id, otpCode, 'RESET')
@@ -137,7 +156,7 @@ class OtpService {
     const secret = env.JWT_RESET_SECRET
     if (!secret) throw new AppError(500, 'JWT_RESET_SECRET is not defined in environment variables')
 
-    return generateToken({ id: user.id }, secret, '15m')
+    return generateToken({ email: user.email }, secret, '15m')
   }
 
   resetUserPassword = async (

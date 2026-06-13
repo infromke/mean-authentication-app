@@ -25,8 +25,9 @@ class OtpController {
     req: Request<{}, any, ResendCodeDTO>,
     res: Response,
   ): Promise<Response> => {
-    const { email, type } = req.body
-    const filter = type === 'VERIFY' ? { _id: req.user!.id } : { email: email }
+    const { type } = req.body
+
+    const filter = type === 'VERIFY' ? { _id: req.user!.id } : { email: res.locals.reset['email'] }
 
     await this.#otpService.resendOtpCode(type, filter)
     return res.status(200).json({
@@ -64,7 +65,15 @@ class OtpController {
   ): Promise<Response> => {
     const { email } = req.body
 
-    await this.#otpService.sendPasswordResetCode({ email })
+    const resetEmailToken = await this.#otpService.sendPasswordResetCode({ email })
+
+    res.cookie('resetEmailToken', resetEmailToken, {
+      httpOnly: true,
+      secure: env.NODE_ENV === 'production', // usar TRUE em HTTPS
+      sameSite: 'lax',
+      maxAge: 5 * 60 * 1000, // 5 minutos
+    })
+
     return res.status(200).json({
       message: 'If the e-mail is valid, a code has been sent',
     })
@@ -74,9 +83,16 @@ class OtpController {
     req: Request<{}, any, VerifyResetDTO>,
     res: Response,
   ): Promise<Response> => {
-    const { email, otp } = req.body
+    const { otp } = req.body
+    const { email } = res.locals.reset
 
-    const passwordToken = await this.#otpService.confirmPasswordResetCode(otp, { email })
+    const passwordToken = await this.#otpService.confirmPasswordResetCode({ email }, otp)
+
+    res.clearCookie('resetEmailToken', {
+      httpOnly: true,
+      secure: env.NODE_ENV === 'production', // usar TRUE em HTTPS
+      sameSite: 'lax',
+    })
 
     res.cookie('passwordToken', passwordToken, {
       httpOnly: true,
@@ -92,7 +108,8 @@ class OtpController {
     req: Request<{}, any, ResetPasswordDTO>,
     res: Response,
   ): Promise<Response> => {
-    const { email, newPassword } = req.body
+    const { newPassword } = req.body
+    const { email } = res.locals.reset
 
     const user = await this.#otpService.resetUserPassword({ email }, newPassword)
 

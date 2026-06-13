@@ -22,12 +22,11 @@ export const verifyEmailBodySchema = z.object({ otp: otpRule })
 export const requestResetBodySchema = z.object({ email: emailRule })
 
 // POST /otps/password-reset/check
-export const checkResetBodySchema = z.object({ email: emailRule, otp: otpRule })
+export const checkResetBodySchema = z.object({ otp: otpRule })
 
 // PATCH /password-reset
 export const resetPasswordBodySchema = z
   .object({
-    email: emailRule,
     newPassword: z.string().min(8, 'Password must be at least 8 characters'),
     confirmPassword: z.string().min(1, 'Confirm your password'),
   })
@@ -37,26 +36,11 @@ export const resetPasswordBodySchema = z
   })
 
 // POST /otps/resend
-export const resendOtpBodySchema = z
-  .object({
-    type: z.enum(OTP_TYPES, {
-      error: 'Invalid OTP type',
-    }),
-    email: emailRule.optional(),
-  })
-  .refine(
-    (data) => {
-      if (data.type === 'RESET') {
-        const emailResult = z.email().safeParse(data.email)
-        return emailResult.success
-      }
-      return true
-    },
-    {
-      error: 'Provide a valid e-mail address for password reset',
-      path: ['email'],
-    },
-  )
+export const resendOtpBodySchema = z.object({
+  type: z.enum(OTP_TYPES, {
+    error: 'Invalid OTP type',
+  }),
+})
 
 /* SCHEMAS (para o Express consumir) */
 
