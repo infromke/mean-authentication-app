@@ -2,8 +2,8 @@ import { Component, inject } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { ToastrService } from 'ngx-toastr';
 
-import { UserService } from '../../../core/services/user-service/user-service';
 import { AuthService } from '../../../core/services/auth-service/auth-service';
+import { UserService } from '../../../core/services/user-service/user-service';
 import { Navbar } from '../../../shared/components/navbar/navbar';
 import { UserSection } from '../../../shared/components/user-section/user-section';
 

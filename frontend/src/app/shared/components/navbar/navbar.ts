@@ -1,9 +1,9 @@
 import { Component, inject } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 
-import { Menu } from '../menu/menu';
-import { UserService } from '../../../core/services/user-service/user-service';
 import { AuthService } from '../../../core/services/auth-service/auth-service';
+import { UserService } from '../../../core/services/user-service/user-service';
+import { Menu } from '../menu/menu';
 
 @Component({
   selector: 'app-navbar',

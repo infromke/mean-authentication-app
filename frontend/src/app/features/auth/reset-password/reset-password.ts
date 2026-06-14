@@ -1,12 +1,12 @@
-import { Component, inject, signal } from '@angular/core';
-import { Router } from '@angular/router';
+import { Component, inject } from '@angular/core';
 import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { Router } from '@angular/router';
 
-import { CardBody } from '../../../shared/components/card-body/card-body';
-import { InputGroup } from '../../../shared/components/input-group/input-group';
+import { ToastrService } from 'ngx-toastr';
 import { AuthService } from '../../../core/services/auth-service/auth-service';
 import { UserService } from '../../../core/services/user-service/user-service';
-import { ToastrService } from 'ngx-toastr';
+import { CardBody } from '../../../shared/components/card-body/card-body';
+import { InputGroup } from '../../../shared/components/input-group/input-group';
 
 @Component({
   selector: 'app-reset-password',

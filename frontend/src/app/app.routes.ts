@@ -1,8 +1,8 @@
 import { Routes } from '@angular/router';
 
-import publicGuard from './core/guards/public-guard/public-guard';
 import authGuard from './core/guards/auth-guard/auth-guard';
 import passwordResetGuard from './core/guards/password-reset-guard/password-reset-guard';
+import publicGuard from './core/guards/public-guard/public-guard';
 
 export const routes: Routes = [
   {

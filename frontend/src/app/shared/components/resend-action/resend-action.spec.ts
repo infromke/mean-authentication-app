@@ -8,9 +8,8 @@ describe('ResendAction', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [ResendAction]
-    })
-    .compileComponents();
+      imports: [ResendAction],
+    }).compileComponents();
 
     fixture = TestBed.createComponent(ResendAction);
     component = fixture.componentInstance;

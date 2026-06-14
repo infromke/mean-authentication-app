@@ -1,13 +1,13 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { ToastrService } from 'ngx-toastr';
 
+import { AuthService } from '../../../core/services/auth-service/auth-service';
+import { UserService } from '../../../core/services/user-service/user-service';
 import { CardBody } from '../../../shared/components/card-body/card-body';
 import { InputGroup } from '../../../shared/components/input-group/input-group';
 import { RedirectAction } from '../../../shared/components/redirect-action/redirect-action';
-import { AuthService } from '../../../core/services/auth-service/auth-service';
-import { UserService } from '../../../core/services/user-service/user-service';
 
 @Component({
   selector: 'app-login',
