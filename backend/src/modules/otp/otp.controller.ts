@@ -131,7 +131,8 @@ class OtpController {
   }
 
   /**
-   * Atualiza a senha do usuário, limpa a sessão de cookies e retorna os dados atualizados (`200 OK`).
+   * Atualiza a senha do usuário,  limpa a sessão de cookies e fornece o hiperlink
+   *  para a rota de login (`200 OK`).
    */
   resetPassword = async (
     req: Request<{}, any, ResetPasswordDTO>,
@@ -140,7 +141,7 @@ class OtpController {
     const { newPassword } = req.body
     const { email } = res.locals.reset
 
-    const user = await this.#otpService.resetUserPassword({ email }, newPassword)
+    await this.#otpService.resetUserPassword({ email }, newPassword)
 
     res.clearCookie('passwordToken', {
       httpOnly: true,
@@ -148,7 +149,12 @@ class OtpController {
       sameSite: 'lax',
     })
 
-    return res.status(200).json(user)
+    return res.status(200).json({
+      nextStep: {
+        href: '/auth/login',
+        method: 'POST',
+      },
+    })
   }
 }
 

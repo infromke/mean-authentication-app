@@ -1,6 +1,6 @@
 import type { FilterQuery, ProjectionType } from 'mongoose'
 import type { OtpType } from './otp.types.js'
-import type { IUser, IUserDocument, IUserPersistence } from '../user/user.model.js'
+import type { IUser, IUserDocument } from '../user/user.model.js'
 import env from '../../config/env.js'
 import userService from '../user/user.service.js'
 import otpRepository from './otp.repository.js'
@@ -181,14 +181,11 @@ class OtpService {
   resetUserPassword = async (
     filter: FilterQuery<IUserDocument>,
     password: string,
-  ): Promise<IUserPersistence> => {
+  ): Promise<void> => {
     const user = await this.#getUserByFilter(filter, '+password') // recebe um objeto user não formatado
-    const updatedUser = await this.#userService.updateUser(user._id, { password })
-
+    await this.#userService.updateUser(user._id, { password })
     const userIdString = user._id.toString()
     clearUserCache(userIdString) // limpa o cache para não retornar dados ultrapassados no próximo GET
-
-    return updatedUser
   }
 }
 
