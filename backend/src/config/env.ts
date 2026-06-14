@@ -18,6 +18,7 @@ const envSchema = z.object({
   SMTP_PORT: z.coerce.number().int().positive(),
   SMTP_USER: z.email('SMTP_USER must be a valid email address'),
   SMTP_PWD: z.string().min(1, 'SMTP_PWD is required'),
+  BCRYPT_SALT_ROUNDS: z.coerce.number().int().positive().optional(),
 })
 
 // faz o parse das variáveis atuais do sistema
@@ -35,6 +36,11 @@ if (!envParse.success) {
 }
 
 // as variáveis estritamente tipadas estão aqui
-const env = envParse.data
+const envData = envParse.data
+
+const env = {
+  ...envData,
+  BCRYPT_SALT_ROUNDS: envData.BCRYPT_SALT_ROUNDS ?? (envData.NODE_ENV === 'production' ? 12 : 10),
+}
 
 export default env

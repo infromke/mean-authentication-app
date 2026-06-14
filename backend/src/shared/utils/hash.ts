@@ -1,12 +1,14 @@
 import bcrypt from 'bcrypt'
 
+import env from '../../config/env.js'
+
 /**
  * Gera uma senha de forma assíncrona.
  * @param {string} password - Senha fornecida.
  * @returns {promise} Senha hasheada.
  */
 const generatePassword = async (password: string): Promise<string> => {
-  const salt = await bcrypt.genSalt(10)
+  const salt = await bcrypt.genSalt(env.BCRYPT_SALT_ROUNDS)
   const hash = await bcrypt.hash(password, salt)
   return hash
 }
