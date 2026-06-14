@@ -3,7 +3,6 @@ import { Router } from '@angular/router';
 import { ToastrService } from 'ngx-toastr';
 
 import { AuthService } from '../../../core/services/auth-service/auth-service';
-import { UserService } from '../../../core/services/user-service/user-service';
 
 import { CardBody } from '../../../shared/components/card-body/card-body';
 import { OtpInput } from '../../../shared/components/otp-input/otp-input';
@@ -17,7 +16,6 @@ import { ResendAction } from '../../../shared/components/resend-action/resend-ac
 })
 export class VerifyEmail {
   private authService = inject(AuthService);
-  private userService = inject(UserService);
   private router = inject(Router);
 
   private toastr = inject(ToastrService);
@@ -34,10 +32,9 @@ export class VerifyEmail {
   }
 
   private sendInitialOtp() {
-    const user = this.userService.userData();
-    if (!user?.id || this.hasSentInitialOtp) return;
+    if (this.hasSentInitialOtp) return;
 
-    this.authService.requestEmailVerification(user.id).subscribe({
+    this.authService.requestEmailVerification().subscribe({
       next: (res) => {
         this.hasSentInitialOtp = true;
         this.toastr.success('Code has been sent');
@@ -48,11 +45,9 @@ export class VerifyEmail {
 
   // recebe o código
   handleOtpSubmit(otp: string) {
-    const user = this.userService.userData();
-    if (!user) return;
-
     this.isLoading.set(true);
-    this.authService.checkEmailOtp(user.id, otp).subscribe({
+
+    this.authService.checkEmailOtp(otp).subscribe({
       next: (res) => {
         // atualiza o estado do usuário para verificado (isAccountVerified: true)
         this.authService.verifySession().subscribe(() => {

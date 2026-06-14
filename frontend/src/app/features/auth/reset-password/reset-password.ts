@@ -29,14 +29,6 @@ export class ResetPassword {
   });
 
   onResetSubmit(): void {
-    const email = this.userService.resetEmail();
-
-    if (!email) {
-      this.toastr.info('Session expired. Request a new code!');
-      this.router.navigate(['/forgot-password']);
-      return;
-    }
-
     if (this.form.invalid) {
       this.form.markAllAsTouched(); // faz aparecer as mensagens de erro nos inputs
       return;
@@ -49,7 +41,7 @@ export class ResetPassword {
       return;
     }
 
-    this.authService.resetPassword(email, formData).subscribe({
+    this.authService.resetPassword(formData).subscribe({
       next: () => {
         this.userService.setResetEmail(null);
         this.toastr.success('Password changed successfully');

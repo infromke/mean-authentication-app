@@ -7,7 +7,6 @@ import { OtpInput } from '../../../shared/components/otp-input/otp-input';
 import { ResendAction } from '../../../shared/components/resend-action/resend-action';
 
 import { AuthService } from '../../../core/services/auth-service/auth-service';
-import { UserService } from '../../../core/services/user-service/user-service';
 
 @Component({
   selector: 'app-verify-reset',
@@ -17,7 +16,6 @@ import { UserService } from '../../../core/services/user-service/user-service';
 })
 export class VerifyReset {
   private authService = inject(AuthService);
-  private userService = inject(UserService);
   private router = inject(Router);
 
   private toastr = inject(ToastrService);
@@ -29,16 +27,8 @@ export class VerifyReset {
 
   // recebe o código
   handleOtpSubmit(otp: string) {
-    const email = this.userService.resetEmail();
-
-    if (!email) {
-      this.toastr.info('Session expired. Request a new code!');
-      this.router.navigate(['/forgot-password']);
-      return;
-    }
-
     this.isLoading.set(true);
-    this.authService.checkResetOtp(email, otp).subscribe({
+    this.authService.checkResetOtp(otp).subscribe({
       next: () => {
         // leva o usuário para a página de redefinição de senha
         this.router.navigate(['/forgot-password/reset']);
@@ -47,7 +37,7 @@ export class VerifyReset {
         this.isLoading.set(false);
         this.otpInput.reset(); // limpa os campos se o código estiver errado
 
-        if (err.status === 400) {
+        if (err.status === 404) {
           this.toastr.error('Invalid code');
           return; // evita que o usuário saiba que o erro retorna "User not found"
         }
@@ -59,23 +49,14 @@ export class VerifyReset {
 
   // reenvia o código
   handleResend() {
-    const email = this.userService.resetEmail();
-    if (!email) return;
-
     this.resendAction.setResending(true);
-    this.authService.resendOtp('RESET', email).subscribe({
+    this.authService.resendOtp('RESET').subscribe({
       next: (res) => {
         this.toastr.success(res.message);
         this.resendAction.startTimer();
       },
       error: (err) => {
         this.resendAction.startTimer();
-
-        if (err.status === 400) {
-          this.toastr.info('If the e-mail is valid, a new code has been sent');
-          return; // evita que o usuário saiba que o erro retorna "User not found"
-        }
-
         this.toastr.error(err.error?.detail);
       },
       complete: () => this.resendAction.setResending(false),
