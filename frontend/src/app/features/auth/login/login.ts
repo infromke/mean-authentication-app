@@ -42,10 +42,6 @@ export class Login {
         this.router.navigate(['/home']);
       },
       error: (err) => {
-        if (err.status === 400) {
-          this.toastr.error('Invalid credentials');
-          return; // evita que o usuário saiba que o erro retorna "User not found"
-        }
         this.toastr.error(err.error?.detail);
       },
     });
