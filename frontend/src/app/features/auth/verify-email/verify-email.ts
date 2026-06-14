@@ -35,7 +35,7 @@ export class VerifyEmail {
     if (this.hasSentInitialOtp) return;
 
     this.authService.requestEmailVerification().subscribe({
-      next: (res) => {
+      next: () => {
         this.hasSentInitialOtp = true;
         this.toastr.success('Code has been sent');
       },
@@ -57,8 +57,15 @@ export class VerifyEmail {
       },
       error: (err) => {
         this.isLoading.set(false);
-        this.toastr.error(err.error?.detail);
         this.otpInput.reset(); // limpa os campos se o código estiver errado
+
+        if (err.status === 401 || err.status === 403) {
+          this.router.navigate(['/']);
+          this.toastr.info('Your session has timed out. Please sign in again.');
+          return;
+        }
+
+        this.toastr.error(err.error?.detail);
       },
     });
   }
@@ -71,7 +78,15 @@ export class VerifyEmail {
         this.toastr.info(res.message);
         this.resendAction.startTimer();
       },
-      error: (err) => this.toastr.error(err.error?.detail),
+      error: (err) => {
+        if (err.status === 401 || err.status === 403) {
+          this.router.navigate(['/']);
+          this.toastr.info('Your session has timed out. Please sign in again.');
+          return;
+        }
+        this.resendAction.startTimer();
+        this.toastr.error(err.error?.detail);
+      },
       complete: () => this.resendAction.setResending(false),
     });
   }

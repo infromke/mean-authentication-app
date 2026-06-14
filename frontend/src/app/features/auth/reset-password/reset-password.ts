@@ -48,6 +48,11 @@ export class ResetPassword {
         this.router.navigate(['/']); // leva para a página de login
       },
       error: (err) => {
+        if (err.status === 401 || err.status === 403) {
+          this.router.navigate(['/']);
+          this.toastr.info('Your session has timed out. Please try again.');
+          return;
+        }
         this.toastr.error(err.error?.detail);
       },
     });
