@@ -9,18 +9,13 @@ import verifyAccessToken from './verifyAccessToken.js'
 import verifyResetEmailToken from './verifyResetEmailToken.js'
 
 /**
- * Verifica se o usuário está logado e se sua conta foi verificada.
- */
-const verifiedOnly = [verifyAccessToken, isAccountVerified]
-
-/**
- * Verifica se o usuário está logado e se é dono da conta que deseja alterar.
+ * Verifica se o usuário está logado e se é o titular da conta que deseja alterar.
  */
 const ownerOnly = [verifyAccessToken, verifyOwnership]
 
 /**
- * Verifica se o usuário está logado se o ID (`id`) passado é válido.
- * Também verifica se o usuário logado é dono da conta que deseja alterar e se sua conta está verificada.
+ * Verifica se o usuário (i) está logado, (ii) forneceu um `id` válido, (iii) é o
+ * titular da conta que deseja alterar e (iv) possui e-mail verificado.
  */
 const fullLock = [
   verifyAccessToken,
@@ -28,18 +23,12 @@ const fullLock = [
   verifyOwnership,
   isAccountVerified,
 ]
-
 /**
- * Verifica se tipo (`type`) do otp enviado é `VERIFY` ou `RESET`.
- * Se for do tipo VERIFY, o usuário passa pelo middleware verifyAccessToken.
- * Se for do tipo RESET, o usuário passa pelo middleware verifyResetEmailToken.
+ * Roteia a verificação do token baseado no tipo do OTP ("VERIFY" ou "RESET").
  */
-const resendOtpFlow: RequestHandler = (req: Request, res: Response, next: NextFunction): void => {
-  if (req.body.type === 'VERIFY') {
-    verifyAccessToken(req, res, next)
-    return
-  }
-  verifyResetEmailToken(req, res, next)
+const dynamicOtpAuth: RequestHandler = (req: Request, res: Response, next: NextFunction) => {
+  const strategy = req.body.type === 'VERIFY' ? verifyAccessToken : verifyResetEmailToken
+  return strategy(req, res, next)
 }
 
-export { fullLock, ownerOnly, resendOtpFlow, verifiedOnly }
+export { dynamicOtpAuth, fullLock, ownerOnly }

@@ -50,13 +50,13 @@ router.get('/:id', handleValidation(paramsIdSchema), userController.getById)
  * @desc    Atualiza os dados cadastrais do perfil do usuário.
  * @access  Privado (Apenas o próprio dono da conta)
  */
-router.patch('/:id', ownerOnly, handleValidation(updateSchema), userController.update)
+router.patch('/:id', ...ownerOnly, handleValidation(updateSchema), userController.update)
 
 /**
  * @route   DELETE /users/:id
  * @desc    Remove permanentemente a conta de um usuário do sistema.
  * @access  Privado (Requer titularidade sobre a conta e e-mail verificado)
  */
-router.delete('/:id', fullLock, userController.remove)
+router.delete('/:id', ...fullLock, userController.remove)
 
 export default router
