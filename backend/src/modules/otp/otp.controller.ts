@@ -1,5 +1,7 @@
 import type { Request, Response } from 'express'
+
 import env from '../../config/env.js'
+
 import otpService from './otp.service.js'
 import type {
   RequestResetDTO,

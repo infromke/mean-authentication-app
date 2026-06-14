@@ -1,5 +1,7 @@
 import nodemailer from 'nodemailer'
+
 import type { MailOptions } from '../shared/types/mail.types.js'
+
 import env from './env.js'
 
 const transporter = nodemailer.createTransport({

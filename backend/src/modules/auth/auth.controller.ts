@@ -1,5 +1,7 @@
 import type { Request, Response } from 'express'
+
 import env from '../../config/env.js'
+
 import authService from './auth.service.js'
 
 class AuthController {

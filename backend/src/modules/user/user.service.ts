@@ -1,12 +1,16 @@
 import type { FilterQuery, ProjectionType } from 'mongoose'
+
 import env from '../../config/env.js'
 import { sendEmail } from '../../config/nodemailer.js'
+
 import AppError from '../../shared/errors/AppError.js'
 import cache from '../../shared/lib/cache.js'
 import type { ListQuery, PaginationResult } from '../../shared/types/pagination.types.js'
 import clearUserCache from '../../shared/utils/clearUserCache.js'
 import generateToken from '../../shared/utils/generateToken.js'
+
 import { getWelcomeMailOptions } from '../otp/utils/generateMail.js'
+
 import type { IUser, IUserDocument } from './user.model.js'
 import userRepository from './user.repository.js'
 import type { CreateUserDTO } from './user.types.js'

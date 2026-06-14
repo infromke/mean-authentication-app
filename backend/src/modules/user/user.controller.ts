@@ -1,5 +1,7 @@
 import type { Request, Response } from 'express'
+
 import env from '../../config/env.js'
+
 import userService from './user.service.js'
 import type { CreateUserDTO } from './user.types.js'
 

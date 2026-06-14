@@ -1,4 +1,5 @@
 import mongoose, { Document, Schema, Types } from 'mongoose'
+
 import type { OtpType } from './otp.types.js'
 
 // esqueleto da entidade

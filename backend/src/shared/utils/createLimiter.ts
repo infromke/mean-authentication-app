@@ -2,6 +2,7 @@ import rateLimit, {
   type RateLimitExceededEventHandler,
   type RateLimitRequestHandler,
 } from 'express-rate-limit'
+
 import AppError from '../errors/AppError.js'
 
 /**

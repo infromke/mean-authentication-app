@@ -1,12 +1,16 @@
 import type { FilterQuery, ProjectionType } from 'mongoose'
+
 import env from '../../config/env.js'
 import { sendEmail } from '../../config/nodemailer.js'
+
 import AppError from '../../shared/errors/AppError.js'
 import cache from '../../shared/lib/cache.js'
 import clearUserCache from '../../shared/utils/clearUserCache.js'
 import generateToken from '../../shared/utils/generateToken.js'
+
 import type { IUser, IUserDocument } from '../user/user.model.js'
 import userService from '../user/user.service.js'
+
 import otpRepository from './otp.repository.js'
 import type { OtpType } from './otp.types.js'
 import { getOtpMailOptions } from './utils/generateMail.js'

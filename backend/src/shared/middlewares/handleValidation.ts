@@ -1,5 +1,7 @@
-import type { NextFunction, Request, RequestHandler, Response } from 'express'
 import { ZodError, type ZodType } from 'zod'
+
+import type { NextFunction, Request, RequestHandler, Response } from 'express'
+
 import AppError from '../errors/AppError.js'
 
 /**

@@ -1,4 +1,5 @@
 import type { NextFunction, Request, RequestHandler, Response } from 'express'
+
 import AppError from '../../../shared/errors/AppError.js'
 import userService from '../user.service.js'
 

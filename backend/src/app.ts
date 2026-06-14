@@ -1,6 +1,8 @@
 import cookieParser from 'cookie-parser'
-import express, { type NextFunction, type Request, type Response } from 'express'
 import morgan from 'morgan'
+
+import express, { type NextFunction, type Request, type Response } from 'express'
+
 import cors from './config/cors.js'
 import connectToDb from './config/database.js'
 import env from './config/env.js'

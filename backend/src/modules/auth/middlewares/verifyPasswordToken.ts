@@ -1,5 +1,7 @@
-import type { NextFunction, Request, RequestHandler, Response } from 'express'
 import jwt from 'jsonwebtoken'
+
+import type { NextFunction, Request, RequestHandler, Response } from 'express'
+
 import env from '../../../config/env.js'
 import AppError from '../../../shared/errors/AppError.js'
 import type { TokenResetPayload } from '../../../shared/types/auth.types.js'

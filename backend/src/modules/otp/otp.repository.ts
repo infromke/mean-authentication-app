@@ -1,4 +1,5 @@
 import type { Types } from 'mongoose'
+
 import Otp, { type IOtp, type IOtpPersistence } from './otp.model.js'
 import type { OtpType } from './otp.types.js'
 

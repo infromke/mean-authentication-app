@@ -1,4 +1,5 @@
 import cors, { type CorsOptions } from 'cors'
+
 import env from './env.js'
 
 const allowedOrigins = [

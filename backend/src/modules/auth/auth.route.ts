@@ -1,6 +1,8 @@
 import { Router } from 'express'
+
 import handleValidation from '../../shared/middlewares/handleValidation.js'
 import { sessionLimiter } from '../../shared/middlewares/rateLimiter.js'
+
 import authController from './auth.controller.js'
 import loginSchema from './auth.schema.js'
 import { isAuthenticated } from './middlewares/isLoggedIn.js'

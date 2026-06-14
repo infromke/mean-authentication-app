@@ -1,5 +1,7 @@
 import type { FilterQuery, ProjectionType, Types } from 'mongoose'
+
 import type { FindAllParams } from '../../shared/types/pagination.types.js'
+
 import User, { type IUser, type IUserDocument, type IUserPersistence } from './user.model.js'
 
 interface PaginatedUsers {

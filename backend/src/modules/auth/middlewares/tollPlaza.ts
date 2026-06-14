@@ -1,8 +1,10 @@
 import type { NextFunction, Request, RequestHandler, Response } from 'express'
+
 import handleValidation from '../../../shared/middlewares/handleValidation.js'
 import { paramsIdSchema } from '../../../shared/schemas/common.schema.js'
 import isAccountVerified from '../../user/middlewares/isAccountVerified.js'
 import verifyOwnership from '../../user/middlewares/verifyOwnership.js'
+
 import verifyAccessToken from './verifyAccessToken.js'
 import verifyResetEmailToken from './verifyResetEmailToken.js'
 

@@ -1,4 +1,5 @@
 import env from '../../config/env.js'
+
 import AppError from '../errors/AppError.js'
 
 const isEnvDev = env.NODE_ENV === 'dev' || env.NODE_ENV === 'development'
