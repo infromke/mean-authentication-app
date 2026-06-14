@@ -1,5 +1,5 @@
-import { z } from 'zod'
 import mongoose from 'mongoose'
+import { z } from 'zod'
 
 /**
  * Verifica se o `id` fornecido segue o padrão de ID auto-gerado pelo MongoDB.

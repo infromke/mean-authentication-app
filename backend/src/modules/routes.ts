@@ -1,8 +1,8 @@
 import { Router } from 'express'
 import { globalLimiter } from '../shared/middlewares/rateLimiter.js'
-import UserRouter from './user/user.route.js'
 import AuthRouter from './auth/auth.route.js'
 import OtpRouter from './otp/otp.route.js'
+import UserRouter from './user/user.route.js'
 
 const router = Router()
 

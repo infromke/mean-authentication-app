@@ -1,10 +1,10 @@
 import { Router } from 'express'
-import authController from './auth.controller.js'
-import { sessionLimiter } from '../../shared/middlewares/rateLimiter.js'
 import handleValidation from '../../shared/middlewares/handleValidation.js'
+import { sessionLimiter } from '../../shared/middlewares/rateLimiter.js'
+import authController from './auth.controller.js'
 import loginSchema from './auth.schema.js'
-import verifyAccessToken from './middlewares/verifyAccessToken.js'
 import { isAuthenticated } from './middlewares/isLoggedIn.js'
+import verifyAccessToken from './middlewares/verifyAccessToken.js'
 
 const router = Router()
 

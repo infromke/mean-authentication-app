@@ -1,13 +1,13 @@
-import express, { type Request, type Response, type NextFunction } from 'express'
 import cookieParser from 'cookie-parser'
+import express, { type NextFunction, type Request, type Response } from 'express'
 import morgan from 'morgan'
-import connectToDb from './config/database.js'
 import cors from './config/cors.js'
+import connectToDb from './config/database.js'
+import env from './config/env.js'
 import { verifyConnection } from './config/nodemailer.js'
 import GlobalRouter from './modules/routes.js'
-import errorHandler from './shared/middlewares/errorHandler.js'
 import AppError from './shared/errors/AppError.js'
-import env from './config/env.js'
+import errorHandler from './shared/middlewares/errorHandler.js'
 
 //  config
 const app = express()

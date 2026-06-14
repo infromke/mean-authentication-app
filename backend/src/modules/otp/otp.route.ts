@@ -1,9 +1,12 @@
 import { Router } from 'express'
-import otpController from './otp.controller.js'
-import verifyAccessToken from '../auth/middlewares/verifyAccessToken.js'
-import verifyResetEmailToken from '../auth/middlewares/verifyResetEmailToken.js'
-import verifyPasswordToken from '../auth/middlewares/verifyPasswordToken.js'
 import handleValidation from '../../shared/middlewares/handleValidation.js'
+import { otpSendLimiter, otpVerifyLimiter } from '../../shared/middlewares/rateLimiter.js'
+import { isGuest } from '../auth/middlewares/isLoggedIn.js'
+import { resendOtpFlow } from '../auth/middlewares/tollPlaza.js'
+import verifyAccessToken from '../auth/middlewares/verifyAccessToken.js'
+import verifyPasswordToken from '../auth/middlewares/verifyPasswordToken.js'
+import verifyResetEmailToken from '../auth/middlewares/verifyResetEmailToken.js'
+import otpController from './otp.controller.js'
 import {
   checkResetSchema,
   checkVerificationSchema,
@@ -11,9 +14,6 @@ import {
   resendOtpSchema,
   resetPasswordSchema,
 } from './otp.schema.js'
-import { resendOtpFlow } from '../auth/middlewares/tollPlaza.js'
-import { otpSendLimiter, otpVerifyLimiter } from '../../shared/middlewares/rateLimiter.js'
-import { isGuest } from '../auth/middlewares/isLoggedIn.js'
 
 const router = Router()
 

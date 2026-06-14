@@ -1,10 +1,10 @@
-import type { Request, Response, NextFunction, RequestHandler } from 'express'
-import verifyAccessToken from './verifyAccessToken.js'
-import verifyResetEmailToken from './verifyResetEmailToken.js'
-import isAccountVerified from '../../user/middlewares/isAccountVerified.js'
-import verifyOwnership from '../../user/middlewares/verifyOwnership.js'
+import type { NextFunction, Request, RequestHandler, Response } from 'express'
 import handleValidation from '../../../shared/middlewares/handleValidation.js'
 import { paramsIdSchema } from '../../../shared/schemas/common.schema.js'
+import isAccountVerified from '../../user/middlewares/isAccountVerified.js'
+import verifyOwnership from '../../user/middlewares/verifyOwnership.js'
+import verifyAccessToken from './verifyAccessToken.js'
+import verifyResetEmailToken from './verifyResetEmailToken.js'
 
 /**
  * Verifica se o usuário está logado e se sua conta foi verificada.
@@ -40,4 +40,4 @@ const resendOtpFlow: RequestHandler = (req: Request, res: Response, next: NextFu
   verifyResetEmailToken(req, res, next)
 }
 
-export { verifiedOnly, ownerOnly, fullLock, resendOtpFlow }
+export { fullLock, ownerOnly, resendOtpFlow, verifiedOnly }

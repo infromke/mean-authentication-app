@@ -1,7 +1,7 @@
 import type { Request, Response } from 'express'
-import type { CreateUserDTO } from './user.types.js'
 import env from '../../config/env.js'
 import userService from './user.service.js'
+import type { CreateUserDTO } from './user.types.js'
 
 class UserController {
   #userService: typeof userService

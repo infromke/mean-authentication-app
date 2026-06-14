@@ -1,6 +1,6 @@
+import env from '../../../config/env.js'
 import type { MailOptions } from '../../../shared/types/mail.types.js'
 import type { OtpType } from '../otp.types.js'
-import env from '../../../config/env.js'
 import getOtpEmailTemplate from '../templates/otpEmail.js'
 import getWelcomeEmailTemplate from '../templates/welcomeEmail.js'
 

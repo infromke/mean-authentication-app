@@ -27,4 +27,4 @@ const otpVerifyLimiter = createLimiter(
   'Too many failed attempts. Please try again in 15 minutes',
 )
 
-export { globalLimiter, authLimiter, sessionLimiter, otpSendLimiter, otpVerifyLimiter }
+export { authLimiter, globalLimiter, otpSendLimiter, otpVerifyLimiter, sessionLimiter }

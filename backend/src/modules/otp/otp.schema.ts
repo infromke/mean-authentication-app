@@ -68,9 +68,9 @@ const resendOtpSchema = z.object({
 })
 
 export {
+  checkResetSchema,
   checkVerificationSchema,
   requestResetSchema,
-  checkResetSchema,
-  resetPasswordSchema,
   resendOtpSchema,
+  resetPasswordSchema,
 }

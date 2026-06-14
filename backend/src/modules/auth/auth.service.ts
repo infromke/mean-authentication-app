@@ -1,11 +1,11 @@
 import env from '../../config/env.js'
-import userService from '../user/user.service.js'
 import AppError from '../../shared/errors/AppError.js'
-import generateToken from '../../shared/utils/generateToken.js'
-import { validatePassword } from '../../shared/utils/hash.js'
-import formatUserObject from '../user/utils/formatUserObject.js'
 import cache from '../../shared/lib/cache.js'
 import clearUserCache from '../../shared/utils/clearUserCache.js'
+import generateToken from '../../shared/utils/generateToken.js'
+import { validatePassword } from '../../shared/utils/hash.js'
+import userService from '../user/user.service.js'
+import formatUserObject from '../user/utils/formatUserObject.js'
 
 // interface para os dados de login do usuário
 interface UserCredentials {
