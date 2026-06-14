@@ -174,9 +174,17 @@ class OtpService {
     filter: FilterQuery<IUserDocument>,
     otpCode: string,
   ): Promise<string> => {
-    const user = await this.#getUserByFilter(filter)
-    await this.#validateCode(user.id, otpCode, 'RESET')
-    return generateToken({ email: user.email }, env.JWT_RESET_SECRET, '15m')
+    try {
+      const user = await this.#getUserByFilter(filter)
+      await this.#validateCode(user.id, otpCode, 'RESET')
+      return generateToken({ email: user.email }, env.JWT_RESET_SECRET, '15m')
+    } catch (error) {
+      if (error && typeof error === 'object' && 'status' in error && error.status === 404) {
+        throw new AppError(403, 'Invalid code') // não avisa que o usuário não existe, apenas nega o código
+      }
+
+      throw error // repassa outros erros inesperados
+    }
   }
 
   /**
