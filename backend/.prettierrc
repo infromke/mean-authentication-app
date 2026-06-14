@@ -1,5 +1,17 @@
 {
   "printWidth": 100,
   "semi": false,
-  "singleQuote": true
+  "singleQuote": true,
+
+  "plugins": ["@trivago/prettier-plugin-sort-imports"],
+  "importOrder": [
+    "^mongoose$",
+    "^express$",
+    "^../../config/(.*)$",
+    "^../../shared/(.*)$",
+    "^../(.*)$",
+    "^[./]"
+  ],
+  "importOrderSeparation": true,
+  "importOrderSortSpecifiers": true
 }
