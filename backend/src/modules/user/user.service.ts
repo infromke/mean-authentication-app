@@ -125,7 +125,7 @@ class UserService {
     const user = await this.#userRepository.create(data)
 
     const userIdString = user._id.toString()
-    const accessToken = generateToken({ id: userIdString }, env.JWT_RESET_SECRET, '1d')
+    const accessToken = generateToken({ id: userIdString }, env.JWT_ACCESS_SECRET, '1d')
     await sendEmail(getWelcomeMailOptions(data.name, data.email))
 
     clearUserCache() // limpa o cache para não retornar dados ultrapassados no próximo GET
