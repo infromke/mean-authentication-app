@@ -143,22 +143,13 @@ class OtpService {
       const user = await this.#getUserByFilter(filter)
       await this.#sendCodeEmail(user.id, user.email, 'RESET')
 
-      const secret = env.JWT_RESET_SECRET
-      if (!secret)
-        throw new AppError(500, 'JWT_RESET_SECRET is not defined in environment variables')
-
-      return generateToken({ email: user.email }, secret, '5m')
+      return generateToken({ email: user.email }, env.JWT_RESET_SECRET, '5m')
     } catch (error: unknown) {
       const isObjectError = error && typeof error === 'object'
 
       if (isObjectError && 'status' in error && error.status === 404) {
-        const secret = env.JWT_RESET_SECRET
-
-        if (!secret)
-          throw new AppError(500, 'JWT_RESET_SECRET is not defined in environment variables')
-
         // gera um token falso pra gastar o mesmo tempo computacional
-        return generateToken({ email: 'for_security@example.com' }, secret, '5m')
+        return generateToken({ email: 'for_security@example.com' }, env.JWT_RESET_SECRET, '5m')
       }
 
       if (isObjectError && 'code' in error && error.code === 11000) {
@@ -181,11 +172,7 @@ class OtpService {
   ): Promise<string> => {
     const user = await this.#getUserByFilter(filter)
     await this.#validateCode(user.id, otpCode, 'RESET')
-
-    const secret = env.JWT_RESET_SECRET
-    if (!secret) throw new AppError(500, 'JWT_RESET_SECRET is not defined in environment variables')
-
-    return generateToken({ email: user.email }, secret, '15m')
+    return generateToken({ email: user.email }, env.JWT_RESET_SECRET, '15m')
   }
 
   /**

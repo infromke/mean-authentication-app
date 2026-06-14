@@ -56,12 +56,8 @@ class AuthService {
       throw new AppError(400, 'Invalid credentials')
     }
 
-    const secret = env.JWT_ACCESS_SECRET
-    if (!secret)
-      throw new AppError(500, 'JWT_ACCESS_SECRET is not defined in environment variables')
-
     const userIdString = user._id.toString()
-    const accessToken = generateToken({ id: userIdString }, secret, '1d')
+    const accessToken = generateToken({ id: userIdString }, env.JWT_ACCESS_SECRET, '1d')
 
     clearUserCache(user._id) // limpa o cache para não retornar dados ultrapassados
     return { user: formatUserObject(user), accessToken } // formata o objeto user para não expor a senha
