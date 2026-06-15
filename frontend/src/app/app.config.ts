@@ -19,7 +19,8 @@ export const appConfig: ApplicationConfig = {
     importProvidersFrom(LucideAngularModule.pick({ User, Lock, AtSign, LockOpen, ChevronDown })),
     provideAnimationsAsync(),
     provideToastr({
-      timeOut: 4000,
+      timeOut: 5000, // toasts duram 5 segundos
+      extendedTimeOut: 2000, // 2 segundos extras se o usuário passar com o mouse
       positionClass: 'toast-top-right',
       preventDuplicates: true,
       progressBar: true,
