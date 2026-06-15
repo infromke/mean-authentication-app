@@ -1,4 +1,5 @@
 import type z from 'zod'
+
 import type { registerBodySchema } from './user.schema.js'
 
 // DTOs baseados nos schemas do Zod

@@ -1,6 +1,8 @@
-import type { ErrorRequestHandler, Request, Response, NextFunction } from 'express'
-import type { AppError } from '../types/error.types.js'
+import type { ErrorRequestHandler, NextFunction, Request, Response } from 'express'
+
 import env from '../../config/env.js'
+
+import AppError from '../errors/AppError.js'
 
 // mapeamento dos status HTTP de erros esperados
 const HTTP_ERROR: Record<number, string> = {
@@ -17,23 +19,22 @@ const HTTP_ERROR: Record<number, string> = {
  * Diferencia entre ambiente de produção e desenvolvimento seguindo a RFC 7807.
  */
 const errorHandler: ErrorRequestHandler = (
-  err: AppError,
+  err: Error | AppError,
   req: Request,
   res: Response,
   _next: NextFunction,
 ): Response => {
-  let status = err.status || 500
+  const isAppError = err instanceof AppError
+
+  let status = isAppError ? err.status : 500
   let detail = err.message || 'An unexpected error occurred. Please try again later.'
 
   //  tratamento para o erro de duplicidade gerado pelo mongodb/mongoose
-  if (err.code === 11000) {
+  if ('code' in err && err.code === 11000) {
     const field = Object.keys(err.keyPattern || {})[0] || 'field' // pega o nome do campo repetido
     status = 409
     detail = `The provided ${field} is already in use or active.`
   }
-
-  //  busca o nome do erro ou simplesmente usa 'Error'
-  const title = HTTP_ERROR[status] || 'Error'
 
   //  log de erro no console
   if (env.NODE_ENV === 'development') {
@@ -45,12 +46,11 @@ const errorHandler: ErrorRequestHandler = (
 
   return res.status(status).json({
     type: 'about:blank', // valor padrão da RFC quando não há link de doc
-    title,
+    title: HTTP_ERROR[status] || 'Error', //  busca o nome do erro ou simplesmente usa 'Error'
     status,
     detail,
     instance: req.originalUrl,
-    // extensões personalizadas abaixo
-    ...(err.errors ? { errors: err.errors } : {}), // para os erros vindos do Zod
+    ...(isAppError && 'errors' in err && err.errors ? { errors: err.errors } : {}), // erros do Zod
     ...(env.NODE_ENV === 'development' ? { stack: err.stack } : {}),
   })
 }

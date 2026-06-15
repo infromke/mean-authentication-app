@@ -1,4 +1,5 @@
 import 'express'
+
 import type { TokenUserPayload } from './auth.types.ts'
 
 declare module 'express' {

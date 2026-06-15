@@ -11,13 +11,14 @@ const envSchema = z.object({
     .url('MONGODB_URI must be a valid connection URL')
     .min(1, 'MONGODB_URI is required'),
   DB_NAME: z.string().min(1, 'DB_NAME is required'),
-  JWT_ACCESS_SECRET: z.string().min(16, 'JWT_ACCESS_SECRET must be at least 16 characters long'),
-  JWT_RESET_SECRET: z.string().min(16, 'JWT_RESET_SECRET must be at least 16 characters long'),
+  JWT_ACCESS_SECRET: z.string().min(64, 'JWT_ACCESS_SECRET must be at least 64 characters long'),
+  JWT_RESET_SECRET: z.string().min(64, 'JWT_RESET_SECRET must be at least 64 characters long'),
   SMTP_MAILER: z.email('SMTP_USER must be a valid email address'),
   SMTP_HOST: z.string().min(1, 'SMTP_HOST is required'),
   SMTP_PORT: z.coerce.number().int().positive(),
   SMTP_USER: z.email('SMTP_USER must be a valid email address'),
   SMTP_PWD: z.string().min(1, 'SMTP_PWD is required'),
+  BCRYPT_SALT_ROUNDS: z.coerce.number().int().positive().optional(),
 })
 
 // faz o parse das variáveis atuais do sistema
@@ -35,6 +36,11 @@ if (!envParse.success) {
 }
 
 // as variáveis estritamente tipadas estão aqui
-const env = envParse.data
+const envData = envParse.data
+
+const env = {
+  ...envData,
+  BCRYPT_SALT_ROUNDS: envData.BCRYPT_SALT_ROUNDS ?? (envData.NODE_ENV === 'production' ? 12 : 10),
+}
 
 export default env

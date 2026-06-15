@@ -1,5 +1,6 @@
-import type { Request, Response, NextFunction, RequestHandler } from 'express'
-import throwHttpError from '../../../shared/utils/throwHttpError.js'
+import type { NextFunction, Request, RequestHandler, Response } from 'express'
+
+import AppError from '../../../shared/errors/AppError.js'
 
 /**
  * Verifica se o usuário autenticado é o proprietário da conta passada pelo ID na URL.
@@ -12,7 +13,7 @@ const verifyOwnership: RequestHandler = (
   const authenticatedUserId = req.user!.id ? req.user!.id.toString() : ''
 
   if (req.params.id !== authenticatedUserId)
-    throw throwHttpError(403, 'You can only modify your own account')
+    throw new AppError(403, 'You can only modify your own account')
 
   next()
 }

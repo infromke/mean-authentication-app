@@ -10,20 +10,20 @@ import normalizeJwtError from '../../../shared/utils/normalizeJwtError.js'
 const isEnvDev = env.NODE_ENV === 'dev' || env.NODE_ENV === 'development'
 
 /**
- * Middleware para autorizar a redefinição de senha.
- * Verifica se o cookie `passwordToken` (gerado após validar o OTP) é válido.
+ * Middleware para gerenciar o fluxo de redefinição de senha.
+ * Verifica se o cookie `resetEmailToken` (gerado após o usuário fornecer seu e-mail) é válido.
  */
-const verifyPasswordToken: RequestHandler = (
+const verifyResetEmailToken: RequestHandler = (
   req: Request,
   res: Response,
   next: NextFunction,
 ): void => {
-  const { passwordToken } = req.cookies
+  const { resetEmailToken } = req.cookies
 
-  if (!passwordToken) throw new AppError(401, isEnvDev ? 'Token not found' : 'Access denied')
+  if (!resetEmailToken) throw new AppError(401, isEnvDev ? 'Token not found' : 'Access denied')
 
   try {
-    const payload = jwt.verify(passwordToken, env.JWT_RESET_SECRET) as TokenResetPayload
+    const payload = jwt.verify(resetEmailToken, env.JWT_RESET_SECRET) as TokenResetPayload
     res.locals.reset = { email: payload.email }
     next()
   } catch (error: unknown) {
@@ -32,4 +32,4 @@ const verifyPasswordToken: RequestHandler = (
   }
 }
 
-export default verifyPasswordToken
+export default verifyResetEmailToken

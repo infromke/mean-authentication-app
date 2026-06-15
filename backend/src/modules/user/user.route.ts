@@ -1,31 +1,62 @@
 import { Router } from 'express'
-import userController from './user.controller.js'
-import { authLimiter } from '../../shared/middlewares/rateLimiter.js'
+
 import handleValidation from '../../shared/middlewares/handleValidation.js'
-import { fullLock, ownerOnly } from '../auth/middlewares/tollPlaza.js'
-import { registerSchema, updateSchema } from './user.schema.js'
+import { authLimiter } from '../../shared/middlewares/rateLimiter.js'
 import { paramsIdSchema } from '../../shared/schemas/common.schema.js'
+
 import { isGuest } from '../auth/middlewares/isLoggedIn.js'
+import { fullLock, ownerOnly } from '../auth/middlewares/tollPlaza.js'
+
+import userController from './user.controller.js'
+import { registerSchema, updateSchema } from './user.schema.js'
 
 const router = Router()
 
-//  --- PUBLIC ROUTES ---
+/**
+ * -----------------------------------------------------------------------------
+ * PUBLIC ROUTES
+ * -----------------------------------------------------------------------------
+ */
 
-// @route GET /users
+/**
+ * @route   GET /users
+ * @desc    Recupera a lista paginada de todos os usuários cadastrados.
+ * @access  Público
+ */
 router.get('/', userController.getAll)
 
-// @route POST /users
+/**
+ * @route   POST /users
+ * @desc    Cria uma nova conta de usuário no sistema.
+ * @access  Público (Apenas convidados / Protegido por Rate Limiter)
+ */
 router.post('/', authLimiter, isGuest, handleValidation(registerSchema), userController.create)
 
-// @route GET /users/:id
+/**
+ * @route   GET /users/:id
+ * @desc    Busca os detalhes públicos de um usuário específico através do ID.
+ * @access  Público
+ */
 router.get('/:id', handleValidation(paramsIdSchema), userController.getById)
 
-//  --- PRIVATE ROUTES ---
+/**
+ * -----------------------------------------------------------------------------
+ * PRIVATE ROUTES
+ * -----------------------------------------------------------------------------
+ */
 
-// @route PATCH /users/:id
-router.patch('/:id', ownerOnly, handleValidation(updateSchema), userController.update)
+/**
+ * @route   PATCH /users/:id
+ * @desc    Atualiza os dados cadastrais do perfil do usuário.
+ * @access  Privado (Apenas o próprio dono da conta)
+ */
+router.patch('/:id', ...ownerOnly, handleValidation(updateSchema), userController.update)
 
-// @route DELETE /users/:id
-router.delete('/:id', fullLock, userController.destroy)
+/**
+ * @route   DELETE /users/:id
+ * @desc    Remove permanentemente a conta de um usuário do sistema.
+ * @access  Privado (Requer titularidade sobre a conta e e-mail verificado)
+ */
+router.delete('/:id', ...fullLock, userController.remove)
 
 export default router

@@ -2,8 +2,8 @@ import { HttpClient } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 
-import { UserData } from '../user-service/user-service';
 import { environment } from '../../../../environments/environment';
+import { UserData } from '../user-service/user-service';
 
 @Injectable({
   providedIn: 'root',
@@ -25,22 +25,22 @@ export class AuthService {
     });
   }
 
-  /* resource: /sessions */
+  /* resource: /auth */
   verifySession(): Observable<UserData> {
-    return this.http.get<UserData>(`${this.API_URL}/sessions/me`, {
+    return this.http.get<UserData>(`${this.API_URL}/auth/me`, {
       withCredentials: true,
     });
   }
 
   login(credentials: any): Observable<UserData> {
-    return this.http.post<UserData>(`${this.API_URL}/sessions/login`, credentials, {
+    return this.http.post<UserData>(`${this.API_URL}/auth/login`, credentials, {
       withCredentials: true,
     });
   }
 
   logout(): Observable<void> {
     return this.http.post<void>(
-      `${this.API_URL}/sessions/logout`,
+      `${this.API_URL}/auth/logout`,
       {},
       {
         withCredentials: true,
@@ -51,58 +51,7 @@ export class AuthService {
   /* resource: /otps */
   checkResetStatus(): Observable<{ active: boolean; message: string }> {
     return this.http.get<{ active: boolean; message: string }>(
-      `${this.API_URL}/otps/password-reset/status`,
-      { withCredentials: true },
-    );
-  }
-
-  requestPasswordReset(email: string): Observable<{ message: string }> {
-    return this.http.post<{ message: string }>(`${this.API_URL}/otps/password-reset/request`, {
-      email,
-    });
-  }
-
-  requestEmailVerification(userId: string): Observable<void> {
-    return this.http.post<void>(
-      `${this.API_URL}/otps/email-verification/${userId}`,
-      {},
-      {
-        withCredentials: true,
-      },
-    );
-  }
-
-  checkEmailOtp(userId: string, otp: string): Observable<void> {
-    return this.http.post<void>(
-      `${this.API_URL}/otps/email-verification/check/${userId}`,
-      { otp },
-      {
-        withCredentials: true,
-      },
-    );
-  }
-
-  checkResetOtp(email: string, otp: string): Observable<void> {
-    return this.http.post<void>(
-      `${this.API_URL}/otps/password-reset/check/`,
-      { email, otp },
-      {
-        withCredentials: true,
-      },
-    );
-  }
-
-  resetPassword(
-    email: string,
-    data: { password: string; confirmPassword: string },
-  ): Observable<any> {
-    return this.http.patch(
-      `${this.API_URL}/otps/password-reset/`,
-      {
-        email,
-        newPassword: data.password,
-        confirmPassword: data.confirmPassword,
-      },
+      `${this.API_URL}/otps/password-reset/me`,
       { withCredentials: true },
     );
   }
@@ -118,5 +67,58 @@ export class AuthService {
     return this.http.post<{ message: string }>(`${this.API_URL}/otps/resend`, payload, {
       withCredentials: type === 'VERIFY',
     });
+  }
+
+  requestEmailVerification(): Observable<void> {
+    return this.http.post<void>(
+      `${this.API_URL}/otps/email-verification`,
+      {},
+      {
+        withCredentials: true,
+      },
+    );
+  }
+
+  checkEmailOtp(otp: string): Observable<void> {
+    return this.http.post<void>(
+      `${this.API_URL}/otps/email-verification/check`,
+      { otp },
+      {
+        withCredentials: true,
+      },
+    );
+  }
+
+  requestPasswordReset(email: string): Observable<{ message: string }> {
+    return this.http.post<{ message: string }>(
+      `${this.API_URL}/otps/password-reset/request`,
+      {
+        email,
+      },
+      {
+        withCredentials: true,
+      },
+    );
+  }
+
+  checkResetOtp(otp: string): Observable<void> {
+    return this.http.post<void>(
+      `${this.API_URL}/otps/password-reset/check/`,
+      { otp },
+      {
+        withCredentials: true,
+      },
+    );
+  }
+
+  resetPassword(data: { password: string; confirmPassword: string }): Observable<any> {
+    return this.http.patch(
+      `${this.API_URL}/otps/password-reset/`,
+      {
+        newPassword: data.password,
+        confirmPassword: data.confirmPassword,
+      },
+      { withCredentials: true },
+    );
   }
 }

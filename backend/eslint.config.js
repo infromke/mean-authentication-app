@@ -1,6 +1,6 @@
 import pluginJs from '@eslint/js'
-import tseslint from 'typescript-eslint'
 import eslintConfigPrettier from 'eslint-config-prettier'
+import tseslint from 'typescript-eslint'
 
 export default tseslint.config(
   { files: ['src/**/*.ts'] }, // aplica as configurações em todos os arquivos TypeScript

@@ -1,4 +1,5 @@
 import { z } from 'zod'
+
 import { idSchema } from '../../shared/schemas/common.schema.js'
 
 /* REGRAS de base (compartilhadas entre register e update) */

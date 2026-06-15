@@ -1,23 +1,24 @@
 import bcrypt from 'bcrypt'
 
+import env from '../../config/env.js'
+
 /**
- * Gera uma senha de forma assíncrona.
- * @param {string} password - Senha fornecida.
- * @returns {promise} Senha hasheada.
+ * Gera o hash criptográfico de uma senha de forma assíncrona.
+ * @param password A senha em texto limpo fornecida pelo usuário.
+ * @returns A string do hash criptografado gerado.
  */
 const generatePassword = async (password: string): Promise<string> => {
-  const salt = await bcrypt.genSalt(10)
-  const hash = await bcrypt.hash(password, salt)
-  return hash
+  const salt = await bcrypt.genSalt(env.BCRYPT_SALT_ROUNDS)
+  return await bcrypt.hash(password, salt)
 }
 
 /**
- * Compara senhas de forma assíncrona.
- * @param {string} givenPwd - Senha fornecida.
- * @param {string} storedPwd - Senha armazenada no banco de dados.
- * @returns {promise} true se as senhas coincidirem, caso contrário false.
+ * Compara uma senha em texto limpo com um hash armazenado para verificar a correspondência.
+ * @param plainPassword A senha em texto limpo enviada na requisição atual.
+ * @param hashedPassword O hash da senha recuperado do banco de dados.
+ * @returns True se as senhas coincidirem, caso contrário false.
  */
-const validatePassword = async (givenPwd: string, storedPwd: string): Promise<boolean> =>
-  await bcrypt.compare(givenPwd, storedPwd)
+const validatePassword = async (plainPassword: string, hashedPassword: string): Promise<boolean> =>
+  await bcrypt.compare(plainPassword, hashedPassword)
 
 export { generatePassword, validatePassword }

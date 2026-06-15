@@ -1,15 +1,15 @@
+import env from '../../../config/env.js'
 import type { MailOptions } from '../../../shared/types/mail.types.js'
 import type { OtpType } from '../otp.types.js'
-import env from '../../../config/env.js'
 import getOtpEmailTemplate from '../templates/otpEmail.js'
 import getWelcomeEmailTemplate from '../templates/welcomeEmail.js'
 
 /**
- * Gera o objeto de e-mail para fluxos de OTP (Verify ou Reset).
- * @param {string} email - E-mail do usuário.
- * @param {string} code - Código de OTP gerado.
- * @param {'VERIFY' | 'RESET'} type - Tipo do OTP.
- * @returns {Object} E-mail de código OTP estruturado.
+ * Constrói a configuração e o conteúdo do e-mail para fluxos de autenticação OTP.
+ * @param email O e-mail do destinatário.
+ * @param code O código numérico gerado para a validação.
+ * @param type O propósito do fluxo (verificação de conta ou redefinição de senha).
+ * @returns A estrutura formatada pronta para consumo do Nodemailer.
  */
 const getOtpMailOptions = (email: string, code: string, type: OtpType): MailOptions => {
   const isVerify = type === 'VERIFY'
@@ -25,10 +25,10 @@ const getOtpMailOptions = (email: string, code: string, type: OtpType): MailOpti
 }
 
 /**
- * Gera o objeto de e-mail de boas-vindas.
- * @param {string} name - Nome do usuário.
- * @param {string} email - E-mail do usuário.
- * @returns {Object} E-mail de boas-vindas estruturado.
+ * Constrói a configuração e a mensagem de boas-vindas para novos usuários registrados.
+ * @param name O nome informado pelo usuário no cadastro.
+ * @param email O e-mail de destino do usuário.
+ * @returns A estrutura formatada pronta para consumo do Nodemailer.
  */
 const getWelcomeMailOptions = (name: string, email: string): MailOptions => {
   const firstName = name.split(' ')[0]

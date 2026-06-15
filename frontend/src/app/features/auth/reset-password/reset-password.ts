@@ -1,12 +1,12 @@
-import { Component, inject, signal } from '@angular/core';
-import { Router } from '@angular/router';
+import { Component, inject } from '@angular/core';
 import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { Router } from '@angular/router';
 
-import { CardBody } from '../../../shared/components/card-body/card-body';
-import { InputGroup } from '../../../shared/components/input-group/input-group';
+import { ToastrService } from 'ngx-toastr';
 import { AuthService } from '../../../core/services/auth-service/auth-service';
 import { UserService } from '../../../core/services/user-service/user-service';
-import { ToastrService } from 'ngx-toastr';
+import { CardBody } from '../../../shared/components/card-body/card-body';
+import { InputGroup } from '../../../shared/components/input-group/input-group';
 
 @Component({
   selector: 'app-reset-password',
@@ -29,14 +29,6 @@ export class ResetPassword {
   });
 
   onResetSubmit(): void {
-    const email = this.userService.resetEmail();
-
-    if (!email) {
-      this.toastr.info('Session expired. Request a new code!');
-      this.router.navigate(['/forgot-password']);
-      return;
-    }
-
     if (this.form.invalid) {
       this.form.markAllAsTouched(); // faz aparecer as mensagens de erro nos inputs
       return;
@@ -49,13 +41,18 @@ export class ResetPassword {
       return;
     }
 
-    this.authService.resetPassword(email, formData).subscribe({
+    this.authService.resetPassword(formData).subscribe({
       next: () => {
         this.userService.setResetEmail(null);
         this.toastr.success('Password changed successfully');
         this.router.navigate(['/']); // leva para a página de login
       },
       error: (err) => {
+        if (err.status === 401 || err.status === 403) {
+          this.router.navigate(['/']);
+          this.toastr.info('Your session has timed out. Please try again.');
+          return;
+        }
         this.toastr.error(err.error?.detail);
       },
     });

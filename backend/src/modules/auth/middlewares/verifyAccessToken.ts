@@ -1,8 +1,10 @@
-import type { Request, Response, NextFunction, RequestHandler } from 'express'
-import type { TokenUserPayload } from '../../../shared/types/auth.types.js'
-import env from '../../../config/env.js'
 import jwt from 'jsonwebtoken'
-import throwHttpError from '../../../shared/utils/throwHttpError.js'
+
+import type { NextFunction, Request, RequestHandler, Response } from 'express'
+
+import env from '../../../config/env.js'
+import AppError from '../../../shared/errors/AppError.js'
+import type { TokenUserPayload } from '../../../shared/types/auth.types.js'
 import normalizeJwtError from '../../../shared/utils/normalizeJwtError.js'
 
 const isEnvDev = env.NODE_ENV === 'dev' || env.NODE_ENV === 'development'
@@ -17,13 +19,11 @@ const verifyAccessToken: RequestHandler = (
 ): void => {
   const { accessToken } = req.cookies
 
-  if (!accessToken) throw throwHttpError(401, isEnvDev ? 'Token not found' : 'Access denied')
+  if (!accessToken) throw new AppError(401, isEnvDev ? 'Token not found' : 'Access denied')
 
   try {
     const payload = jwt.verify(accessToken, env.JWT_ACCESS_SECRET) as TokenUserPayload
-
     req.user = { id: payload.id }
-
     next()
   } catch (error: unknown) {
     const formattedError = normalizeJwtError(error)

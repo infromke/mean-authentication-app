@@ -1,7 +1,7 @@
 {
   "name": "auth-server",
   "description": "API Node.js para criação e autenticação de usuários",
-  "version": "2.1.2",
+  "version": "3.0.0",
   "private": true,
   "main": "index.js",
   "type": "module",
@@ -28,6 +28,7 @@
   },
   "devDependencies": {
     "@eslint/js": "10.0.1",
+    "@trivago/prettier-plugin-sort-imports": "6.0.2",
     "@types/bcrypt": "6.0.0",
     "@types/cookie-parser": "1.4.10",
     "@types/cors": "2.8.19",

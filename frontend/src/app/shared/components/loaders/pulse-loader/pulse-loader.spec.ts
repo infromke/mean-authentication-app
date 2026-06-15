@@ -8,9 +8,8 @@ describe('PulseLoader', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [PulseLoader]
-    })
-    .compileComponents();
+      imports: [PulseLoader],
+    }).compileComponents();
 
     fixture = TestBed.createComponent(PulseLoader);
     component = fixture.componentInstance;

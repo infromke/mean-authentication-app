@@ -1,6 +1,8 @@
-import type { Request, Response, NextFunction, RequestHandler } from 'express'
 import { ZodError, type ZodType } from 'zod'
-import throwHttpError from '../utils/throwHttpError.js'
+
+import type { NextFunction, Request, RequestHandler, Response } from 'express'
+
+import AppError from '../errors/AppError.js'
 
 /**
  * Processa os resultados das validações do Zod.
@@ -28,7 +30,7 @@ const handleValidation =
             error: issue.message,
           }
         })
-        throw throwHttpError(400, 'Your request has invalid fields', formattedErrors)
+        throw new AppError(400, 'Your request has invalid fields', undefined, formattedErrors)
       }
 
       next(error) // repassa outros erros
