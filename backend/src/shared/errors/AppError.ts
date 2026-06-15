@@ -5,6 +5,7 @@ class AppError extends Error {
   public readonly code?: number
   public readonly errors?: ZodIssue[] | unknown[] | unknown
   public readonly keyPattern?: Record<string, unknown>
+  public data?: unknown | unknown[] // para qualquer payload extra
 
   constructor(
     status: number = 500,
@@ -25,6 +26,14 @@ class AppError extends Error {
 
     // gera o rastro de arquivos por onde o erro passou, desconsiderando o próprio AppError
     Error.captureStackTrace(this, this.constructor)
+  }
+
+  /**
+   * Encadeia metadados adicionais à instância do erro sem poluir o construtor.
+   */
+  public withData(data: any): this {
+    this.data = data
+    return this
   }
 }
 
