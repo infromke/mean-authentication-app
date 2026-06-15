@@ -6,9 +6,10 @@ type FormattedUser = Omit<IUser, 'password'> & {
 }
 
 /**
- * Filtra e formata os dados do objeto `user`.
- * @param {Object} user - Instância ou objeto bruto do usuário vindo da persistência do MongoDB.
- * @returns {Object} Dados públicos e formatados do usuário.
+ * Mapeia a estrutura de persistência do MongoDB para a assinatura pública da aplicação. Remove
+ * dados sensíveis e padroniza o ID do usuário.
+ * @param user O documento bruto ou instância do usuário originado da persistência.
+ * @returns O objeto do usuário formatado contendo apenas dados públicos.
  */
 const formatUserObject = (user: IUserPersistence): FormattedUser => ({
   id: user._id.toString(),

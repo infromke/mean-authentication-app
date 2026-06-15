@@ -2,7 +2,7 @@ import cache from '../lib/cache.js'
 
 /**
  * Limpa chaves de cache relacionadas a um usuário específico ou listas globais.
- * @param {string} userId - (Opcional) ID do usuário para limpar sessões/perfil.
+ * @param userId ID do usuário para limpar sessões/perfil.
  */
 const clearUserCache = (userId: string | null = null): void => {
   const allCacheKeys = cache.keys()
