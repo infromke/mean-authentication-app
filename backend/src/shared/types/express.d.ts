@@ -1,6 +1,6 @@
 import 'express'
 
-import type { TokenUserPayload } from './auth.types.ts'
+import type { TokenUserPayload } from './auth.types.js'
 
 declare module 'express' {
   interface Request {
