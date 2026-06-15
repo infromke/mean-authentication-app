@@ -139,27 +139,38 @@ class OtpService {
 
   /**
    * Envia o código de redefinição para o usuário e gera o token `resetEmailToken` (de 5 min).
-   * Caso necessário, cria tokens fantasmas (shadow tokens) com um e-mail fictício para
-   * camuflar o tempo de resposta da API.
+   * - `200 OK`: Retorna o token de redefinição gerado;
+   * - `404 Not Found`: Retorna um token fantasma (shadow token) para mitigar user enumeration;
+   * - `409 Conflict`: Anexa um novo token de redefinição aos metadados do erro.
    */
   sendPasswordResetCode = async (filter: FilterQuery<IUserDocument>): Promise<any> => {
+    let userEmailForToken = 'for_security@example.com' // fallback
+
     try {
       const user = await this.#getUserByFilter(filter)
-      await this.#sendCodeEmail(user.id, user.email, 'RESET')
+      userEmailForToken = user.email
 
-      return generateToken({ email: user.email }, env.JWT_RESET_SECRET, '5m')
+      await this.#sendCodeEmail(user.id, userEmailForToken, 'RESET')
+
+      return generateToken({ email: userEmailForToken }, env.JWT_RESET_SECRET, '5m')
     } catch (error: unknown) {
       const isObjectError = error && typeof error === 'object'
 
+      // para camuflar o tempo de resposta da API quando o usuário não existe
       if (isObjectError && 'status' in error && error.status === 404) {
-        // gera um token falso pra gastar o mesmo tempo computacional
-        return generateToken({ email: 'for_security@example.com' }, env.JWT_RESET_SECRET, '5m')
+        return generateToken({ email: userEmailForToken }, env.JWT_RESET_SECRET, '5m')
       }
 
+      // quando o usuário já possui um código ativo, apenas reatribuímos o token de e-mail
       if (isObjectError && 'code' in error && error.code === 11000) {
-        throw new AppError(
-          409,
-          'An active password reset code has already been sent to this account',
+        const recoveryToken = generateToken(
+          { email: userEmailForToken },
+          env.JWT_RESET_SECRET,
+          '5m',
+        )
+
+        throw new AppError(409, 'A code has already been sent to this account').withData(
+          recoveryToken,
         )
       }
 

@@ -1,6 +1,8 @@
-import type { Request, Response } from 'express'
+import type { NextFunction, Request, Response } from 'express'
 
 import env from '../../config/env.js'
+
+import AppError from '../../shared/errors/AppError.js'
 
 import otpService from './otp.service.js'
 import type {
@@ -77,25 +79,43 @@ class OtpController {
 
   /**
    * Solicita a redefinição de senha por e-mail e gera o cookie temporário `resetEmailToken` (de 5 min).
+   * - Em caso de conflito (já existe um código ativo no sistema), intercepta a exceção para
+   * reatribuir o cookie de fluxo pendente e garantir a continuidade da validação no front-end.
    */
   requestPasswordReset = async (
     req: Request<{}, any, RequestResetDTO>,
     res: Response,
-  ): Promise<Response> => {
+    next: NextFunction,
+  ): Promise<void> => {
     const { email } = req.body
 
-    const resetEmailToken = await this.#otpService.sendPasswordResetCode({ email })
+    try {
+      const resetEmailToken = await this.#otpService.sendPasswordResetCode({ email })
 
-    res.cookie('resetEmailToken', resetEmailToken, {
-      httpOnly: true,
-      secure: env.NODE_ENV === 'production', // usar TRUE em HTTPS
-      sameSite: 'lax',
-      maxAge: 5 * 60 * 1000, // 5 minutos
-    })
+      res.cookie('resetEmailToken', resetEmailToken, {
+        httpOnly: true,
+        secure: env.NODE_ENV === 'production', // usar TRUE em HTTPS
+        sameSite: 'lax',
+        maxAge: 5 * 60 * 1000, // 5 minutos
+      })
 
-    return res.status(200).json({
-      message: 'If the e-mail is valid, a code has been sent',
-    })
+      res.status(200).json({
+        message: 'If the e-mail is valid, a code has been sent',
+      })
+
+      return
+    } catch (error: unknown) {
+      if (error instanceof AppError && error.status === 409 && error.data) {
+        res.cookie('resetEmailToken', error.data, {
+          httpOnly: true,
+          secure: env.NODE_ENV === 'production',
+          sameSite: 'lax',
+          maxAge: 5 * 60 * 1000,
+        })
+      }
+
+      return next(error)
+    }
   }
 
   /**
