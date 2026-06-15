@@ -16,11 +16,11 @@ O projeto conta com um ecossistema de gestão de identidades (IAM) que lida com 
 
 A aplicação foi estruturada sob o conceito de Monólito Modular com responsabilidades separadas em uma estrutura em camadas. Também, o projeto possui uma abordagem híbrida onde utiliza Classes Singleton para camadas de persistência e orquestração e funções modulares para utilitários.
 
-- **Modularização por Domínio**: Organização estrita em módulos (User, Session, OTP), onde cada domínio possui seus próprios Controllers, Services, Repositories e Schemas;
+- **Modularização por Domínio**: Organização estrita em módulos (User, Auth, OTP), onde cada domínio possui seus próprios Controllers, Services, Repositories e Schemas;
 - **Padronização RFC 7807 (Problem Details)**: Implementação do padrão IETF para respostas de erro, fornecendo mensagens consistentes e semânticas;
-- **Encadeamento de Middlewares**: Pipeline de execução para sanitização de inputs, proteção de rotas via interceptores JWT e controle de fluxo;
+- **Encadeamento de Middlewares**: Pipeline de execução para sanitização de inputs, proteção de rotas via interceptores e controle de fluxo;
 - **POJO Persistence Pattern**: Camada de persistência otimizada com .lean(), garantindo que a lógica de negócio lide apenas com objetos JavaScript puros, aumentando a performance e previsibilidade;
-- **Pipeline Type-Safe para Erros**: União entre o suporte nativo a erros assíncronos do Express 5 e a palavra-chave "throw" do JavaScript, o que permite o encerramento imediato de fluxos;
+- **Pipeline Type-Safe para Erros**: União entre o suporte nativo a erros assíncronos do Express 5 e a palavra-chave "throw" do JavaScript, permitindo o encerramento imediato de fluxos com suporte a metadados;
 - **Sistema de Tipos Estrito e Defensivo**: Arquitetura configurada sem o uso de "any" e sim "unknown" com Type Narrowing para manipulação dados. Ainda, contratos de dados concentrados em arquivos de definição específicos ou análogos ao seu domínio;
 - **Validação de Infraestrutura Fail-Fast**: Centralização e validação das variáveis de ambiente (process.env) logo na inicialização da API, garantindo que o servidor sequer suba caso falte alguma.
 
@@ -29,8 +29,8 @@ A aplicação foi estruturada sob o conceito de Monólito Modular com responsabi
 ### Back-end (Node.js 22.21, Express 5.2 e TypeScript 6.0)
 
 - **Runtime & Tooling**: `typescript` para checagem estática estrita de tipos, `tsx` para execução em desenvolvimento, além de padronização de código automatizada com `ESLint` e diretrizes de formatação cross-editor via `EditorConfig`;
-- **Security**: `jsonwebtoken` para autenticação Stateless, `bcrypt` para hashing e validação de senhas e `CORS` para políticas de segurança cross-origin;
-- **Session Management**: `cookie-parser` para a manipulação segura de credenciais em cookies;
+- **Security**: `jsonwebtoken` para autenticação Stateless, `bcrypt` com fator de custo dinâmico adaptável ao ambiente (12 em produção, 10 em desenvolvimento) para hashing de senhas e `CORS` para políticas de segurança cross-origin;
+- **Session Management**: `cookie-parser` para a manipulação segura e isolada de credenciais via cookies de navegação;
 - **Resilience**: `node-cache` para redução de latência em dados de sessão e perfil, e `express-rate-limit` implementando a Internet Draft (draft-ietf-httpapi-ratelimit-headers) para evitar bots, sobrecarregamento e brute-force;
 - **Data Validation & Type Inference**: Validação de esquemas e contratos HTTP utilizando `Zod`, com uso estendido para a inferência automática de DTOs nativos via z.infer;
 - **Communication**: `nodemailer` integrado ao SMTP da Brevo para fluxos transacionais de OTP;
@@ -38,19 +38,20 @@ A aplicação foi estruturada sob o conceito de Monólito Modular com responsabi
 
 ### Front-end (Standalone-first Angular 21.1)
 
-- **Dependency Injection (DI)**: Uso extensivo da função inject() em vez de constructors;
+- **Dependency Injection (DI)**: Uso extensivo da função inject() em vez de construtores tradicionais;
 - **State Management**: Uso de Signals para gerenciamento de estado e RxJS (Observables) para fluxos assíncronos complexos;
 - **Forms**: Reactive Forms para a construção de formulários para validações tipadas e detalhadas;
 - **Testing & Quality**: Suíte de testes com `Vitest` e `jsdom` para garantir a confiabilidade dos componentes;
-- **UI/UX**: Estilização modular com `SASS` (SCSS), ícones via `lucide-angular` e feedback com `ngx-toastr`.
+- **UI/UX**: Estilização modular com `SASS` (SCSS), ícones via `lucide-angular` e feedback visual em tempo real com `ngx-toastr`.
 
 ## Funcionalidades
 
-- **Autenticação Stateless**: Login com persistência segura via Cookies HttpOnly/Secure. Implementação de Declaration Merging para acoplar o ciclo de vida do usuário autenticado diretamente ao objeto Request do Express de forma nativa;
-- **Fluxo de Confiança (OTP)**: Verificação de conta e recuperação de senha via One-Time Password, com expiração automática via MongoDB TTL;
+- **Autenticação Stateful baseada em Cookies**: Sessões seguras gerenciadas integralmente via Cookies HTTP-Only/Secure. O front-end delega o ciclo de vida das credenciais ao navegador (withCredentials);
+- **Fluxo de Confiança (OTP)**: Verificação de conta e recuperação de senha via One-Time Password, com expiração automática via MongoDB TTL e inteligência de reatribuição de fluxo pendente em caso de conflitos (409);
 - **Paginação Dinâmica**: Listagem de dados com suporte a size, page e sort, inspirado pelo padrão Spring Data JPA;
 - **Caching Estruturado**: Sistema de cache inteligente que armazena dados já sanitizados e formatados para otimizar a listagem de usuários e busca por ID, verificação de integridade da sessão ativa e validação de status do token de redefinição de senha;
 - **Segurança Proativa**: Proteção contra ataques de força bruta (Rate Limiting por IP) e tratamento especializado de colisões de dados (E11000);
+- **Defesa contra User Enumeration e Timing Attacks**: Camuflagem de respostas em fluxos de autenticação e redefinição de senha, utilizando shadow tokens e respostas agnósticas para impedir que atacantes descubram e-mails cadastrados por análise de tempo ou comportamento da API;
 - **Sanitização RESTful**: Endpoints semânticos com filtragem de campos sensíveis (senha) em todas as respostas da API;
 - **Unificação de Identificadores**: Padronização de identificadores para o formato String (id), ocultando detalhes de implementação do MongoDB (\_id) em toda a camada de transporte (API e Front-end).
 
@@ -109,19 +110,19 @@ As respostas de erro seguem o padrão application/problem+json. Um exemplo de er
   "title": "Bad Request",
   "status": 400,
   "detail": "Your request has invalid fields",
-  "instance": "/sessions/login/",
+  "instance": "/auth/login",
   "errors": [
     {
       "field": "email",
-      "message": "Provide a valid e-mail address"
+      "error": "Provide a valid e-mail address"
     },
     {
       "field": "email",
-      "message": "Email cannot be empty"
+      "error": "Email cannot be empty"
     },
     {
       "field": "password",
-      "message": "Password cannot be empty"
+      "error": "Password cannot be empty"
     }
   ]
 }
@@ -164,6 +165,9 @@ No final de tudo isso, eu aprendi a...
 - Garantir a segurança da API com JWT, CORS, Rate Limiting e HttpOnly Cookies;
 - Construir e-mails XHTML e gerenciar fluxos de e-mail automatizados;
 - Implementar Caching de dados para reduzir a carga no banco de dados e melhorar o tempo de resposta;
+- Projetar e implementar uma arquitetura de autenticação robusta baseada em Cookies HTTP-Only e Stateful Tracking;
+- Mitigar vulnerabilidades de segurança como User Enumeration e Timing Attacks através de shadow tokens e respostas camufladas;
+- Gerenciar fluxos assíncronos e reatividade com RxJS e Observables;
 - Utilizar índices compostos e índices TTL no MongoDB para automação de ciclo de vida de dados;
 - Implementar logging de requisições com o Morgan para examinar seu tráfego em desenvolvimento;
-- Utilizar o Zod para criar esquemas de validação.
+- Utilizar o Zod para criar esquemas de validação de dados e variáveis de ambiente.
