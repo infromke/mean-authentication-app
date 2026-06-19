@@ -1,4 +1,4 @@
-import type { FilterQuery, ProjectionType } from 'mongoose'
+import type { ProjectionType } from 'mongoose'
 
 import env from '../../config/env.js'
 import { sendEmail } from '../../config/nodemailer.js'
@@ -11,10 +11,10 @@ import generateToken from '../../shared/utils/generateToken.js'
 
 import { getWelcomeMailOptions } from '../otp/utils/generateMail.js'
 
-import type { IUser, IUserDocument } from './user.model.js'
+import type { IUser, IUserDocument, IUserPersistence } from './user.model.js'
 import userRepository from './user.repository.js'
 import type { CreateUserDTO } from './user.types.js'
-import formatUserObject from './utils/formatUserObject.js'
+import formatUserObject, { type FormattedUser } from './utils/formatUserObject.js'
 
 const isEnvDev = env.NODE_ENV === 'dev' || env.NODE_ENV === 'development'
 
@@ -70,33 +70,29 @@ class UserService {
   }
 
   /**
-   * Busca um usuário por filtro genérico e condicionalmente formata a resposta.
-   * Se a projeção incluir o "`+password`", ignora a formatação padrão e entrega os dados brutos do usuário.
-   */
-  findByFilter = async (
-    filter: FilterQuery<IUserDocument>,
-    projection: ProjectionType<IUserDocument> = {},
-  ): Promise<any> => {
-    const user = await this.#userRepository.findOne(filter, projection)
-
-    if (!user) throw new AppError(404, 'User not found')
-    if (projection === '+password') return user // retorna o objeto "user" bruto
-
-    return formatUserObject(user)
-  }
-
-  /**
-   * Busca um usuário pelo e-mail sem tratamento de erros (para validações internas de login).
+   * Busca um usuário pelo e-mail, podendo retornar null. O tratamento de erros deve ser interno.
    */
   findByEmail = async (
     email: string,
     projection: ProjectionType<IUserDocument> = {},
-  ): Promise<any | null> => await this.#userRepository.findOne({ email }, projection)
+  ): Promise<IUserPersistence | null> => await this.#userRepository.findOne({ email }, projection)
 
   /**
-   * Busca um usuário por ID utilizando estratégia de Cache-Aside (busca no cache primeiro, depois no banco).
+   * Recupera o documento original e mutável do usuário diretamente da camada de persistência.
    */
-  findById = async (id: string): Promise<any> => {
+  findEntityById = async (id: string): Promise<IUserPersistence> => {
+    const user = await this.#userRepository.findById(id)
+
+    if (!user)
+      throw new AppError(404, isEnvDev ? `User with ID '${id}' not found` : 'User not found')
+
+    return user
+  }
+
+  /**
+   * Recupera a projeção pública e higienizada (sem senha) do usuário utilizando a estratégia Cache-Aside.
+   */
+  getSummaryById = async (id: string): Promise<FormattedUser> => {
     const cacheKey = `user_id_${id}`
 
     // tenta buscar o resultado da requisição no cache primeiro
@@ -104,11 +100,7 @@ class UserService {
     if (cachedData) return cachedData
 
     // se não houver cache, executa a lógica normal abaixo
-    const user = await this.#userRepository.findById(id)
-
-    if (!user)
-      throw new AppError(404, isEnvDev ? `User with ID '${id}' not found` : 'User not found')
-
+    const user = await this.findEntityById(id)
     const formattedUser = formatUserObject(user)
 
     cache.set(cacheKey, formattedUser) // salva os dados no cache
@@ -121,41 +113,40 @@ class UserService {
    */
   createUser = async (
     data: CreateUserDTO,
-  ): Promise<{ formattedUser: any; accessToken: string }> => {
-    const user = await this.#userRepository.create(data)
+  ): Promise<{ newUser: FormattedUser; accessToken: string }> => {
+    const rawUser = await this.#userRepository.create(data)
 
-    const userIdString = user._id.toString()
-    const accessToken = generateToken({ id: userIdString }, env.JWT_ACCESS_SECRET, '1d')
+    const accessToken = generateToken({ id: rawUser._id.toString() }, env.JWT_ACCESS_SECRET, '1d')
     await sendEmail(getWelcomeMailOptions(data.name, data.email))
 
-    clearUserCache() // limpa o cache para não retornar dados ultrapassados no próximo GET
-    return { formattedUser: formatUserObject(user), accessToken }
+    clearUserCache()
+    return { newUser: formatUserObject(rawUser), accessToken }
   }
 
   /**
    * Atualiza parcialmente os dados do usuário e invalida seus caches específicos por ID.
    */
-  updateUser = async (id: string, data: Partial<IUser>): Promise<any> => {
-    const user = await this.#userRepository.updateById(id, data)
+  updateUser = async (id: string, data: Partial<IUser>): Promise<FormattedUser> => {
+    const updatedUser = await this.#userRepository.updateById(id, data)
 
-    if (!user)
+    if (!updatedUser) {
       throw new AppError(404, isEnvDev ? `User with ID '${id}' not found` : 'User not found')
+    }
 
-    const formattedUser = formatUserObject(user)
-    clearUserCache(id) // limpa o cache para não retornar dados ultrapassados no próximo GET
-    return formattedUser
+    clearUserCache(id)
+    return formatUserObject(updatedUser)
   }
 
   /**
    * Remove permanentemente o usuário do banco e limpa todas as suas entradas de cache ativas.
    */
   deleteUser = async (id: string): Promise<void> => {
-    const user = await this.#userRepository.deleteById(id)
+    const deletedUser = await this.#userRepository.deleteById(id)
 
-    if (!user)
+    if (!deletedUser)
       throw new AppError(404, isEnvDev ? `User with ID '${id}' not found` : 'User not found')
 
-    clearUserCache(id) // limpa o cache para não retornar dados ultrapassados no próximo GET
+    clearUserCache(id)
   }
 }
 
