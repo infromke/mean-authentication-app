@@ -38,7 +38,7 @@ class OtpController {
   ): Promise<Response> => {
     const { type } = req.body
 
-    const filter = type === 'VERIFY' ? { _id: req.user!.id } : { email: res.locals.reset['email'] }
+    const filter = type === 'VERIFY' ? req.user!.id : res.locals.reset['email']
 
     await this.#otpService.resendOtpCode(type, filter)
     return res.status(200).json({
@@ -90,7 +90,7 @@ class OtpController {
     const { email } = req.body
 
     try {
-      const resetEmailToken = await this.#otpService.sendPasswordResetCode({ email })
+      const resetEmailToken = await this.#otpService.sendPasswordResetCode(email)
 
       res.cookie('resetEmailToken', resetEmailToken, {
         httpOnly: true,
@@ -129,7 +129,7 @@ class OtpController {
     const { otp } = req.body
     const { email } = res.locals.reset
 
-    const passwordToken = await this.#otpService.confirmPasswordResetCode({ email }, otp)
+    const passwordToken = await this.#otpService.confirmPasswordResetCode(email, otp)
 
     res.clearCookie('resetEmailToken', {
       httpOnly: true,
@@ -163,7 +163,7 @@ class OtpController {
     const { newPassword } = req.body
     const { email } = res.locals.reset
 
-    await this.#otpService.resetUserPassword({ email }, newPassword)
+    await this.#otpService.resetUserPassword(email, newPassword)
 
     res.clearCookie('passwordToken', {
       httpOnly: true,

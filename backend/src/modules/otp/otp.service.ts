@@ -1,4 +1,4 @@
-import type { FilterQuery, ProjectionType } from 'mongoose'
+import type { ProjectionType } from 'mongoose'
 
 import env from '../../config/env.js'
 import { sendEmail } from '../../config/nodemailer.js'
@@ -8,13 +8,16 @@ import cache from '../../shared/lib/cache.js'
 import clearUserCache from '../../shared/utils/clearUserCache.js'
 import generateToken from '../../shared/utils/generateToken.js'
 
-import type { IUser, IUserDocument } from '../user/user.model.js'
+import type { IUserDocument, IUserPersistence } from '../user/user.model.js'
 import userService from '../user/user.service.js'
+import type { FormattedUser } from '../user/utils/formatUserObject.js'
 
 import otpRepository from './otp.repository.js'
 import type { OtpType } from './otp.types.js'
 import { getOtpMailOptions } from './utils/generateMail.js'
 import { createOtpOptions } from './utils/generateOtp.js'
+
+const isEnvDev = env.NODE_ENV === 'dev' || env.NODE_ENV === 'development'
 
 class OtpService {
   #otpRepository: typeof otpRepository
@@ -29,13 +32,18 @@ class OtpService {
   }
 
   /**
-   * Encapsula a busca de usuários.
+   * Encapsula a busca de usuários com projeção. Retorna a entidade bruta do usuário no banco de dados.
    */
-  #getUserByFilter = async (
-    filter: FilterQuery<IUser>,
+  #getUserByEmail = async (
+    email: string,
     projection: ProjectionType<IUserDocument> | {} = {},
-  ): Promise<any> => {
-    return await this.#userService.findByFilter(filter, projection)
+  ): Promise<IUserPersistence> => {
+    const user = await this.#userService.findByEmail(email, projection)
+
+    if (!user)
+      throw new AppError(404, isEnvDev ? `User with e-mail ${email} not found` : 'User not found')
+
+    return user
   }
 
   /**
@@ -60,6 +68,14 @@ class OtpService {
   }
 
   /**
+   * Checa a tipagem do objeto User e a reconhece em sua forma bruta (`IUserPersistence`)
+   * ou higienizada (`FormattedUser`).
+   */
+  #isUserPersistenceEntity = (user: IUserPersistence | FormattedUser): user is IUserPersistence => {
+    return '_id' in user
+  }
+
+  /**
    * Retorna o status da sessão de redefinição de senha, lendo e salvando o estado em cache.
    */
   getPasswordResetStatus = (token: string): any => {
@@ -81,19 +97,23 @@ class OtpService {
    * Reenvia o código OTP controlando concorrência através de trava curta de cooldown (60 segundos).
    * Silencia falhas de enumeração caso o fluxo em andamento seja o de redefinição de senha.
    */
-  resendOtpCode = async (type: OtpType, filter: FilterQuery<IUserDocument>): Promise<void> => {
+  resendOtpCode = async (type: OtpType, identifier: string): Promise<void> => {
     try {
-      const user = await this.#getUserByFilter(filter)
+      const user = identifier.includes('@')
+        ? await this.#getUserByEmail(identifier)
+        : await this.#userService.getSummaryById(identifier)
+
+      const userId = this.#isUserPersistenceEntity(user) ? user._id.toString() : user.id
 
       // verifica se o cooldown de 60s está ativo
-      const cooldownKey = `otp_cooldown_${type}_${user.id}`
+      const cooldownKey = `otp_cooldown_${type}_${userId}`
       if (cache.has(cooldownKey)) throw new AppError(429, 'Wait 60s before requesting a new code')
 
       // deleta o OTP previamente gerado
-      await this.#otpRepository.deleteOne(user.id, type)
+      await this.#otpRepository.deleteOne(userId, type)
 
-      if (type === 'VERIFY') await this.sendEmailVerificationCode(user.id)
-      else await this.sendPasswordResetCode({ email: user.email })
+      if (type === 'VERIFY') await this.sendEmailVerificationCode(userId)
+      else await this.sendPasswordResetCode(user.email)
 
       cache.set(cooldownKey, true, 60) // ativa o cooldown no cache
     } catch (error: unknown) {
@@ -109,7 +129,7 @@ class OtpService {
    * se o e-mail já estiver verificado.
    */
   sendEmailVerificationCode = async (id: string): Promise<void> => {
-    const user = await this.#userService.findById(id)
+    const user = await this.#userService.getSummaryById(id)
 
     if (user.isAccountVerified) throw new AppError(403, 'Account has already been verified')
 
@@ -128,7 +148,7 @@ class OtpService {
    * Confirma a verificação do e-mail, altera o estado do usuário no banco e limpa caches de sessão antigos.
    */
   confirmEmailVerification = async (id: string, otpCode: string): Promise<void> => {
-    const user = await this.#userService.findById(id)
+    const user = await this.#userService.getSummaryById(id)
     if (user.isAccountVerified) throw new AppError(403, 'Account has already been verified')
 
     await this.#validateCode(user.id, otpCode, 'VERIFY')
@@ -143,14 +163,14 @@ class OtpService {
    * - `404 Not Found`: Retorna um token fantasma (shadow token) para mitigar user enumeration;
    * - `409 Conflict`: Anexa um novo token de redefinição aos metadados do erro.
    */
-  sendPasswordResetCode = async (filter: FilterQuery<IUserDocument>): Promise<any> => {
+  sendPasswordResetCode = async (email: string): Promise<any> => {
     let userEmailForToken = 'for_security@example.com' // fallback
 
     try {
-      const user = await this.#getUserByFilter(filter)
+      const user = await this.#getUserByEmail(email)
       userEmailForToken = user.email
 
-      await this.#sendCodeEmail(user.id, userEmailForToken, 'RESET')
+      await this.#sendCodeEmail(user._id.toString(), userEmailForToken, 'RESET')
 
       return generateToken({ email: userEmailForToken }, env.JWT_RESET_SECRET, '5m')
     } catch (error: unknown) {
@@ -181,13 +201,10 @@ class OtpService {
   /**
    * Valida o código OTP e gera o token `passwordToken` (de 15 min) que libera a troca de senha.
    */
-  confirmPasswordResetCode = async (
-    filter: FilterQuery<IUserDocument>,
-    otpCode: string,
-  ): Promise<string> => {
+  confirmPasswordResetCode = async (email: string, otpCode: string): Promise<string> => {
     try {
-      const user = await this.#getUserByFilter(filter)
-      await this.#validateCode(user.id, otpCode, 'RESET')
+      const user = await this.#getUserByEmail(email)
+      await this.#validateCode(user._id.toString(), otpCode, 'RESET')
       return generateToken({ email: user.email }, env.JWT_RESET_SECRET, '15m')
     } catch (error) {
       if (error && typeof error === 'object' && 'status' in error && error.status === 404) {
@@ -201,14 +218,9 @@ class OtpService {
   /**
    * Persiste as novas credenciais do usuário e invalida imediatamente todos os caches vinculados ao ID.
    */
-  resetUserPassword = async (
-    filter: FilterQuery<IUserDocument>,
-    password: string,
-  ): Promise<void> => {
-    const user = await this.#getUserByFilter(filter, '+password') // recebe um objeto user não formatado
-    await this.#userService.updateUser(user._id, { password })
-    const userIdString = user._id.toString()
-    clearUserCache(userIdString) // limpa o cache para não retornar dados ultrapassados no próximo GET
+  resetUserPassword = async (email: string, password: string): Promise<void> => {
+    const user = await this.#getUserByEmail(email, '+password')
+    await this.#userService.updateUser(user._id.toString(), { password })
   }
 }
 
