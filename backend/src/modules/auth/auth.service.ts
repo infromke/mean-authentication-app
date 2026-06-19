@@ -33,8 +33,8 @@ class AuthService {
     if (cachedData) return cachedData
 
     // se não houver cache, executa a lógica normal abaixo
-    const user = await this.#userService.findById(id)
-    cache.set(cacheKey, user, 120) // salva os dados no cache com TTL de 2 min
+    const user = await this.#userService.getSummaryById(id)
+    cache.set(cacheKey, user, 120)
     return user
   }
 
@@ -48,9 +48,8 @@ class AuthService {
     const user = await this.#userService.findByEmail(credentials.email, '+password') // pode retornar null
 
     // usa a senha do usuário mesmo ou uma falsa (para gastar o mesmo tempo computacional)
-    const passwordToValidate = user
-      ? user.password
-      : '$2a$10$EBj1t.NspLYcG8p/Qts4Bue35p1NCIR29jNwtF0P29eVKxRV2s5cm'
+    const passwordToValidate =
+      user?.password ?? '$2a$10$EBj1t.NspLYcG8p/Qts4Bue35p1NCIR29jNwtF0P29eVKxRV2s5cm'
 
     const isPasswordValid = await validatePassword(credentials.password, passwordToValidate)
 
@@ -61,8 +60,8 @@ class AuthService {
     const userIdString = user._id.toString()
     const accessToken = generateToken({ id: userIdString }, env.JWT_ACCESS_SECRET, '1d')
 
-    clearUserCache(user._id) // limpa o cache para não retornar dados ultrapassados
-    return { user: formatUserObject(user), accessToken } // formata o objeto user para não expor a senha
+    clearUserCache(userIdString)
+    return { user: formatUserObject(user), accessToken }
   }
 
   /**
