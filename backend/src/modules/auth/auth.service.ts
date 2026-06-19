@@ -7,7 +7,7 @@ import generateToken from '../../shared/utils/generateToken.js'
 import { validatePassword } from '../../shared/utils/hash.js'
 
 import userService from '../user/user.service.js'
-import formatUserObject from '../user/utils/formatUserObject.js'
+import formatUserObject, { type FormattedUser } from '../user/utils/formatUserObject.js'
 
 // interface para os dados de login do usuário
 interface UserCredentials {
@@ -25,11 +25,11 @@ class AuthService {
   /**
    * Busca os detalhes da sessão ativa do usuário com TTL curto de cache (2 minutos).
    */
-  getAuthenticatedUser = async (id: string): Promise<any> => {
+  getAuthenticatedUser = async (id: string): Promise<FormattedUser> => {
     const cacheKey = `user_session_${id}`
 
     // tenta buscar o resultado da requisição no cache primeiro
-    const cachedData = cache.get(cacheKey) as any | undefined
+    const cachedData = cache.get(cacheKey) as FormattedUser | undefined
     if (cachedData) return cachedData
 
     // se não houver cache, executa a lógica normal abaixo
@@ -44,7 +44,7 @@ class AuthService {
    */
   authenticate = async (
     credentials: UserCredentials,
-  ): Promise<{ user: any; accessToken: string }> => {
+  ): Promise<{ user: FormattedUser; accessToken: string }> => {
     const user = await this.#userService.findByEmail(credentials.email, '+password') // pode retornar null
 
     // usa a senha do usuário mesmo ou uma falsa (para gastar o mesmo tempo computacional)

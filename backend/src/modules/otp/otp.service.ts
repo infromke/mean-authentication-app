@@ -19,6 +19,12 @@ import { createOtpOptions } from './utils/generateOtp.js'
 
 const isEnvDev = env.NODE_ENV === 'dev' || env.NODE_ENV === 'development'
 
+// interface dedicada para o método getPasswordResetStatus
+interface PasswordResetStatus {
+  active: boolean
+  message: string
+}
+
 class OtpService {
   #otpRepository: typeof otpRepository
   #userService: typeof userService
@@ -78,18 +84,18 @@ class OtpService {
   /**
    * Retorna o status da sessão de redefinição de senha, lendo e salvando o estado em cache.
    */
-  getPasswordResetStatus = (token: string): any => {
+  getPasswordResetStatus = (token: string): PasswordResetStatus => {
     const identifier = token.split('.')[1]
     const cacheKey = `password_reset_${identifier}`
 
     // tenta buscar o resultado da requisição no cache primeiro
-    const cachedData = cache.get(cacheKey) as any | undefined
+    const cachedData = cache.get(cacheKey) as PasswordResetStatus | undefined
     if (cachedData) return cachedData
 
     // se não houver cache, executa a lógica normal abaixo
     const resetStatus = { active: true, message: 'The password reset session is active' }
 
-    cache.set(cacheKey, resetStatus) // salva os dados no cache
+    cache.set(cacheKey, resetStatus)
     return resetStatus
   }
 
@@ -163,7 +169,7 @@ class OtpService {
    * - `404 Not Found`: Retorna um token fantasma (shadow token) para mitigar user enumeration;
    * - `409 Conflict`: Anexa um novo token de redefinição aos metadados do erro.
    */
-  sendPasswordResetCode = async (email: string): Promise<any> => {
+  sendPasswordResetCode = async (email: string): Promise<string> => {
     let userEmailForToken = 'for_security@example.com' // fallback
 
     try {

@@ -31,7 +31,7 @@ class AppError extends Error {
   /**
    * Encadeia metadados adicionais à instância do erro sem poluir o construtor.
    */
-  public withData(data: any): this {
+  public withData(data: unknown | unknown[]): this {
     this.data = data
     return this
   }

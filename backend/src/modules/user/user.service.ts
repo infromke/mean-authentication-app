@@ -96,14 +96,14 @@ class UserService {
     const cacheKey = `user_id_${id}`
 
     // tenta buscar o resultado da requisição no cache primeiro
-    const cachedData = cache.get(cacheKey) as any | undefined
+    const cachedData = cache.get(cacheKey) as FormattedUser | undefined
     if (cachedData) return cachedData
 
     // se não houver cache, executa a lógica normal abaixo
     const user = await this.findEntityById(id)
     const formattedUser = formatUserObject(user)
 
-    cache.set(cacheKey, formattedUser) // salva os dados no cache
+    cache.set(cacheKey, formattedUser)
     return formattedUser
   }
 
