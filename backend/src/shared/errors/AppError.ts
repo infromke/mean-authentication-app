@@ -1,25 +1,27 @@
 import type { ZodIssue } from 'zod'
 
+type ErrorMessage = string | [publicInfo: string, debugInfo: string]
+
 class AppError extends Error {
   public readonly status: number
-  public readonly code?: number
+  public readonly code?: string
   public readonly errors?: ZodIssue[] | unknown[] | unknown
-  public readonly keyPattern?: Record<string, unknown>
+  public readonly debug?: string
   public data?: unknown | unknown[] // para qualquer payload extra
 
   constructor(
     status: number = 500,
-    message: string = 'Internal Server Error',
-    code?: number,
+    message: ErrorMessage = 'Internal Server Error',
+    code?: string,
     errors?: ZodIssue[] | unknown[] | unknown,
-    keyPattern?: Record<string, unknown>,
   ) {
-    super(message)
+    const isArray = Array.isArray(message)
+    super(isArray ? message[0] : message)
 
     this.status = status
     this.errors = errors
+    if (isArray && message[1]) this.debug = message[1]
     if (code) this.code = code
-    if (keyPattern) this.keyPattern = keyPattern
 
     // garante que o JS reconheça que o AppError é filho de Error e não o próprio Error
     Object.setPrototypeOf(this, new.target.prototype)
