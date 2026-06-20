@@ -26,6 +26,14 @@ interface RFC7807Response {
   stack?: string
 }
 
+/**
+ * Transforma uma exceção capturada em uma estrutura de resposta padronizada em conformidade estrita
+ * com a RFC 7807 (Problem Details). Modifica dinamicamente o campo `detail` e anexa metadados
+ * adicionais como a `stack` trace se o ambiente de execução atual for "development".
+ * @param err O erro original capturado no pipeline da aplicação.
+ * @param originalUrl O endpoint HTTP (`req.originalUrl`) onde a exceção ocorreu, mapeado para a propriedade `instance`.
+ * @returns Um objeto contendo o status HTTP final e o corpo da resposta estruturado de acordo com a RFC 7807.
+ */
 const formatProblemDetails = (err: Error | AppError, originalUrl: string) => {
   const isAppError = err instanceof AppError
 
