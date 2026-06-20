@@ -17,8 +17,6 @@ import type { OtpType } from './otp.types.js'
 import { getOtpMailOptions } from './utils/generateMail.js'
 import { createOtpOptions } from './utils/generateOtp.js'
 
-const isEnvDev = env.NODE_ENV === 'dev' || env.NODE_ENV === 'development'
-
 // interface dedicada para o método getPasswordResetStatus
 interface PasswordResetStatus {
   active: boolean
@@ -46,8 +44,7 @@ class OtpService {
   ): Promise<IUserPersistence> => {
     const user = await this.#userService.findByEmail(email, projection)
 
-    if (!user)
-      throw new AppError(404, isEnvDev ? `User with e-mail ${email} not found` : 'User not found')
+    if (!user) throw new AppError(404, ['User not found', `User with e-mail ${email} not found`])
 
     return user
   }

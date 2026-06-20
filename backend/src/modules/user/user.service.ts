@@ -16,8 +16,6 @@ import userRepository from './user.repository.js'
 import type { CreateUserDTO } from './user.types.js'
 import formatUserObject, { type FormattedUser } from './utils/formatUserObject.js'
 
-const isEnvDev = env.NODE_ENV === 'dev' || env.NODE_ENV === 'development'
-
 class UserService {
   #userRepository: typeof userRepository
 
@@ -83,8 +81,7 @@ class UserService {
   findEntityById = async (id: string): Promise<IUserPersistence> => {
     const user = await this.#userRepository.findById(id)
 
-    if (!user)
-      throw new AppError(404, isEnvDev ? `User with ID '${id}' not found` : 'User not found')
+    if (!user) throw new AppError(404, ['User not found', `User with ID '${id}' not found`])
 
     return user
   }
@@ -114,8 +111,13 @@ class UserService {
   createUser = async (
     data: CreateUserDTO,
   ): Promise<{ newUser: FormattedUser; accessToken: string }> => {
-    const rawUser = await this.#userRepository.create(data)
+    // verifica se o usuário já existe
+    const existingUser = await this.findByEmail(data.email)
 
+    if (existingUser)
+      throw new AppError(409, 'The provided e-mail is already in use', 'EMAIL_ALREADY_IN_USE')
+
+    const rawUser = await this.#userRepository.create(data)
     const accessToken = generateToken({ id: rawUser._id.toString() }, env.JWT_ACCESS_SECRET, '1d')
     await sendEmail(getWelcomeMailOptions(data.name, data.email))
 
@@ -127,11 +129,15 @@ class UserService {
    * Atualiza parcialmente os dados do usuário e invalida seus caches específicos por ID.
    */
   updateUser = async (id: string, data: Partial<IUser>): Promise<FormattedUser> => {
-    const updatedUser = await this.#userRepository.updateById(id, data)
-
-    if (!updatedUser) {
-      throw new AppError(404, isEnvDev ? `User with ID '${id}' not found` : 'User not found')
+    // verifica se o usuário já existe
+    if (data.email) {
+      const existingUser = await this.findByEmail(data.email)
+      if (existingUser)
+        throw new AppError(409, 'The provided e-mail is already in use', 'EMAIL_ALREADY_IN_USE')
     }
+
+    const updatedUser = await this.#userRepository.updateById(id, data)
+    if (!updatedUser) throw new AppError(404, ['User not found', `User with ID '${id}' not found`])
 
     clearUserCache(id)
     return formatUserObject(updatedUser)
@@ -143,8 +149,7 @@ class UserService {
   deleteUser = async (id: string): Promise<void> => {
     const deletedUser = await this.#userRepository.deleteById(id)
 
-    if (!deletedUser)
-      throw new AppError(404, isEnvDev ? `User with ID '${id}' not found` : 'User not found')
+    if (!deletedUser) throw new AppError(404, ['User not found', `User with ID '${id}' not found`])
 
     clearUserCache(id)
   }
