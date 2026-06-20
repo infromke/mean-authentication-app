@@ -129,14 +129,25 @@ class UserService {
    * Atualiza parcialmente os dados do usuário e invalida seus caches específicos por ID.
    */
   updateUser = async (id: string, data: Partial<IUser>): Promise<FormattedUser> => {
+    // cópia do payload só pra gerenciar mutações de estado sem alterar o original
+    const updatePayload: Partial<IUser> = { ...data }
+
     // verifica se o usuário já existe
     if (data.email) {
       const existingUser = await this.findByEmail(data.email)
-      if (existingUser)
+
+      // lança um erro se o e-mail pertence a OUTRO usuário
+      if (existingUser && existingUser._id.toString() !== id) {
         throw new AppError(409, 'The provided e-mail is already in use', 'EMAIL_ALREADY_IN_USE')
+      }
+
+      // se o e-mail é de fato novo, o estado de verificado é revertido
+      if (!existingUser || existingUser._id.toString() === id) {
+        updatePayload.isAccountVerified = false
+      }
     }
 
-    const updatedUser = await this.#userRepository.updateById(id, data)
+    const updatedUser = await this.#userRepository.updateById(id, updatePayload)
     if (!updatedUser) throw new AppError(404, ['User not found', `User with ID '${id}' not found`])
 
     clearUserCache(id)
