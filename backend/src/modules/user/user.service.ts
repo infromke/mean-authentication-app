@@ -1,15 +1,13 @@
 import type { ProjectionType } from 'mongoose'
 
 import env from '../../config/env.js'
-import { sendEmail } from '../../config/nodemailer.js'
 
 import AppError from '../../shared/errors/AppError.js'
 import cache from '../../shared/lib/cache.js'
+import mailService from '../../shared/mail/mail.service.js'
 import type { ListQuery, PaginationResult } from '../../shared/types/pagination.types.js'
 import clearUserCache from '../../shared/utils/clearUserCache.js'
 import generateToken from '../../shared/utils/generateToken.js'
-
-import { getWelcomeMailOptions } from '../otp/utils/generateMail.js'
 
 import type { IUser, IUserDocument, IUserPersistence } from './user.model.js'
 import userRepository from './user.repository.js'
@@ -18,9 +16,14 @@ import formatUserObject, { type FormattedUser } from './utils/formatUserObject.j
 
 class UserService {
   #userRepository: typeof userRepository
+  #mailService: typeof mailService
 
-  constructor(userRepositoryInstance: typeof userRepository) {
+  constructor(
+    userRepositoryInstance: typeof userRepository,
+    mailServiceInstance: typeof mailService,
+  ) {
     this.#userRepository = userRepositoryInstance
+    this.#mailService = mailServiceInstance
   }
 
   /**
@@ -147,8 +150,7 @@ class UserService {
 
     const rawUser = await this.#userRepository.create(data)
     const accessToken = generateToken({ id: rawUser._id.toString() }, env.JWT_ACCESS_SECRET, '1d')
-    await sendEmail(getWelcomeMailOptions(data.name, data.email))
-
+    await this.#mailService.sendWelcomeEmail(data.name, data.email)
     clearUserCache()
     return { newUser: formatUserObject(rawUser), accessToken }
   }
@@ -194,4 +196,4 @@ class UserService {
   }
 }
 
-export default new UserService(userRepository)
+export default new UserService(userRepository, mailService)

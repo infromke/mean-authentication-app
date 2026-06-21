@@ -1,10 +1,10 @@
 import type { ProjectionType } from 'mongoose'
 
 import env from '../../config/env.js'
-import { sendEmail } from '../../config/nodemailer.js'
 
 import AppError from '../../shared/errors/AppError.js'
 import cache from '../../shared/lib/cache.js'
+import mailService from '../../shared/mail/mail.service.js'
 import clearUserCache from '../../shared/utils/clearUserCache.js'
 import generateToken from '../../shared/utils/generateToken.js'
 
@@ -14,7 +14,6 @@ import type { FormattedUser } from '../user/utils/formatUserObject.js'
 
 import otpRepository from './otp.repository.js'
 import type { OtpType } from './otp.types.js'
-import { getOtpMailOptions } from './utils/generateMail.js'
 import { createOtpOptions } from './utils/generateOtp.js'
 
 // interface dedicada para o método getPasswordResetStatus
@@ -26,13 +25,16 @@ interface PasswordResetStatus {
 class OtpService {
   #otpRepository: typeof otpRepository
   #userService: typeof userService
+  #mailService: typeof mailService
 
   constructor(
     otpRepositoryInstance: typeof otpRepository,
     userServiceInstance: typeof userService,
+    mailServiceInstance: typeof mailService,
   ) {
     this.#otpRepository = otpRepositoryInstance
     this.#userService = userServiceInstance
+    this.#mailService = mailServiceInstance
   }
 
   /**
@@ -55,7 +57,11 @@ class OtpService {
   #sendCodeEmail = async (userId: string, userEmail: string, otpType: OtpType): Promise<void> => {
     const otpOptions = createOtpOptions(userId, otpType)
     const newOtp = await this.#otpRepository.create(otpOptions)
-    await sendEmail(getOtpMailOptions(userEmail, newOtp.code, otpType))
+    await this.#mailService.sendOtpEmail(
+      userEmail,
+      newOtp.code,
+      otpType === 'VERIFY' ? 'verification' : 'password reset',
+    )
   }
 
   /**
@@ -227,4 +233,4 @@ class OtpService {
   }
 }
 
-export default new OtpService(otpRepository, userService)
+export default new OtpService(otpRepository, userService, mailService)

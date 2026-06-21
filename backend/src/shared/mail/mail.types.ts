@@ -5,3 +5,5 @@ export interface MailOptions {
   text: string
   html: string
 }
+
+export type MailOtpType = 'verification' | 'password reset'

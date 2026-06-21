@@ -6,9 +6,9 @@ import express, { type NextFunction, type Request, type Response } from 'express
 import cors from './config/cors.js'
 import connectToDb from './config/database.js'
 import env from './config/env.js'
-import { verifyConnection } from './config/nodemailer.js'
 import GlobalRouter from './modules/routes.js'
 import AppError from './shared/errors/AppError.js'
+import mailService from './shared/mail/mail.service.js'
 import errorHandler from './shared/middlewares/errorHandler.js'
 
 //  config
@@ -17,7 +17,7 @@ const app = express()
 app.set('trust proxy', 1) // habilita o reconhecimento do IP real do usuário
 
 connectToDb()
-verifyConnection() // verifica a conexão do nodemailer
+mailService.verifyConnection() // verifica a conexão do nodemailer
 
 app.use(express.json())
 app.use(cors)
