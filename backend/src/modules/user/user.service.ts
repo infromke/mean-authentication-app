@@ -34,18 +34,46 @@ class UserService {
     if (cachedData) return cachedData
 
     // se não houver cache, executa a lógica normal abaixo
-    const page = Math.max(0, parseInt(query.page || '0', 0))
-    const size = Math.max(1, parseInt(query.size || '10', 10))
-    const sortParam = query.sort || 'createdAt,desc'
+    const search = query.search?.trim()
+    const verified = query.verified ? query.verified === 'true' : undefined
 
-    // parse do sort
-    const [field, direction] = sortParam.split(',')
-    const sortOrder = direction === 'desc' ? -1 : 1
+    // fallback para evitar valores vazios
+    const rawPage = parseInt(query.page || '0', 10)
+    const rawSize = parseInt(query.size || '10', 10)
+
+    // evita NaN e limita 50 itens para size
+    const page = Math.max(0, isNaN(rawPage) ? 0 : rawPage)
+    const size = Math.max(1, Math.min(50, isNaN(rawSize) ? 10 : rawSize))
+
+    // parse do sort com padrão "createdAt,desc"
+    const sortParts = query.sort || 'createdAt,desc'
+    const [sortProperty, sortDirection] = sortParts.toLowerCase().split(',')
+
+    const sortOrder = sortDirection === 'asc' ? 1 : -1
+    let sortField: string
+
+    // valida e define as propriedades após o toLowerCase()
+    switch (sortProperty) {
+      case 'id':
+        sortField = '_id' // traduz para o padrão do MongoDB
+        break
+
+      case 'name':
+        sortField = 'name'
+        break
+
+      case 'createdat':
+      default:
+        sortField = 'createdAt'
+        break
+    }
 
     const { users, totalElements } = await this.#userRepository.findAll({
+      search,
+      verified,
       page,
       size,
-      sortField: field || 'createdAt',
+      sortField,
       sortOrder,
     })
 
@@ -55,7 +83,7 @@ class UserService {
     const paginationData: PaginationResult = {
       content: users.map((user) => formatUserObject(user)),
       first: page === 0,
-      last: page >= totalPages - 1,
+      last: page >= (totalPages === 0 ? 0 : totalPages - 1),
       number: page,
       numberOfElements: users.length,
       size,
@@ -63,7 +91,7 @@ class UserService {
       totalPages,
     }
 
-    cache.set(cacheKey, paginationData) // salva os dados no cache
+    cache.set(cacheKey, paginationData)
     return paginationData
   }
 
