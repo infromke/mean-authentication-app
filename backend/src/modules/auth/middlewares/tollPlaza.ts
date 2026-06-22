@@ -23,6 +23,7 @@ const fullLock = [
   verifyOwnership,
   isAccountVerified,
 ]
+
 /**
  * Roteia a verificação do token baseado no tipo do OTP ("VERIFY" ou "RESET").
  */
