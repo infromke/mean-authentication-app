@@ -92,8 +92,8 @@ router.get('/password-reset/me', verifyPasswordToken, identityController.checkRe
 router.post(
   '/resend',
   otpSendLimiter,
-  dynamicOtpAuth,
   handleValidation(resendOtpSchema),
+  dynamicOtpAuth,
   identityController.resendOtpCode,
 )
 
