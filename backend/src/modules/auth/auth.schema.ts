@@ -61,9 +61,11 @@ export const resetPasswordBodySchema = z
 
 // POST /auth/resend
 export const resendOtpBodySchema = z.object({
-  type: z.enum(OTP_TYPES, {
-    error: 'Invalid OTP type',
-  }),
+  type: z
+    .string({ error: 'OTP type is required' })
+    .trim()
+    .transform((val) => val.toUpperCase()) // padroniza para letras maiúsculas
+    .pipe(z.enum(OTP_TYPES, { error: 'Invalid OTP type' })),
 })
 
 /* SCHEMAS (para o Express consumir) */
