@@ -48,10 +48,9 @@ export class AuthService {
     );
   }
 
-  /* resource: /otps */
   checkResetStatus(): Observable<{ active: boolean; message: string }> {
     return this.http.get<{ active: boolean; message: string }>(
-      `${this.API_URL}/otps/password-reset/me`,
+      `${this.API_URL}/auth/password-reset/me`,
       { withCredentials: true },
     );
   }
@@ -64,14 +63,14 @@ export class AuthService {
       payload.email = email;
     }
 
-    return this.http.post<{ message: string }>(`${this.API_URL}/otps/resend`, payload, {
+    return this.http.post<{ message: string }>(`${this.API_URL}/auth/resend`, payload, {
       withCredentials: type === 'VERIFY',
     });
   }
 
   requestEmailVerification(): Observable<void> {
     return this.http.post<void>(
-      `${this.API_URL}/otps/email-verification`,
+      `${this.API_URL}/auth/email-verification`,
       {},
       {
         withCredentials: true,
@@ -81,7 +80,7 @@ export class AuthService {
 
   checkEmailOtp(otp: string): Observable<void> {
     return this.http.post<void>(
-      `${this.API_URL}/otps/email-verification/check`,
+      `${this.API_URL}/auth/email-verification/check`,
       { otp },
       {
         withCredentials: true,
@@ -91,7 +90,7 @@ export class AuthService {
 
   requestPasswordReset(email: string): Observable<{ message: string }> {
     return this.http.post<{ message: string }>(
-      `${this.API_URL}/otps/password-reset/request`,
+      `${this.API_URL}/auth/password-reset/request`,
       {
         email,
       },
@@ -103,7 +102,7 @@ export class AuthService {
 
   checkResetOtp(otp: string): Observable<void> {
     return this.http.post<void>(
-      `${this.API_URL}/otps/password-reset/check/`,
+      `${this.API_URL}/auth/password-reset/check/`,
       { otp },
       {
         withCredentials: true,
@@ -113,7 +112,7 @@ export class AuthService {
 
   resetPassword(data: { password: string; confirmPassword: string }): Observable<any> {
     return this.http.patch(
-      `${this.API_URL}/otps/password-reset/`,
+      `${this.API_URL}/auth/password-reset/`,
       {
         newPassword: data.password,
         confirmPassword: data.confirmPassword,
