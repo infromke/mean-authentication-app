@@ -19,8 +19,8 @@ import {
 import authController from './controllers/auth.controller.js'
 import identityController from './controllers/identity.controller.js'
 import { isAuthenticated, isGuest } from './middlewares/isLoggedIn.js'
-import { dynamicOtpAuth } from './middlewares/tollPlaza.js'
 import verifyAccessToken from './middlewares/verifyAccessToken.js'
+import verifyOtpContext from './middlewares/verifyOtpContext.js'
 import verifyPasswordToken from './middlewares/verifyPasswordToken.js'
 import verifyResetEmailToken from './middlewares/verifyResetEmailToken.js'
 
@@ -93,7 +93,7 @@ router.post(
   '/resend',
   otpSendLimiter,
   handleValidation(resendOtpSchema),
-  dynamicOtpAuth,
+  verifyOtpContext,
   identityController.resendOtpCode,
 )
 
