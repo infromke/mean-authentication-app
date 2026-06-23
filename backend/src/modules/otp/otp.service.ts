@@ -6,7 +6,7 @@ import type { IOtpPersistence } from './otp.model.js'
 import otpRepository from './otp.repository.js'
 import type { OtpOptions, OtpType } from './otp.types.js'
 
-class OtpService {
+export class OtpService {
   #otpRepository: typeof otpRepository
 
   constructor(otpRepositoryInstance: typeof otpRepository) {
@@ -47,7 +47,7 @@ class OtpService {
   validateOtp = async (userId: string, userCode: string, otpType: OtpType): Promise<void> => {
     const otpDocument = await this.#otpRepository.findById(userId, otpType)
 
-    if (!otpDocument) throw new AppError(404, 'Code has expired')
+    if (!otpDocument) throw new AppError(404, 'Code not found or expired')
     if (userCode !== otpDocument?.code) throw new AppError(403, 'Invalid code')
 
     await this.deleteOtp(userId, otpType)
@@ -58,7 +58,7 @@ class OtpService {
 
     if (result.deletedCount === 0)
       console.warn(
-        `[MONGODB] Attempt to delete OTP (${otpType}) document for user '${userId}' failed.`,
+        `[MONGODB] Attempt to delete OTP (${otpType}) document for user '${userId}' failed`,
       )
   }
 }
