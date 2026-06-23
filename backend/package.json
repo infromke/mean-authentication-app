@@ -11,7 +11,9 @@
     "start": "node ./dist/server.js",
     "start:local": "node --env-file=.env ./dist/server.js",
     "lint": "eslint src/**/*.ts",
-    "lint:fix": "eslint src/**/*.ts --fix"
+    "lint:fix": "eslint src/**/*.ts --fix",
+    "test": "vitest",
+    "test:run": "vitest run"
   },
   "dependencies": {
     "bcrypt": "6.0.0",
@@ -41,6 +43,7 @@
     "eslint-config-prettier": "10.1.8",
     "tsx": "4.22.3",
     "typescript": "6.0.3",
-    "typescript-eslint": "8.60.1"
+    "typescript-eslint": "8.60.1",
+    "vitest": "4.1.9"
   }
 }
