@@ -3,8 +3,6 @@ import type { ZodIssue } from 'zod'
 import env from '../../../config/env.js'
 import AppError from '../AppError.js'
 
-const isDev = env.NODE_ENV === 'development' || env.NODE_ENV === 'dev'
-
 const HTTP_ERRORS: Record<number, string> = {
   400: 'Bad Request',
   401: 'Unauthorized',
@@ -35,6 +33,7 @@ interface RFC7807Response {
  * @returns Um objeto contendo o status HTTP final e o corpo da resposta estruturado de acordo com a RFC 7807.
  */
 const formatProblemDetails = (err: Error | AppError, originalUrl: string) => {
+  const isDev = env.NODE_ENV === 'development' || env.NODE_ENV === 'dev'
   const isAppError = err instanceof AppError
 
   let status = isAppError ? err.status : 500
