@@ -8,7 +8,23 @@ const normalizeJwtError = (error: unknown): AppError => {
   // se já for uma instância de Error (que o jsonwebtoken lança)
   if (error instanceof Error) {
     if (error.name === 'TokenExpiredError') {
-      return new AppError(403, ['Access denied', 'Token has expired'])
+      return new AppError(401, ['Session expired', 'JWT has expired'])
+    }
+
+    // erros de configuração interna
+    if (
+      error.message === 'invalid algorithm' ||
+      error.message === 'secret or public key must be provided'
+    ) {
+      return new AppError(500, [
+        'Internal Server Error',
+        `Internal JWT config error: ${error.message}`,
+      ])
+    }
+
+    // outros erros (malformed, invalid signature, claims inválidas)
+    if (error.name === 'JsonWebTokenError' || error.name === 'NotBeforeError') {
+      return new AppError(401, ['Access denied', `JWT was rejected: ${error.message}`])
     }
   }
 
