@@ -7,9 +7,7 @@ const envSchema = z.object({
   SERVER_PORT: z.coerce.number().int().positive().default(3001),
   CLIENT_PORT: z.coerce.number().int().positive().default(4200),
   FRONTEND_URL: z.url('FRONTEND_URL must be a valid URL').optional(), // responsabilidade do Render
-  MONGODB_URI: z
-    .url('MONGODB_URI must be a valid connection URL')
-    .min(1, 'MONGODB_URI is required'),
+  MONGODB_URI: z.string().min(1, 'MONGODB_URI is required'),
   DB_NAME: z.string().min(1, 'DB_NAME is required'),
   JWT_ACCESS_SECRET: z.string().min(64, 'JWT_ACCESS_SECRET must be at least 64 characters long'),
   JWT_RESET_SECRET: z.string().min(64, 'JWT_RESET_SECRET must be at least 64 characters long'),
