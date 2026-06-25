@@ -14,7 +14,7 @@ import userRepository from './user.repository.js'
 import type { CreateUserDTO } from './user.types.js'
 import formatUserObject, { type FormattedUser } from './utils/formatUserObject.js'
 
-class UserService {
+export class UserService {
   #userRepository: typeof userRepository
   #mailService: typeof mailService
 
