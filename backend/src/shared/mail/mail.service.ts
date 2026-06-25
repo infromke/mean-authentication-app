@@ -6,7 +6,7 @@ import type { MailOptions, MailOtpType } from './mail.types.js'
 import getOtpEmailTemplate from './templates/otpEmail.js'
 import getWelcomeEmailTemplate from './templates/welcomeEmail.js'
 
-class MailService {
+export class MailService {
   #transporter = nodemailer.createTransport({
     host: env.SMTP_HOST,
     port: env.SMTP_PORT,
