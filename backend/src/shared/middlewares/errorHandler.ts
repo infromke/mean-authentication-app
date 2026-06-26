@@ -5,8 +5,6 @@ import env from '../../config/env.js'
 import AppError from '../errors/AppError.js'
 import formatProblemDetails from '../errors/utils/formatProblemDetails.js'
 
-const isDev = env.NODE_ENV === 'development' || env.NODE_ENV === 'dev'
-
 /**  Captura qualquer erro inesperado lançado em rotas, middlewares ou controllers.
  * Diferencia entre ambiente de produção e desenvolvimento seguindo a RFC 7807.
  */
@@ -16,6 +14,8 @@ const errorHandler: ErrorRequestHandler = (
   res: Response,
   _next: NextFunction,
 ): Response => {
+  const isDev = env.NODE_ENV === 'development' || env.NODE_ENV === 'dev'
+
   if (isDev) {
     console.error(err.stack) // exibe a stack no terminal
   }
