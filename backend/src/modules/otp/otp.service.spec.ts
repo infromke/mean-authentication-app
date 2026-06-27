@@ -27,7 +27,7 @@ describe('OtpService', () => {
       const otpType = 'VERIFY'
 
       const mockSavedOtp: Partial<IOtpPersistence> = {
-        userId: new Types.ObjectId(),
+        userId: new Types.ObjectId(userId),
         code: '123456',
         type: otpType,
         expiresAt: new Date(),
