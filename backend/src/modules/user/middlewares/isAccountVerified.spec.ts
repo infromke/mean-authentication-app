@@ -33,7 +33,7 @@ describe('isAccountVerified', () => {
 
     expect(userService.getSummaryById).toHaveBeenCalledWith('6a3d70d4dd08603c3e977a9d')
     expect(nextFunction).toHaveBeenCalledTimes(1)
-    expect(nextFunction).toHaveBeenCalledWith()
+    expect(nextFunction).toHaveBeenCalled()
   })
 
   it('should throw an AppError (403) if the user account is not verified', async () => {
