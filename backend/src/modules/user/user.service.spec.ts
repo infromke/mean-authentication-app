@@ -122,17 +122,12 @@ describe('UserService', () => {
 
   describe('getSummaryById', () => {
     it('should return the cached formatted version of an user document if it exists in cache', async () => {
-      const mockCachedData = {
-        name: 'Matheus Campos',
-        email: 'matheus_campos@example.com',
-      }
+      const mockCachedData = { name: 'Matheus Campos', email: 'matheus_campos@example.com' }
       vi.mocked(cache.get).mockReturnValue(mockCachedData)
 
-      const findEntityByIdSpy = vi.spyOn(userServiceInstance, 'findEntityById')
       const result = await userServiceInstance.getSummaryById('6a3b419b5ce4b6964d530b3f')
 
       expect(result).toEqual(mockCachedData)
-      expect(findEntityByIdSpy).not.toHaveBeenCalled()
       expect(mockUserRepository.findById).not.toHaveBeenCalled()
     })
 
@@ -143,29 +138,34 @@ describe('UserService', () => {
         _id: new Types.ObjectId(userId),
         name: 'Maria Almeida',
         email: 'maria_almeida@example.com',
+        password: 'hashed_password_string',
         isAccountVerified: false,
       }
 
       vi.mocked(cache.get).mockReturnValue(undefined)
       mockUserRepository.findById.mockResolvedValue(mockUser)
 
-      const findEntityByIdSpy = vi.spyOn(userServiceInstance, 'findEntityById')
       const result = await userServiceInstance.getSummaryById(userId)
 
-      expect(findEntityByIdSpy).toHaveBeenCalledTimes(1)
       expect(mockUserRepository.findById).toHaveBeenCalledTimes(1)
-      expect(result.id).toBe(String(new Types.ObjectId(userId)))
+      expect(result).toEqual({
+        id: userId,
+        name: 'Maria Almeida',
+        email: 'maria_almeida@example.com',
+        isAccountVerified: false,
+      })
+      expect(result).not.toHaveProperty('password')
       expect(cache.set).toHaveBeenCalledTimes(1)
     })
 
     it('should throw an AppError (404) if the repository returns null', async () => {
       mockUserRepository.findById.mockResolvedValue(null)
 
-      const findEntityByIdSpy = vi.spyOn(userServiceInstance, 'findEntityById')
       const act = () => userServiceInstance.getSummaryById('6a3b4ead5cab76cc08ee1da8')
 
       await expect(act).rejects.toThrow(AppError)
-      expect(findEntityByIdSpy).toHaveBeenCalledTimes(1)
+      await expect(act).rejects.toThrow('User not found')
+      expect(cache.set).not.toHaveBeenCalled()
     })
   })
 
