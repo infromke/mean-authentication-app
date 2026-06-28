@@ -47,6 +47,23 @@ class IdentityService {
     return user
   }
 
+  #createOtpAndSendEmail = async (
+    userId: string,
+    userEmail: string,
+    otpType: OtpType,
+    emailType: 'verification' | 'password reset',
+  ): Promise<void> => {
+    try {
+      const otpDocument = await this.#otpService.createOtp(userId, otpType)
+      await this.#mailService.sendOtpEmail(userEmail, otpDocument.code, emailType)
+    } catch (error: unknown) {
+      if (error && typeof error === 'object' && 'code' in error && error.code === 11000) {
+        throw new AppError(409, 'An active code has already been sent to this account')
+      }
+      throw error // lança outros erros inesperados
+    }
+  }
+
   /**
    * Checa a tipagem do objeto User e a reconhece em sua forma bruta (`IUserPersistence`)
    * ou higienizada (`FormattedUser`).
@@ -113,16 +130,7 @@ class IdentityService {
 
     if (user.isAccountVerified) throw new AppError(403, 'Account has already been verified')
 
-    try {
-      const otpDocument = await this.#otpService.createOtp(user.id, 'VERIFY')
-      await this.#mailService.sendOtpEmail(user.email, otpDocument.code, 'verification')
-    } catch (error: unknown) {
-      if (error && typeof error === 'object' && 'code' in error && error.code === 11000) {
-        throw new AppError(409, 'An active e-mail code has already been sent to this account')
-      }
-
-      throw error // repassa outros erros inesperados
-    }
+    await this.#createOtpAndSendEmail(user.id, user.email, 'VERIFY', 'verification')
   }
 
   /**
@@ -149,10 +157,12 @@ class IdentityService {
     try {
       const user = await this.#getUserByEmail(email)
       userEmailForToken = user.email
-
-      const otpDocument = await this.#otpService.createOtp(user._id.toString(), 'RESET')
-      await this.#mailService.sendOtpEmail(userEmailForToken, otpDocument.code, 'password reset')
-
+      await this.#createOtpAndSendEmail(
+        user._id.toString(),
+        userEmailForToken,
+        'RESET',
+        'password reset',
+      )
       return generateToken({ email: userEmailForToken }, env.JWT_RESET_SECRET, '5m')
     } catch (error: unknown) {
       const isObjectError = error && typeof error === 'object'
