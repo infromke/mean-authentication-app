@@ -25,7 +25,60 @@ export const registerBodySchema = userBody
     path: ['confirmPassword'], // erro associado ao campo confirmPassword
   })
 
+export const getAllUsersQuerySchema = z.object({
+  // apenas aceita uma string opcional para a busca textual (nome/e-mail)
+  search: z
+    .string()
+    .optional()
+    .transform((val) => val?.trim()),
+
+  // converte a string "true"/"false" diretamente para booleano ou marca como "undefined"
+  verified: z
+    .string()
+    .optional()
+    .transform((val) => {
+      if (val === 'true') return true
+      if (val === 'false') return false
+      return undefined
+    }),
+
+  // se não for enviado, assume "0". Depois transforma e valida como número positivo.
+  page: z
+    .string()
+    .default('0')
+    .transform((val) => parseInt(val, 10))
+    .refine((val) => !isNaN(val) && val >= 0, { error: 'Page must be a non-negative number' }),
+
+  // se não for enviado, assume "10". Depois transforma e limita o tamanho máximo em 50.
+  size: z
+    .string()
+    .default('10')
+    .transform((val) => parseInt(val, 10))
+    .refine((val) => !isNaN(val) && val >= 1 && val <= 50, {
+      error: 'Size must be between 1 and 50',
+    }),
+
+  // trata a ordenação dinâmica com "createdAt,desc" como fallback
+  sort: z
+    .string()
+    .default('createdAt,desc')
+    .transform((val) => {
+      const [rawField, rawDirection] = val.split(',')
+
+      const allowedFields = ['name', 'email', 'createdAt']
+      const finalField = rawField && allowedFields.includes(rawField) ? rawField : 'createdAt'
+      const finalDirection = rawDirection === 'asc' ? 'asc' : 'desc'
+
+      return { field: finalField, direction: finalDirection }
+    }),
+})
+
 /* SCHEMAS (para o Express consumir) */
+
+// GET /users
+const getAllUsersSchema = z.object({
+  query: getAllUsersQuerySchema,
+})
 
 // POST /users
 const registerSchema = z.object({
@@ -56,4 +109,4 @@ const updateSchema = z.object({
     ),
 })
 
-export { registerSchema, updateSchema }
+export { getAllUsersSchema, registerSchema, updateSchema }

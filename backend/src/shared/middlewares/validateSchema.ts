@@ -22,9 +22,24 @@ const validateSchema =
       // reinjeta os dados transformados no body
       req.body = parsedData.body
 
-      // para query e params as propriedades são apenas mutadas em vez de substituir o objeto todo
-      Object.assign(req.query, parsedData.query)
-      Object.assign(req.params, parsedData.params)
+      // para query e params as propriedades são redefinidas
+      if (parsedData.query) {
+        Object.defineProperty(req, 'query', {
+          value: parsedData.query,
+          writable: true,
+          configurable: true,
+          enumerable: true,
+        })
+      }
+
+      if (parsedData.params) {
+        Object.defineProperty(req, 'params', {
+          value: parsedData.params,
+          writable: true,
+          configurable: true,
+          enumerable: true,
+        })
+      }
 
       next()
     } catch (error) {
