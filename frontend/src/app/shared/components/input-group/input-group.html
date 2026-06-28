@@ -23,13 +23,15 @@
   @if (control.invalid && control.touched) {
     <small class="error-text fade-in">
       @if (control.hasError('required')) {
-        {{ label }} cannot be empty.
+        {{ label }} cannot be empty
       } @else if (control.hasError('email')) {
-        Please enter a valid e-mail address.
+        Inform a valid e-mail address
       } @else if (control.hasError('minlength')) {
-        Password must be at least {{ control.getError('minlength').requiredLength }} characters.
+        Password must be at least {{ control.getError('minlength').requiredLength }} characters
+      } @else if (control.hasError('emailInUse')) {
+        This e-mail is already taken
       } @else {
-        Invalid field.
+        Invalid field
       }
     </small>
   }

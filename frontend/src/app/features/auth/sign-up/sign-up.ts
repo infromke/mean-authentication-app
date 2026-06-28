@@ -50,7 +50,15 @@ export class SignUp {
         this.router.navigate(['/home']);
       },
       error: (err) => {
-        this.toastr.error(err.error?.detail);
+        if (err.status === 409 && err.error?.code === 'EMAIL_ALREADY_IN_USE') {
+          const emailControl = this.form.get('email');
+
+          if (emailControl) {
+            emailControl.setErrors({ emailInUse: true });
+          }
+        } else {
+          this.toastr.error(err.error?.detail);
+        }
       },
     });
   }
