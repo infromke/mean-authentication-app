@@ -8,9 +8,9 @@ const emailRule = z
   .toLowerCase()
   .min(1, 'Email cannot be empty')
 
-const otpRule = z.string({ error: 'OTP is required' }).min(1, 'OTP cannot be empty')
+const codeRule = z.string({ error: 'Code is required' }).min(1, 'Code cannot be empty')
 
-const OTP_TYPES = ['VERIFY', 'RESET'] as const
+const CODE_TYPES = ['VERIFY', 'RESET'] as const
 
 /**
  * -----------------------------------------------------------------------------
@@ -40,13 +40,13 @@ const loginSchema = z.object({
 /* ESTRUTURAS ISOLADAS (para o z.infer) */
 
 // POST /auth/email-verification/check
-export const verifyEmailBodySchema = z.object({ otp: otpRule })
+export const verifyEmailBodySchema = z.object({ code: codeRule })
 
 // POST /auth/password-reset/request
 export const requestResetBodySchema = z.object({ email: emailRule })
 
 // POST /auth/password-reset/check
-export const checkResetBodySchema = z.object({ otp: otpRule })
+export const checkResetBodySchema = z.object({ code: codeRule })
 
 // PATCH /auth/password-reset
 export const resetPasswordBodySchema = z
@@ -62,10 +62,10 @@ export const resetPasswordBodySchema = z
 // POST /auth/resend
 export const resendOtpBodySchema = z.object({
   type: z
-    .string({ error: 'OTP type is required' })
+    .string({ error: 'Code type is required' })
     .trim()
     .transform((val) => val.toUpperCase()) // padroniza para letras maiúsculas
-    .pipe(z.enum(OTP_TYPES, { error: 'Invalid OTP type' })),
+    .pipe(z.enum(CODE_TYPES, { error: 'Invalid code type' })),
 })
 
 /* SCHEMAS (para o Express consumir) */

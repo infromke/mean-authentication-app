@@ -70,8 +70,8 @@ class IdentityController {
     res: Response,
   ): Promise<Response> => {
     const { id } = req.user!
-    const { otp } = req.body
-    await this.#identityService.confirmEmailVerification(id, otp)
+    const { code } = req.body
+    await this.#identityService.confirmEmailVerification(id, code)
     return res.status(204).end()
   }
 
@@ -124,10 +124,10 @@ class IdentityController {
     req: Request<{}, any, VerifyResetDTO>,
     res: Response,
   ): Promise<Response> => {
-    const { otp } = req.body
+    const { code } = req.body
     const { email } = res.locals.reset
 
-    const passwordToken = await this.#identityService.confirmPasswordResetCode(email, otp)
+    const passwordToken = await this.#identityService.confirmPasswordResetCode(email, code)
 
     res.clearCookie('resetEmailToken', {
       httpOnly: true,

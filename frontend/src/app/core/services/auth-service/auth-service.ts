@@ -78,10 +78,10 @@ export class AuthService {
     );
   }
 
-  checkEmailOtp(otp: string): Observable<void> {
+  checkEmailOtp(code: string): Observable<void> {
     return this.http.post<void>(
       `${this.API_URL}/auth/email-verification/check`,
-      { otp },
+      { code },
       {
         withCredentials: true,
       },
@@ -100,10 +100,10 @@ export class AuthService {
     );
   }
 
-  checkResetOtp(otp: string): Observable<void> {
+  checkResetOtp(code: string): Observable<void> {
     return this.http.post<void>(
       `${this.API_URL}/auth/password-reset/check/`,
-      { otp },
+      { code },
       {
         withCredentials: true,
       },
