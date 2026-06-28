@@ -46,7 +46,13 @@ describe('UserService', () => {
 
   describe('findAllUsers', () => {
     it('should return the cached pagination result if it exists in cache', async () => {
-      const mockQuery = { page: '0', size: '10', sort: 'name,asc' }
+      const mockQuery = {
+        page: 0,
+        size: 10,
+        sort: { field: 'name', direction: 'asc' },
+        search: undefined,
+        verified: undefined,
+      }
       const mockCachedData = { content: [], totalElements: 0, totalPages: 0 }
 
       vi.mocked(cache.get).mockReturnValue(mockCachedData)
@@ -71,7 +77,14 @@ describe('UserService', () => {
         totalElements: 1,
       })
 
-      const query = { page: 'invalid-page', size: '999', sort: 'id,asc' }
+      const query = {
+        page: 0,
+        size: 50,
+        sort: { field: 'id', direction: 'asc' },
+        search: undefined,
+        verified: undefined,
+      }
+
       const result = await userServiceInstance.findAllUsers(query)
 
       expect(mockUserRepository.findAll).toHaveBeenCalledWith({
@@ -82,7 +95,6 @@ describe('UserService', () => {
         sortField: '_id',
         sortOrder: 1,
       })
-
       expect(cache.set).toHaveBeenCalledTimes(1)
       expect((result.content[0] as any)?.name).toBe('Rogério Souza')
     })

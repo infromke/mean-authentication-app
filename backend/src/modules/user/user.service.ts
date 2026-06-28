@@ -5,13 +5,13 @@ import env from '../../config/env.js'
 import AppError from '../../shared/errors/AppError.js'
 import cache from '../../shared/lib/cache.js'
 import mailService from '../../shared/mail/mail.service.js'
-import type { ListQuery, PaginationResult } from '../../shared/types/pagination.types.js'
+import type { PaginationResult } from '../../shared/types/pagination.types.js'
 import clearUserCache from '../../shared/utils/clearUserCache.js'
 import generateToken from '../../shared/utils/generateToken.js'
 
 import type { IUser, IUserDocument, IUserPersistence } from './user.model.js'
 import userRepository from './user.repository.js'
-import type { CreateUserDTO } from './user.types.js'
+import type { CreateUserDTO, GetAllUsersQuery } from './user.types.js'
 import formatUserObject, { type FormattedUser } from './utils/formatUserObject.js'
 
 export class UserService {
@@ -29,7 +29,7 @@ export class UserService {
   /**
    * Recupera uma lista paginada de usuários com suporte a cache dinâmico baseado na query.
    */
-  findAllUsers = async (query: ListQuery): Promise<PaginationResult> => {
+  findAllUsers = async (query: GetAllUsersQuery): Promise<PaginationResult> => {
     const cacheKey = `users_list_${JSON.stringify(query)}`
 
     // tenta buscar o resultado da requisição no cache primeiro
@@ -37,39 +37,11 @@ export class UserService {
     if (cachedData) return cachedData
 
     // se não houver cache, executa a lógica normal abaixo
-    const search = query.search?.trim()
-    const verified = query.verified ? query.verified === 'true' : undefined
+    const { search, verified, page, size, sort } = query
 
-    // fallback para evitar valores vazios
-    const rawPage = parseInt(query.page || '0', 10)
-    const rawSize = parseInt(query.size || '10', 10)
-
-    // evita NaN e limita 50 itens para size
-    const page = Math.max(0, isNaN(rawPage) ? 0 : rawPage)
-    const size = Math.max(1, Math.min(50, isNaN(rawSize) ? 10 : rawSize))
-
-    // parse do sort com padrão "createdAt,desc"
-    const sortParts = query.sort || 'createdAt,desc'
-    const [sortProperty, sortDirection] = sortParts.toLowerCase().split(',')
-
-    const sortOrder = sortDirection === 'asc' ? 1 : -1
-    let sortField: string
-
-    // valida e define as propriedades após o toLowerCase()
-    switch (sortProperty) {
-      case 'id':
-        sortField = '_id' // traduz para o padrão do MongoDB
-        break
-
-      case 'name':
-        sortField = 'name'
-        break
-
-      case 'createdat':
-      default:
-        sortField = 'createdAt'
-        break
-    }
+    // traduz o campo "id" para o padrão do MongoDB se necessário
+    const sortField = sort.field === 'id' ? '_id' : sort.field
+    const sortOrder = sort.direction === 'asc' ? 1 : -1
 
     const { users, totalElements } = await this.#userRepository.findAll({
       search,

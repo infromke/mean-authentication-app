@@ -3,7 +3,7 @@ import type { Request, Response } from 'express'
 import env from '../../config/env.js'
 
 import userService from './user.service.js'
-import type { CreateUserDTO } from './user.types.js'
+import type { CreateUserDTO, GetAllUsersQuery } from './user.types.js'
 
 class UserController {
   #userService: typeof userService
@@ -16,7 +16,8 @@ class UserController {
    * Retorna uma lista de usuários filtrada ou paginada (`200 OK`).
    */
   getAll = async (req: Request, res: Response): Promise<Response> => {
-    const users = await this.#userService.findAllUsers(req.query)
+    const query = req.query as unknown as GetAllUsersQuery
+    const users = await this.#userService.findAllUsers(query)
     return res.status(200).json(users)
   }
 

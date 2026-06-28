@@ -8,7 +8,7 @@ import { isGuest } from '../auth/middlewares/isLoggedIn.js'
 import { fullLock, ownerOnly } from '../auth/middlewares/tollPlaza.js'
 
 import userController from './user.controller.js'
-import { registerSchema, updateSchema } from './user.schema.js'
+import { getAllUsersSchema, registerSchema, updateSchema } from './user.schema.js'
 
 const router = Router()
 
@@ -23,7 +23,7 @@ const router = Router()
  * @desc    Recupera a lista paginada de todos os usuários cadastrados.
  * @access  Público
  */
-router.get('/', userController.getAll)
+router.get('/', validateSchema(getAllUsersSchema), userController.getAll)
 
 /**
  * @route   POST /users
