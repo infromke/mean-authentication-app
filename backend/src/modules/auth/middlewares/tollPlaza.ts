@@ -1,9 +1,9 @@
 import handleValidation from '../../../shared/middlewares/handleValidation.js'
 import { paramsIdSchema } from '../../../shared/schemas/common.schema.js'
-import isAccountVerified from '../../user/middlewares/isAccountVerified.js'
-import verifyOwnership from '../../user/middlewares/verifyOwnership.js'
 
+import isAccountVerified from './isAccountVerified.js'
 import verifyAccessToken from './verifyAccessToken.js'
+import verifyOwnership from './verifyOwnership.js'
 
 /**
  * Verifica se o usuário está logado e se é o titular da conta que deseja alterar.

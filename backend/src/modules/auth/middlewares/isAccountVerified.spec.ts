@@ -3,7 +3,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 import type { NextFunction, Request, Response } from 'express'
 
 import AppError from '../../../shared/errors/AppError.js'
-import userService from '../user.service.js'
+import userService from '../../user/user.service.js'
 
 import isAccountVerified from './isAccountVerified.js'
 

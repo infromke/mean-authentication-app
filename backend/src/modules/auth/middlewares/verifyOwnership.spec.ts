@@ -3,7 +3,8 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 import type { NextFunction, Request, Response } from 'express'
 
 import AppError from '../../../shared/errors/AppError.js'
-import verifyOwnership from '../../user/middlewares/verifyOwnership.js'
+
+import verifyOwnership from './verifyOwnership.js'
 
 vi.mock('../user.service.js', () => ({
   default: {
