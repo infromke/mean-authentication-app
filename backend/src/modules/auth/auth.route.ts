@@ -1,11 +1,11 @@
 import { Router } from 'express'
 
-import handleValidation from '../../shared/middlewares/handleValidation.js'
 import {
   otpSendLimiter,
   otpVerifyLimiter,
   sessionLimiter,
 } from '../../shared/middlewares/rateLimiter.js'
+import validateSchema from '../../shared/middlewares/validateSchema.js'
 
 import {
   checkResetSchema,
@@ -41,7 +41,7 @@ router.post(
   '/login',
   isAuthenticated,
   sessionLimiter,
-  handleValidation(loginSchema),
+  validateSchema(loginSchema),
   authController.login,
 )
 
@@ -53,7 +53,7 @@ router.post(
 router.post(
   '/password-reset/request',
   isGuest,
-  handleValidation(requestResetSchema),
+  validateSchema(requestResetSchema),
   identityController.requestPasswordReset,
 )
 
@@ -92,7 +92,7 @@ router.get('/password-reset/me', verifyPasswordToken, identityController.checkRe
 router.post(
   '/resend',
   otpSendLimiter,
-  handleValidation(resendOtpSchema),
+  validateSchema(resendOtpSchema),
   verifyOtpContext,
   identityController.resendOtpCode,
 )
@@ -113,7 +113,7 @@ router.post(
   '/email-verification/check',
   verifyAccessToken,
   otpVerifyLimiter,
-  handleValidation(checkVerificationSchema),
+  validateSchema(checkVerificationSchema),
   identityController.verifyEmailAccount,
 )
 
@@ -126,7 +126,7 @@ router.post(
   '/password-reset/check/',
   otpVerifyLimiter,
   verifyResetEmailToken,
-  handleValidation(checkResetSchema),
+  validateSchema(checkResetSchema),
   identityController.verifyPasswordResetCode,
 )
 
@@ -138,7 +138,7 @@ router.post(
 router.patch(
   '/password-reset',
   verifyPasswordToken,
-  handleValidation(resetPasswordSchema),
+  validateSchema(resetPasswordSchema),
   identityController.resetPassword,
 )
 

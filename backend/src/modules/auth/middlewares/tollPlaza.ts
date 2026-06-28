@@ -1,4 +1,4 @@
-import handleValidation from '../../../shared/middlewares/handleValidation.js'
+import validateSchema from '../../../shared/middlewares/validateSchema.js'
 import { paramsIdSchema } from '../../../shared/schemas/common.schema.js'
 
 import isAccountVerified from './isAccountVerified.js'
@@ -16,7 +16,7 @@ const ownerOnly = [verifyAccessToken, verifyOwnership]
  */
 const fullLock = [
   verifyAccessToken,
-  handleValidation(paramsIdSchema),
+  validateSchema(paramsIdSchema),
   verifyOwnership,
   isAccountVerified,
 ]

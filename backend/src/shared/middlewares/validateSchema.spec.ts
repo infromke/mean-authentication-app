@@ -5,9 +5,9 @@ import type { NextFunction, Request, Response } from 'express'
 
 import AppError from '../errors/AppError.js'
 
-import handleValidation from './handleValidation.js'
+import validateSchema from './validateSchema.js'
 
-describe('handleValidation Middleware', () => {
+describe('validateSchema', () => {
   let mockRequest: Partial<Request>
   let mockResponse: Partial<Response>
   let nextFunction: NextFunction
@@ -42,7 +42,7 @@ describe('handleValidation Middleware', () => {
     mockRequest.query = { search: 'test_query_10' }
     mockRequest.params = { id: '6a3f0bf72b4969b23e9ce42d' }
 
-    const middleware = handleValidation(testSchema)
+    const middleware = validateSchema(testSchema)
     middleware(mockRequest as Request, mockResponse as Response, nextFunction)
 
     expect(mockRequest.body).toEqual({ email: 'user@example.com', otp: 261932 })
@@ -56,7 +56,7 @@ describe('handleValidation Middleware', () => {
     mockRequest.query = {}
     mockRequest.params = {}
 
-    const middleware = handleValidation(testSchema)
+    const middleware = validateSchema(testSchema)
     const act = () => middleware(mockRequest as Request, mockResponse as Response, nextFunction)
 
     expect(act).toThrow(AppError)
@@ -82,7 +82,7 @@ describe('handleValidation Middleware', () => {
       }),
     } as any
 
-    const middleware = handleValidation(brokenSchema)
+    const middleware = validateSchema(brokenSchema)
     middleware(mockRequest as Request, mockResponse as Response, nextFunction)
 
     expect(nextFunction).toHaveBeenCalledWith(expect.any(Error))

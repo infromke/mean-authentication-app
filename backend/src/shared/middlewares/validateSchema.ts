@@ -8,7 +8,7 @@ import AppError from '../errors/AppError.js'
  * Processa os resultados das validações do Zod.
  * Caso existam erros, interrompe a requisição e lança um erro formatado.
  */
-const handleValidation =
+const validateSchema =
   <T extends ZodType>(schema: T): RequestHandler =>
   (req: Request, _res: Response, next: NextFunction): void => {
     try {
@@ -45,4 +45,4 @@ const handleValidation =
     }
   }
 
-export default handleValidation
+export default validateSchema
