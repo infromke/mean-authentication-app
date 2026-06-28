@@ -8,6 +8,7 @@ import { UserService } from '../../../core/services/user-service/user-service';
 import { CardBody } from '../../../shared/components/card-body/card-body';
 import { InputGroup } from '../../../shared/components/input-group/input-group';
 import { RedirectAction } from '../../../shared/components/redirect-action/redirect-action';
+import passwordsMatchValidator from '../../../shared/validators/passwordsMatchValidator';
 
 @Component({
   selector: 'app-sign-up',
@@ -24,12 +25,17 @@ export class SignUp {
   private toastr = inject(ToastrService);
 
   // definindo o formulário reativo
-  form = this.formBuilder.group({
-    name: ['', [Validators.required, Validators.minLength(2)]],
-    email: ['', [Validators.required, Validators.email]],
-    password: ['', [Validators.required, Validators.minLength(8)]],
-    confirmPassword: ['', [Validators.required]],
-  });
+  form = this.formBuilder.group(
+    {
+      name: ['', [Validators.required, Validators.minLength(2)]],
+      email: ['', [Validators.required, Validators.email]],
+      password: ['', [Validators.required, Validators.minLength(8)]],
+      confirmPassword: ['', [Validators.required]],
+    },
+    {
+      validators: passwordsMatchValidator,
+    },
+  );
 
   onRegisterSubmit(): void {
     if (this.form.invalid) {
@@ -38,11 +44,6 @@ export class SignUp {
     }
 
     const formData = this.form.getRawValue();
-
-    if (formData.confirmPassword !== formData.password) {
-      this.toastr.error('Passwords must match each other');
-      return;
-    }
 
     this.authService.register(formData).subscribe({
       next: (user) => {

@@ -30,6 +30,8 @@
         Password must be at least {{ control.getError('minlength').requiredLength }} characters
       } @else if (control.hasError('emailInUse')) {
         This e-mail is already taken
+      } @else if (control.hasError('passwordsMismatch')) {
+        Passwords must match each other
       } @else {
         Invalid field
       }
