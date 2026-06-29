@@ -165,15 +165,15 @@ class IdentityService {
       )
       return generateToken({ email: userEmailForToken }, env.JWT_RESET_SECRET, '5m')
     } catch (error: unknown) {
-      const isObjectError = error && typeof error === 'object'
+      const isAppError = error instanceof AppError
 
       // para camuflar o tempo de resposta da API quando o usuário não existe
-      if (isObjectError && 'status' in error && error.status === 404) {
+      if (isAppError && error.status === 404) {
         return generateToken({ email: userEmailForToken }, env.JWT_RESET_SECRET, '5m')
       }
 
       // quando o usuário já possui um código ativo, apenas reatribuímos o token de e-mail
-      if (isObjectError && 'code' in error && error.code === 11000) {
+      if (isAppError && error.status === 409) {
         const recoveryToken = generateToken(
           { email: userEmailForToken },
           env.JWT_RESET_SECRET,
@@ -198,7 +198,7 @@ class IdentityService {
       await this.#otpService.validateOtp(user._id.toString(), otpCode, 'RESET')
       return generateToken({ email: user.email }, env.JWT_RESET_SECRET, '15m')
     } catch (error) {
-      if (error && typeof error === 'object' && 'status' in error && error.status === 404) {
+      if (error instanceof AppError && error.status === 404) {
         throw new AppError(403, 'Invalid code') // não avisa que o usuário não existe, apenas nega o código
       }
 
