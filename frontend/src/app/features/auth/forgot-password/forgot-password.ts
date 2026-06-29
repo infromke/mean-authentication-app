@@ -34,7 +34,7 @@ export class ForgotPassword implements OnInit {
         this.toastr.info('We resumed where you previously left. You can continue!');
       },
       error: (err) => {
-        if (err.status === 401 || err.status === 403) return;
+        if (err.status === 401) return;
       },
     });
   }
