@@ -18,7 +18,7 @@ const isAuthenticated: RequestHandler = (
  * Impede que usuários já autenticados acessem as rotas de POST `/users` e `/auth/password-reset/request`.
  */
 const isGuest: RequestHandler = (req: Request, _res: Response, next: NextFunction): void => {
-  if (req.cookies.accessToken) throw new AppError(403, 'Cannot proceed while logged in')
+  if (req.cookies.accessToken) throw new AppError(400, 'Cannot proceed while logged in')
   next()
 }
 

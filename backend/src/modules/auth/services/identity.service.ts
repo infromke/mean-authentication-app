@@ -135,7 +135,7 @@ class IdentityService {
   sendEmailVerificationCode = async (id: string): Promise<void> => {
     const user = await this.#userService.getSummaryById(id)
 
-    if (user.isAccountVerified) throw new AppError(403, 'Account has already been verified')
+    if (user.isAccountVerified) throw new AppError(422, 'Account has already been verified')
 
     await this.#createOtpAndSendEmail(user.id, user.email, 'VERIFY', 'verification')
   }
@@ -145,7 +145,7 @@ class IdentityService {
    */
   confirmEmailVerification = async (id: string, otpCode: string): Promise<void> => {
     const user = await this.#userService.getSummaryById(id)
-    if (user.isAccountVerified) throw new AppError(403, 'Account has already been verified')
+    if (user.isAccountVerified) throw new AppError(422, 'Account has already been verified')
     await this.#otpService.validateOtp(user.id, otpCode, 'VERIFY')
     await this.#userService.updateUser(user.id, { isAccountVerified: true })
 
@@ -204,7 +204,7 @@ class IdentityService {
       return generateToken({ email: user.email }, env.JWT_RESET_SECRET, '15m')
     } catch (error) {
       if (error instanceof AppError && error.status === 404) {
-        throw new AppError(403, 'Invalid code') // não avisa que o usuário não existe, apenas nega o código
+        throw new AppError(422, 'Invalid code') // não avisa que o usuário não existe, apenas nega o código
       }
 
       throw error // repassa outros erros inesperados

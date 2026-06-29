@@ -48,7 +48,7 @@ export class OtpService {
     const otpDocument = await this.#otpRepository.findById(userId, otpType)
 
     if (!otpDocument) throw new AppError(404, 'Code not found or expired')
-    if (userCode !== otpDocument?.code) throw new AppError(403, 'Invalid code')
+    if (userCode !== otpDocument?.code) throw new AppError(422, 'Invalid code')
 
     await this.deleteOtp(userId, otpType)
   }
