@@ -52,7 +52,7 @@ class AuthService {
     const isPasswordValid = await validatePassword(credentials.password, passwordToValidate)
 
     if (!user || !isPasswordValid) {
-      throw new AppError(400, 'Invalid credentials')
+      throw new AppError(401, 'Invalid credentials')
     }
 
     const userIdString = user._id.toString()
