@@ -11,6 +11,7 @@ const HTTP_ERRORS: Record<number, string> = {
   409: 'Conflict',
   429: 'Too Many Requests',
   500: 'Internal Server Error',
+  503: 'Service Unavailable',
 }
 
 interface RFC7807Response {

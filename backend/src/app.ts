@@ -10,6 +10,7 @@ import GlobalRouter from './modules/routes.js'
 import AppError from './shared/errors/AppError.js'
 import mailService from './shared/mail/mail.service.js'
 import errorHandler from './shared/middlewares/errorHandler.js'
+import timeoutHandler from './shared/middlewares/timeoutHandler.js'
 
 //  config
 const app = express()
@@ -22,6 +23,7 @@ mailService.verifyConnection() // verifica a conexão do nodemailer
 app.use(express.json())
 app.use(cors)
 app.use(cookieParser())
+app.use(timeoutHandler(3)) // middleware de timeout
 
 if (env.NODE_ENV === 'development') {
   app.use(morgan('dev'))
