@@ -54,6 +54,11 @@ const formatProblemDetails = (err: Error | AppError, originalUrl: string) => {
     }
   }
 
+  // para qualquer erro 500 durante production
+  if (!isDev && status === 500) {
+    detail = 'An unexpected error occurred. Please try again later.'
+  }
+
   const body: RFC7807Response = {
     type: 'about:blank',
     title: HTTP_ERRORS[status] || 'Error',
