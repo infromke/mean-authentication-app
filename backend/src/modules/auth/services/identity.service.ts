@@ -47,6 +47,13 @@ class IdentityService {
     return user
   }
 
+  /**
+   * Centraliza a criação de códigos OTP e o envio de e-mails transacionais.
+   * @param userId O ID de persistência do usuário no banco de dados.
+   * @param userEmail O endereço de e-mail do destinatário.
+   * @param otpType O propósito semântico do código ("VERIFY" ou "RESET").
+   * @param emailType O template correspondente para o serviço de e-mail.
+   */
   #createOtpAndSendEmail = async (
     userId: string,
     userEmail: string,
@@ -58,7 +65,7 @@ class IdentityService {
       await this.#mailService.sendOtpEmail(userEmail, otpDocument.code, emailType)
     } catch (error: unknown) {
       if (error && typeof error === 'object' && 'code' in error && error.code === 11000) {
-        throw new AppError(409, 'An active code has already been sent to this account')
+        throw new AppError(409, 'A code has already been sent to this account')
       }
       throw error // lança outros erros inesperados
     }
@@ -180,9 +187,7 @@ class IdentityService {
           '5m',
         )
 
-        throw new AppError(409, 'A code has already been sent to this account').withData(
-          recoveryToken,
-        )
+        throw new AppError(409, error.message).withData(recoveryToken)
       }
 
       throw error // repassa outros erros inesperados
