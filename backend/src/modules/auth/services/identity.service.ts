@@ -204,7 +204,7 @@ class IdentityService {
       return generateToken({ email: user.email }, env.JWT_RESET_SECRET, '15m')
     } catch (error) {
       if (error instanceof AppError && error.status === 404) {
-        throw new AppError(422, 'Invalid code') // não avisa que o usuário não existe, apenas nega o código
+        throw new AppError(422, 'Invalid code', 'INVALID_CODE') // não avisa que o usuário não existe, apenas nega o código
       }
 
       throw error // repassa outros erros inesperados
