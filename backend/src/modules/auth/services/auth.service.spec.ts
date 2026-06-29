@@ -99,24 +99,24 @@ describe('AuthService', () => {
       expect(result).toEqual({ user: mockFormattedUser, accessToken: 'header.payload.signature' })
     })
 
-    it('should throw an AppError (400) and validate a fake hash if user is not found', async () => {
+    it('should throw an AppError (401) and validate a fake hash if user is not found', async () => {
       vi.mocked(userService.findByEmail).mockResolvedValue(null)
       vi.mocked(validatePassword).mockResolvedValue(false)
 
       await expect(authService.authenticate(credentials)).rejects.toThrow(
-        new AppError(400, 'Invalid credentials'),
+        new AppError(401, 'Invalid credentials'),
       )
 
       expect(validatePassword).toHaveBeenCalledWith(credentials.password, fakeHash)
     })
 
-    it('should throw an AppError (400) if user exists but password is invalid', async () => {
+    it('should throw an AppError (401) if user exists but password is invalid', async () => {
       const mockDbUser = { _id: userId, password: 'real_hashed_password' }
       vi.mocked(userService.findByEmail).mockResolvedValue(mockDbUser as any)
       vi.mocked(validatePassword).mockResolvedValue(false)
 
       await expect(authService.authenticate(credentials)).rejects.toThrow(
-        new AppError(400, 'Invalid credentials'),
+        new AppError(401, 'Invalid credentials'),
       )
 
       expect(validatePassword).toHaveBeenCalledWith(credentials.password, 'real_hashed_password')

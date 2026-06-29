@@ -55,7 +55,7 @@ describe('isLoggedIn Middlewares', () => {
       expect(nextFunction).toHaveBeenCalledTimes(1)
     })
 
-    it('should throw an AppError (403) if an accessToken cookie exists', () => {
+    it('should throw an AppError (400) if an accessToken cookie exists', () => {
       mockRequest.cookies = { accessToken: 'header.payload.signature' }
 
       const act = () => isGuest(mockRequest as Request, mockResponse as Response, nextFunction)

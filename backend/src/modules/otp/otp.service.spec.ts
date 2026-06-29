@@ -70,7 +70,7 @@ describe('OtpService', () => {
       await expect(act).rejects.toThrow('Code not found or expired')
     })
 
-    it('should throw an AppError (403) if the user provides an invalid code', async () => {
+    it('should throw an AppError (422) if the user provides an invalid code', async () => {
       mockOtpRepository.findById.mockResolvedValue({ code: '111111' })
 
       const act = () =>

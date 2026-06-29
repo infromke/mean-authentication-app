@@ -80,11 +80,11 @@ describe('IdentityService', () => {
   })
 
   describe('sendEmailVerificationCode', () => {
-    it('should throw an AppError (403) if the user account is already verified', async () => {
+    it('should throw an AppError (422) if the user account is already verified', async () => {
       vi.mocked(userService.getSummaryById).mockResolvedValue({ isAccountVerified: true } as any)
 
       await expect(identityService.sendEmailVerificationCode(userId)).rejects.toThrow(
-        new AppError(403, 'Account has already been verified'),
+        new AppError(422, 'Account has already been verified'),
       )
     })
 
