@@ -152,6 +152,40 @@ describe('IdentityService', () => {
     })
   })
 
+  describe('confirmPasswordResetCode', () => {
+    const otpCode = '123456'
+
+    it('should successfully validate OTP and return a 15-minute password token', async () => {
+      const mockUser = { _id: new Types.ObjectId(userId), email: userEmail }
+      vi.mocked(userService.findByEmail).mockResolvedValue(mockUser as any)
+      vi.mocked(otpService.validateOtp).mockResolvedValue(undefined)
+      vi.mocked(generateToken).mockReturnValue('password_token.jwt.string')
+
+      const result = await identityService.confirmPasswordResetCode(userEmail, otpCode)
+
+      expect(userService.findByEmail).toHaveBeenCalledWith(userEmail, {})
+      expect(otpService.validateOtp).toHaveBeenCalledWith(userId, otpCode, 'RESET')
+      expect(generateToken).toHaveBeenCalledWith({ email: userEmail }, env.JWT_RESET_SECRET, '15m')
+      expect(result).toBe('password_token.jwt.string')
+    })
+
+    it('should mask a 404 user not found error and throw an AppError (422)', async () => {
+      vi.mocked(userService.findByEmail).mockResolvedValue(null)
+
+      try {
+        await identityService.confirmPasswordResetCode(userEmail, otpCode)
+        expect.fail('Should have thrown an AppError 422')
+      } catch (error: any) {
+        expect(error).toBeInstanceOf(AppError)
+        expect(error.status).toBe(422)
+        expect(error.message).toBe('Invalid code')
+        expect(error.code).toBe('INVALID_CODE')
+
+        expect(otpService.validateOtp).not.toHaveBeenCalled()
+      }
+    })
+  })
+
   describe('resendOtpCode', () => {
     it('should throw an AppError (429) if the 60 second code request cooldown is active', async () => {
       vi.mocked(userService.findByEmail).mockResolvedValue({
