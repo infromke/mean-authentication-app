@@ -1,8 +1,7 @@
 import type { Request, Response } from 'express'
 
-import env from '../../config/env.js'
-
-import authService from './auth.service.js'
+import env from '../../../config/env.js'
+import authService from '../services/auth.service.js'
 
 class AuthController {
   #authService: typeof authService

@@ -10,6 +10,7 @@ import AppError from '../errors/AppError.js'
  * @param windowMin O tempo da janela de restrição em minutos.
  * @param maxReq O número máximo de requisições permitidas dentro da janela.
  * @param message A mensagem de erro personalizada a ser exibida quando o limite for excedido.
+ * @throws {AppError} Envia um erro `429 Too Many Requests` via pipeline (next) quando as requisições excedem o limite estabelecido.
  * @returns Um middleware do express-rate-limit.
  */
 const createLimiter = (

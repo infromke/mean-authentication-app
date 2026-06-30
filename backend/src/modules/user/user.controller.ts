@@ -3,7 +3,7 @@ import type { Request, Response } from 'express'
 import env from '../../config/env.js'
 
 import userService from './user.service.js'
-import type { CreateUserDTO } from './user.types.js'
+import type { CreateUserDTO, GetAllUsersQuery } from './user.types.js'
 
 class UserController {
   #userService: typeof userService
@@ -16,7 +16,8 @@ class UserController {
    * Retorna uma lista de usuários filtrada ou paginada (`200 OK`).
    */
   getAll = async (req: Request, res: Response): Promise<Response> => {
-    const users = await this.#userService.findAllUsers(req.query)
+    const query = req.query as unknown as GetAllUsersQuery
+    const users = await this.#userService.findAllUsers(query)
     return res.status(200).json(users)
   }
 
@@ -25,8 +26,7 @@ class UserController {
    */
   getById = async (req: Request<{ id: string }>, res: Response): Promise<Response> => {
     const { id } = req.params
-
-    const user = await this.#userService.findById(id)
+    const user = await this.#userService.getSummaryById(id)
     return res.status(200).json(user)
   }
 
@@ -35,7 +35,7 @@ class UserController {
    */
   create = async (req: Request<{}, any, CreateUserDTO>, res: Response): Promise<Response> => {
     const { name, email, password } = req.body
-    const { formattedUser, accessToken } = await this.#userService.createUser({
+    const { newUser, accessToken } = await this.#userService.createUser({
       name,
       email,
       password,
@@ -48,7 +48,7 @@ class UserController {
       maxAge: 24 * 60 * 60 * 1000, // 1 dia
     })
 
-    return res.status(201).json(formattedUser)
+    return res.status(201).json(newUser)
   }
 
   /**
@@ -65,8 +65,8 @@ class UserController {
     if (req.body.email !== undefined) updates.email = req.body.email
     if (req.body.password !== undefined) updates.password = req.body.password
 
-    const user = await this.#userService.updateUser(id, updates)
-    return res.status(200).json(user)
+    const updatedUser = await this.#userService.updateUser(id, updates)
+    return res.status(200).json(updatedUser)
   }
 
   /**

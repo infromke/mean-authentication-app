@@ -1,38 +1,37 @@
-import env from '../../config/env.js'
-
 import AppError from '../errors/AppError.js'
-
-const isEnvDev = env.NODE_ENV === 'dev' || env.NODE_ENV === 'development'
 
 /**
  * Normaliza erros disparados pela biblioteca jsonwebtoken, adicionando status HTTP
  * e mensagens semânticas baseadas no ambiente.
+ * @param error O erro capturado na interceptação ou validação do token JWT.
+ * @returns Uma nova instância mapeada de AppError pronta para ser lançada.
  */
 const normalizeJwtError = (error: unknown): AppError => {
-  let status = 401
-  let message = 'Access denied'
-
   // se já for uma instância de Error (que o jsonwebtoken lança)
   if (error instanceof Error) {
-    if (isEnvDev) {
-      message = 'Invalid token'
-
-      if (error.name === 'TokenExpiredError') {
-        status = 403
-        message = 'Token has expired'
-      }
-    } else {
-      if (error.name === 'TokenExpiredError') {
-        status = 403
-        message = 'Session expired'
-      }
+    if (error.name === 'TokenExpiredError') {
+      return new AppError(401, ['Session expired', 'JWT has expired'])
     }
 
-    return new AppError(status, message)
+    // erros de configuração interna
+    if (
+      error.message === 'invalid algorithm' ||
+      error.message === 'secret or public key must be provided'
+    ) {
+      return new AppError(500, [
+        'Internal Server Error',
+        `Internal JWT config error: ${error.message}`,
+      ])
+    }
+
+    // outros erros (malformed, invalid signature, claims inválidas)
+    if (error.name === 'JsonWebTokenError' || error.name === 'NotBeforeError') {
+      return new AppError(401, ['Access denied', `JWT was rejected: ${error.message}`])
+    }
   }
 
-  // padrão para erros que não são instância de Error
-  return new AppError(401, isEnvDev ? 'Unknown error while validating token' : 'Access denied')
+  // padrão para outros erros
+  return new AppError(401, ['Access denied', 'Unknown error while validating token'])
 }
 
 export default normalizeJwtError

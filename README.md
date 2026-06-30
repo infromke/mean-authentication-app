@@ -17,6 +17,8 @@ O projeto conta com um ecossistema de gestão de identidades (IAM) que lida com 
 A aplicação foi estruturada sob o conceito de Monólito Modular com responsabilidades separadas em uma estrutura em camadas. Também, o projeto possui uma abordagem híbrida onde utiliza Classes Singleton para camadas de persistência e orquestração e funções modulares para utilitários.
 
 - **Modularização por Domínio**: Organização estrita em módulos (User, Auth, OTP), onde cada domínio possui seus próprios Controllers, Services, Repositories e Schemas;
+- **Princípio da Responsabilidade Única (SRP)**: Desacoplamento estrito de componentes de segurança, isolando o envio de e-mails transacionais no MailService e centralizando a orquestração de fluxos complexos de autenticação, verificação e redefinição de senha no IdentityService, mantendo cada classe focada em um único eixo de mudança;
+- **Service Layer Orientada a Casos de Uso**: Camada de serviços desenhada para orquestrar fluxos transacionais completos e focar nas regras de negócio, atuando de forma síncrona e isolada para garantir a consistência das operações da API;
 - **Padronização RFC 7807 (Problem Details)**: Implementação do padrão IETF para respostas de erro, fornecendo mensagens consistentes e semânticas;
 - **Encadeamento de Middlewares**: Pipeline de execução para sanitização de inputs, proteção de rotas via interceptores e controle de fluxo;
 - **POJO Persistence Pattern**: Camada de persistência otimizada com .lean(), garantindo que a lógica de negócio lide apenas com objetos JavaScript puros, aumentando a performance e previsibilidade;
@@ -32,7 +34,8 @@ A aplicação foi estruturada sob o conceito de Monólito Modular com responsabi
 - **Security**: `jsonwebtoken` para autenticação Stateless, `bcrypt` com fator de custo dinâmico adaptável ao ambiente (12 em produção, 10 em desenvolvimento) para hashing de senhas e `CORS` para políticas de segurança cross-origin;
 - **Session Management**: `cookie-parser` para a manipulação segura e isolada de credenciais via cookies de navegação;
 - **Resilience**: `node-cache` para redução de latência em dados de sessão e perfil, e `express-rate-limit` implementando a Internet Draft (draft-ietf-httpapi-ratelimit-headers) para evitar bots, sobrecarregamento e brute-force;
-- **Data Validation & Type Inference**: Validação de esquemas e contratos HTTP utilizando `Zod`, com uso estendido para a inferência automática de DTOs nativos via z.infer;
+- **Data Validation & Type Inference**: Validação de esquemas, contratos HTTP e queries de paginação/busca utilizando `Zod`, com uso estendido para a inferência automática de DTOs nativos via z.infer;
+- **Testing**: Suíte de testes unitários isolados e determinísticos implementados com `Vitest`;
 - **Communication**: `nodemailer` integrado ao SMTP da Brevo para fluxos transacionais de OTP;
 - **Observability**: Logging de tráfego para monitoramento de requisições HTTP com `morgan`.
 
@@ -40,18 +43,19 @@ A aplicação foi estruturada sob o conceito de Monólito Modular com responsabi
 
 - **Dependency Injection (DI)**: Uso extensivo da função inject() em vez de construtores tradicionais;
 - **State Management**: Uso de Signals para gerenciamento de estado e RxJS (Observables) para fluxos assíncronos complexos;
-- **Forms**: Reactive Forms para a construção de formulários para validações tipadas e detalhadas;
-- **Testing & Quality**: Suíte de testes com `Vitest` e `jsdom` para garantir a confiabilidade dos componentes;
+- **Forms**: Reactive Forms com componentes baseados em FormBuilder para construções tipadas, agregando validadores customizados (como o passwordsMatchValidator) e exibição de falhas inline dedicadas abaixo de cada input;
+- **Testing**: Suíte de testes com `Vitest` e `jsdom` para garantir a confiabilidade dos componentes;
 - **UI/UX**: Estilização modular com `SASS` (SCSS), ícones via `lucide-angular` e feedback visual em tempo real com `ngx-toastr`.
 
 ## Funcionalidades
 
 - **Autenticação Stateful baseada em Cookies**: Sessões seguras gerenciadas integralmente via Cookies HTTP-Only/Secure. O front-end delega o ciclo de vida das credenciais ao navegador (withCredentials);
 - **Fluxo de Confiança (OTP)**: Verificação de conta e recuperação de senha via One-Time Password, com expiração automática via MongoDB TTL e inteligência de reatribuição de fluxo pendente em caso de conflitos (409);
-- **Paginação Dinâmica**: Listagem de dados com suporte a size, page e sort, inspirado pelo padrão Spring Data JPA;
-- **Caching Estruturado**: Sistema de cache inteligente que armazena dados já sanitizados e formatados para otimizar a listagem de usuários e busca por ID, verificação de integridade da sessão ativa e validação de status do token de redefinição de senha;
-- **Segurança Proativa**: Proteção contra ataques de força bruta (Rate Limiting por IP) e tratamento especializado de colisões de dados (E11000);
-- **Defesa contra User Enumeration e Timing Attacks**: Camuflagem de respostas em fluxos de autenticação e redefinição de senha, utilizando shadow tokens e respostas agnósticas para impedir que atacantes descubram e-mails cadastrados por análise de tempo ou comportamento da API;
+- **Paginação e Busca Avançada**: Listagem de dados inspirada pelo padrão Spring Data JPA com suporte a paginação estrita através dos parâmetros "size" e "page", com ordenação dinâmica (sort) e filtros de pesquisa textual ("search") e estado de verificação ("verified");
+- **Ciclo de Vida de E-mail**: Mecanismo de segurança que força a perda automática do estado de verificação ("isAccountVerified = false") e exige uma nova validação OTP imediatamente caso o usuário altere seu endereço de e-mail cadastrado;
+- **Cache-Aside (Lazy Loading)**: Estratégia de cache em memória para otimização de consultas e redução de latência no banco de dados, pareado com invalidação dinâmica de cache em comandos de escrita e mutação de estado;
+- **Resiliência e Segurança Proativa**: Proteção contra ataques de força bruta através de Rate Limiting por IP e um middleware de controle de tempo estrito (timeoutHandler) que aborta requisições pendentes que ultrapassem 3 segundos para evitar a exaustão completa de recursos do servidor;
+- **Defesa contra User Enumeration e Timing Attacks**: Camuflagem de respostas em fluxos de autenticação e redefinição de senha, utilizando shadow tokens e respostas agnósticas para impedir a descoberta de credenciais por análise de tempo ou comportamento;
 - **Sanitização RESTful**: Endpoints semânticos com filtragem de campos sensíveis (senha) em todas as respostas da API;
 - **Unificação de Identificadores**: Padronização de identificadores para o formato String (id), ocultando detalhes de implementação do MongoDB (\_id) em toda a camada de transporte (API e Front-end).
 
@@ -70,8 +74,8 @@ Antes de rodar a aplicação, você precisa preparar sua instância ativa do Mon
 Após cumprir com as condições acima, clone o repositório.
 
 ```shell
-    git clone https://github.com/infromke/mean-authentication-system.git
-    cd mean-authentication-system
+    git clone https://github.com/infromke/mean-authentication-app.git
+    cd mean-authentication-app
 ```
 
 1. Instale as dependências
@@ -170,4 +174,5 @@ No final de tudo isso, eu aprendi a...
 - Gerenciar fluxos assíncronos e reatividade com RxJS e Observables;
 - Utilizar índices compostos e índices TTL no MongoDB para automação de ciclo de vida de dados;
 - Implementar logging de requisições com o Morgan para examinar seu tráfego em desenvolvimento;
-- Utilizar o Zod para criar esquemas de validação de dados e variáveis de ambiente.
+- Utilizar o Zod para criar esquemas de validação de dados e variáveis de ambiente;
+- Validar fluxos de negócio por meio de testes unitários isolados com o Vitest.

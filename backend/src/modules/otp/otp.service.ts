@@ -1,215 +1,80 @@
-import type { FilterQuery, ProjectionType } from 'mongoose'
-
-import env from '../../config/env.js'
-import { sendEmail } from '../../config/nodemailer.js'
+import { Types } from 'mongoose'
 
 import AppError from '../../shared/errors/AppError.js'
-import cache from '../../shared/lib/cache.js'
-import clearUserCache from '../../shared/utils/clearUserCache.js'
-import generateToken from '../../shared/utils/generateToken.js'
 
-import type { IUser, IUserDocument } from '../user/user.model.js'
-import userService from '../user/user.service.js'
-
+import type { IOtpPersistence } from './otp.model.js'
 import otpRepository from './otp.repository.js'
-import type { OtpType } from './otp.types.js'
-import { getOtpMailOptions } from './utils/generateMail.js'
-import { createOtpOptions } from './utils/generateOtp.js'
+import type { OtpOptions, OtpType } from './otp.types.js'
 
-class OtpService {
+export class OtpService {
   #otpRepository: typeof otpRepository
-  #userService: typeof userService
 
-  constructor(
-    otpRepositoryInstance: typeof otpRepository,
-    userServiceInstance: typeof userService,
-  ) {
+  constructor(otpRepositoryInstance: typeof otpRepository) {
     this.#otpRepository = otpRepositoryInstance
-    this.#userService = userServiceInstance
   }
 
   /**
-   * Encapsula a busca de usuários.
+   * Gera de forma pseudo-aleatória uma sequência numérica de 6 dígitos.
+   * @returns O código gerado.
    */
-  #getUserByFilter = async (
-    filter: FilterQuery<IUser>,
-    projection: ProjectionType<IUserDocument> | {} = {},
-  ): Promise<any> => {
-    return await this.#userService.findByFilter(filter, projection)
+  #generateCode = (): string => {
+    let code = ''
+
+    for (let i = 0; i < 6; i++) {
+      const digit = Math.floor(Math.random() * 10)
+      code += digit
+    }
+
+    return code
   }
 
   /**
-   * Cria o documento OTP no banco e despacha o e-mail contendo o código de forma assíncrona.
+   * Cria a estrutura inicial com os parâmetros padrão necessários para persistir um novo OTP. Define
+   * de forma fixa o TTL (tempo de vida) de 15 minutos e converte a string do ID para o tipo
+   * nativo do MongoDB.
+   * @returns O objeto de configuração estruturado com as propriedades do OTP.
    */
-  #sendCodeEmail = async (userId: string, userEmail: string, otpType: OtpType): Promise<void> => {
-    const otpOptions = createOtpOptions(userId, otpType)
-    const newOtp = await this.#otpRepository.create(otpOptions)
-    await sendEmail(getOtpMailOptions(userEmail, newOtp.code, otpType))
+  #generateOtp = (userId: string, otpType: OtpType): OtpOptions => ({
+    userId: new Types.ObjectId(userId),
+    code: this.#generateCode(),
+    type: otpType,
+    expiresAt: new Date(Date.now() + 15 * 60 * 1000), // 15 minutos
+  })
+
+  /**
+   * Cria e persiste um novo código OTP no banco de dados para o usuário e contexto especificados.
+   */
+  createOtp = async (userId: string, otpType: OtpType): Promise<IOtpPersistence> => {
+    const otpData = this.#generateOtp(userId, otpType)
+    return await this.#otpRepository.create(otpData)
   }
 
   /**
-   * Valida a integridade do código fornecido e deleta seu registro logo em seguida.
+   * Valida o código OTP informado comparando-o com o registro em banco e deleta o token se for idêntico.
+   * @throws {AppError} Lança um erro `404 Not Found` se o código não for encontrado ou já tiver expirado.
+   * @throws {AppError} Lança um erro `422 Unprocessable Entity` com code "INVALID_CODE" se o código fornecido estiver incorreto.
    */
-  #validateCode = async (userId: string, otpCode: string, otpType: OtpType): Promise<void> => {
+  validateOtp = async (userId: string, userCode: string, otpType: OtpType): Promise<void> => {
     const otpDocument = await this.#otpRepository.findById(userId, otpType)
 
-    if (!otpDocument) throw new AppError(404, 'Code has expired')
-    if (otpCode !== otpDocument?.code) throw new AppError(403, 'Invalid code')
+    if (!otpDocument) throw new AppError(404, 'Code not found or expired')
+    if (userCode !== otpDocument?.code) throw new AppError(422, 'Invalid code', 'INVALID_CODE')
 
-    await this.#otpRepository.deleteOne(userId, otpType)
+    await this.deleteOtp(userId, otpType)
   }
 
   /**
-   * Retorna o status da sessão de redefinição de senha, lendo e salvando o estado em cache.
+   * Remove de forma permanente o registro de OTP correspondente do banco de dados.
+   * Caso o documento não seja encontrado para exclusão, um aviso descritivo será registrado no console.
    */
-  getPasswordResetStatus = (token: string): any => {
-    const identifier = token.split('.')[1]
-    const cacheKey = `password_reset_${identifier}`
+  deleteOtp = async (userId: string, otpType: OtpType): Promise<void> => {
+    const result = await this.#otpRepository.deleteOne(userId, otpType)
 
-    // tenta buscar o resultado da requisição no cache primeiro
-    const cachedData = cache.get(cacheKey) as any | undefined
-    if (cachedData) return cachedData
-
-    // se não houver cache, executa a lógica normal abaixo
-    const resetStatus = { active: true, message: 'The password reset session is active' }
-
-    cache.set(cacheKey, resetStatus) // salva os dados no cache
-    return resetStatus
-  }
-
-  /**
-   * Reenvia o código OTP controlando concorrência através de trava curta de cooldown (60 segundos).
-   * Silencia falhas de enumeração caso o fluxo em andamento seja o de redefinição de senha.
-   */
-  resendOtpCode = async (type: OtpType, filter: FilterQuery<IUserDocument>): Promise<void> => {
-    try {
-      const user = await this.#getUserByFilter(filter)
-
-      // verifica se o cooldown de 60s está ativo
-      const cooldownKey = `otp_cooldown_${type}_${user.id}`
-      if (cache.has(cooldownKey)) throw new AppError(429, 'Wait 60s before requesting a new code')
-
-      // deleta o OTP previamente gerado
-      await this.#otpRepository.deleteOne(user.id, type)
-
-      if (type === 'VERIFY') await this.sendEmailVerificationCode(user.id)
-      else await this.sendPasswordResetCode({ email: user.email })
-
-      cache.set(cooldownKey, true, 60) // ativa o cooldown no cache
-    } catch (error: unknown) {
-      if (type === 'RESET' && error instanceof AppError && error.status === 404) {
-        return // silencia o erro caso o usuário não for encontrado
-      }
-      throw error // repassa outros erros
-    }
-  }
-
-  /**
-   * Envia o código de verificação para o usuário, somente desconsiderando a operação
-   * se o e-mail já estiver verificado.
-   */
-  sendEmailVerificationCode = async (id: string): Promise<void> => {
-    const user = await this.#userService.findById(id)
-
-    if (user.isAccountVerified) throw new AppError(403, 'Account has already been verified')
-
-    try {
-      await this.#sendCodeEmail(user.id, user.email, 'VERIFY')
-    } catch (error: unknown) {
-      if (error && typeof error === 'object' && 'code' in error && error.code === 11000) {
-        throw new AppError(409, 'An active e-mail code has already been sent to this account')
-      }
-
-      throw error // repassa outros erros inesperados
-    }
-  }
-
-  /**
-   * Confirma a verificação do e-mail, altera o estado do usuário no banco e limpa caches de sessão antigos.
-   */
-  confirmEmailVerification = async (id: string, otpCode: string): Promise<void> => {
-    const user = await this.#userService.findById(id)
-    if (user.isAccountVerified) throw new AppError(403, 'Account has already been verified')
-
-    await this.#validateCode(user.id, otpCode, 'VERIFY')
-    await this.#userService.updateUser(user.id, { isAccountVerified: true })
-
-    clearUserCache(user.id) // limpa o cache para não retornar dados ultrapassados no próximo GET
-  }
-
-  /**
-   * Envia o código de redefinição para o usuário e gera o token `resetEmailToken` (de 5 min).
-   * - `200 OK`: Retorna o token de redefinição gerado;
-   * - `404 Not Found`: Retorna um token fantasma (shadow token) para mitigar user enumeration;
-   * - `409 Conflict`: Anexa um novo token de redefinição aos metadados do erro.
-   */
-  sendPasswordResetCode = async (filter: FilterQuery<IUserDocument>): Promise<any> => {
-    let userEmailForToken = 'for_security@example.com' // fallback
-
-    try {
-      const user = await this.#getUserByFilter(filter)
-      userEmailForToken = user.email
-
-      await this.#sendCodeEmail(user.id, userEmailForToken, 'RESET')
-
-      return generateToken({ email: userEmailForToken }, env.JWT_RESET_SECRET, '5m')
-    } catch (error: unknown) {
-      const isObjectError = error && typeof error === 'object'
-
-      // para camuflar o tempo de resposta da API quando o usuário não existe
-      if (isObjectError && 'status' in error && error.status === 404) {
-        return generateToken({ email: userEmailForToken }, env.JWT_RESET_SECRET, '5m')
-      }
-
-      // quando o usuário já possui um código ativo, apenas reatribuímos o token de e-mail
-      if (isObjectError && 'code' in error && error.code === 11000) {
-        const recoveryToken = generateToken(
-          { email: userEmailForToken },
-          env.JWT_RESET_SECRET,
-          '5m',
-        )
-
-        throw new AppError(409, 'A code has already been sent to this account').withData(
-          recoveryToken,
-        )
-      }
-
-      throw error // repassa outros erros inesperados
-    }
-  }
-
-  /**
-   * Valida o código OTP e gera o token `passwordToken` (de 15 min) que libera a troca de senha.
-   */
-  confirmPasswordResetCode = async (
-    filter: FilterQuery<IUserDocument>,
-    otpCode: string,
-  ): Promise<string> => {
-    try {
-      const user = await this.#getUserByFilter(filter)
-      await this.#validateCode(user.id, otpCode, 'RESET')
-      return generateToken({ email: user.email }, env.JWT_RESET_SECRET, '15m')
-    } catch (error) {
-      if (error && typeof error === 'object' && 'status' in error && error.status === 404) {
-        throw new AppError(403, 'Invalid code') // não avisa que o usuário não existe, apenas nega o código
-      }
-
-      throw error // repassa outros erros inesperados
-    }
-  }
-
-  /**
-   * Persiste as novas credenciais do usuário e invalida imediatamente todos os caches vinculados ao ID.
-   */
-  resetUserPassword = async (
-    filter: FilterQuery<IUserDocument>,
-    password: string,
-  ): Promise<void> => {
-    const user = await this.#getUserByFilter(filter, '+password') // recebe um objeto user não formatado
-    await this.#userService.updateUser(user._id, { password })
-    const userIdString = user._id.toString()
-    clearUserCache(userIdString) // limpa o cache para não retornar dados ultrapassados no próximo GET
+    if (result.deletedCount === 0)
+      console.warn(
+        `[MONGODB] Attempt to delete OTP (${otpType}) document for user '${userId}' failed`,
+      )
   }
 }
 
-export default new OtpService(otpRepository, userService)
+export default new OtpService(otpRepository)

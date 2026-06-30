@@ -1,12 +1,9 @@
-import type { NextFunction, Request, RequestHandler, Response } from 'express'
-
-import handleValidation from '../../../shared/middlewares/handleValidation.js'
+import validateSchema from '../../../shared/middlewares/validateSchema.js'
 import { paramsIdSchema } from '../../../shared/schemas/common.schema.js'
-import isAccountVerified from '../../user/middlewares/isAccountVerified.js'
-import verifyOwnership from '../../user/middlewares/verifyOwnership.js'
 
+import isAccountVerified from './isAccountVerified.js'
 import verifyAccessToken from './verifyAccessToken.js'
-import verifyResetEmailToken from './verifyResetEmailToken.js'
+import verifyOwnership from './verifyOwnership.js'
 
 /**
  * Verifica se o usuário está logado e se é o titular da conta que deseja alterar.
@@ -19,16 +16,9 @@ const ownerOnly = [verifyAccessToken, verifyOwnership]
  */
 const fullLock = [
   verifyAccessToken,
-  handleValidation(paramsIdSchema),
+  validateSchema(paramsIdSchema),
   verifyOwnership,
   isAccountVerified,
 ]
-/**
- * Roteia a verificação do token baseado no tipo do OTP ("VERIFY" ou "RESET").
- */
-const dynamicOtpAuth: RequestHandler = (req: Request, res: Response, next: NextFunction) => {
-  const strategy = req.body.type === 'VERIFY' ? verifyAccessToken : verifyResetEmailToken
-  return strategy(req, res, next)
-}
 
-export { dynamicOtpAuth, fullLock, ownerOnly }
+export { fullLock, ownerOnly }

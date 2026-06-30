@@ -7,10 +7,10 @@ import AppError from '../../../shared/errors/AppError.js'
 import type { TokenUserPayload } from '../../../shared/types/auth.types.js'
 import normalizeJwtError from '../../../shared/utils/normalizeJwtError.js'
 
-const isEnvDev = env.NODE_ENV === 'dev' || env.NODE_ENV === 'development'
-
 /**
  * Verifica a integridade de um web token json lendo-o do cookie httpOnly de acordo com o ambiente.
+ * @throws {AppError} Lança um erro `401 Unauthorized` se o token não for encontrado. Ou se ele for inválido, corrompido ou expirado.
+ * @throws {AppError} Envia um erro `500 Internal Server Error` se o token possuir erros de configuração interna.
  */
 const verifyAccessToken: RequestHandler = (
   req: Request,
@@ -19,7 +19,7 @@ const verifyAccessToken: RequestHandler = (
 ): void => {
   const { accessToken } = req.cookies
 
-  if (!accessToken) throw new AppError(401, isEnvDev ? 'Token not found' : 'Access denied')
+  if (!accessToken) throw new AppError(401, ['Access denied', 'Token not found'])
 
   try {
     const payload = jwt.verify(accessToken, env.JWT_ACCESS_SECRET) as TokenUserPayload

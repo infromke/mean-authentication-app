@@ -1,7 +1,7 @@
 import type { IUser, IUserPersistence } from '../user.model.js'
 
 // IUser sem "password", mas com "id" obrigatoriamente
-type FormattedUser = Omit<IUser, 'password'> & {
+export type FormattedUser = Omit<IUser, 'password'> & {
   id: string
 }
 

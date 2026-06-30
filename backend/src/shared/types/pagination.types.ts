@@ -1,5 +1,7 @@
 // query de listagem
 export interface ListQuery {
+  search?: string
+  verified?: string
   page?: string
   size?: string
   sort?: string
@@ -7,6 +9,8 @@ export interface ListQuery {
 
 // para os parâmetros de busca
 export interface FindAllParams {
+  search?: string | undefined
+  verified?: boolean | undefined
   page: number
   size: number
   sortField: string

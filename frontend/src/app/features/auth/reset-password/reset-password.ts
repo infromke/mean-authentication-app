@@ -7,6 +7,7 @@ import { AuthService } from '../../../core/services/auth-service/auth-service';
 import { UserService } from '../../../core/services/user-service/user-service';
 import { CardBody } from '../../../shared/components/card-body/card-body';
 import { InputGroup } from '../../../shared/components/input-group/input-group';
+import passwordsMatchValidator from '../../../shared/validators/passwordsMatchValidator';
 
 @Component({
   selector: 'app-reset-password',
@@ -23,10 +24,15 @@ export class ResetPassword {
   private toastr = inject(ToastrService);
 
   // definindo o formulário reativo
-  form = this.formBuilder.group({
-    password: ['', [Validators.required, Validators.minLength(8)]],
-    confirmPassword: ['', [Validators.required]],
-  });
+  form = this.formBuilder.group(
+    {
+      password: ['', [Validators.required, Validators.minLength(8)]],
+      confirmPassword: ['', [Validators.required]],
+    },
+    {
+      validators: passwordsMatchValidator,
+    },
+  );
 
   onResetSubmit(): void {
     if (this.form.invalid) {
@@ -36,11 +42,6 @@ export class ResetPassword {
 
     const formData = this.form.getRawValue();
 
-    if (formData.confirmPassword !== formData.password) {
-      this.toastr.error('Passwords must match each other');
-      return;
-    }
-
     this.authService.resetPassword(formData).subscribe({
       next: () => {
         this.userService.setResetEmail(null);
@@ -48,7 +49,7 @@ export class ResetPassword {
         this.router.navigate(['/']); // leva para a página de login
       },
       error: (err) => {
-        if (err.status === 401 || err.status === 403) {
+        if (err.status === 401) {
           this.router.navigate(['/']);
           this.toastr.info('Your session has timed out. Please try again.');
           return;

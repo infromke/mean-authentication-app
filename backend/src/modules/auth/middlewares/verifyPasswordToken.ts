@@ -7,11 +7,11 @@ import AppError from '../../../shared/errors/AppError.js'
 import type { TokenResetPayload } from '../../../shared/types/auth.types.js'
 import normalizeJwtError from '../../../shared/utils/normalizeJwtError.js'
 
-const isEnvDev = env.NODE_ENV === 'dev' || env.NODE_ENV === 'development'
-
 /**
  * Middleware para autorizar a redefinição de senha.
  * Verifica se o cookie `passwordToken` (gerado após validar o OTP) é válido.
+ * @throws {AppError} Lança um erro `401 Unauthorized` se o token não for encontrado. Ou se ele for inválido, corrompido ou expirado.
+ * @throws {AppError} Envia um erro `500 Internal Server Error` se o token possuir erros de configuração interna.
  */
 const verifyPasswordToken: RequestHandler = (
   req: Request,
@@ -20,7 +20,7 @@ const verifyPasswordToken: RequestHandler = (
 ): void => {
   const { passwordToken } = req.cookies
 
-  if (!passwordToken) throw new AppError(401, isEnvDev ? 'Token not found' : 'Access denied')
+  if (!passwordToken) throw new AppError(401, ['Access denied', 'Token not found'])
 
   try {
     const payload = jwt.verify(passwordToken, env.JWT_RESET_SECRET) as TokenResetPayload

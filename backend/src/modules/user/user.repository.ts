@@ -13,16 +13,38 @@ class UserRepository {
   /**
    * Executa uma busca paginada e concorrente (via Promise.all) otimizada com documentos POJO.
    */
-  async findAll({ page, size, sortField, sortOrder }: FindAllParams): Promise<PaginatedUsers> {
+  async findAll({
+    search,
+    verified,
+    page,
+    size,
+    sortField,
+    sortOrder,
+  }: FindAllParams): Promise<PaginatedUsers> {
     const skip = page * size
 
+    const filter: Record<string, unknown> = {}
+
+    // filtro case-insensitive por name/email
+    if (search) {
+      filter.$or = [
+        { name: { $regex: search, $options: 'i' } },
+        { email: { $regex: search, $options: 'i' } },
+      ]
+    }
+
+    // filtro por conta verificada
+    if (verified !== undefined) {
+      filter.isAccountVerified = verified
+    }
+
     const [users, totalElements] = await Promise.all([
-      User.find()
-        .sort({ [sortField]: sortOrder }) // Ordenação dinâmica
+      User.find(filter) // traz apenas os resultados filtrados
+        .sort({ [sortField]: sortOrder })
         .skip(skip)
         .limit(size)
-        .lean<IUserPersistence[]>(), // retorna dados puros (Plain Old JavaScript Objects)
-      User.countDocuments(),
+        .lean<IUserPersistence[]>(),
+      User.countDocuments(filter), // o total de elementos reflete a busca por filtro
     ])
 
     return { users, totalElements }

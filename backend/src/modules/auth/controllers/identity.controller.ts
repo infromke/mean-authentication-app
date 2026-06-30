@@ -1,23 +1,21 @@
 import type { NextFunction, Request, Response } from 'express'
 
-import env from '../../config/env.js'
-
-import AppError from '../../shared/errors/AppError.js'
-
-import otpService from './otp.service.js'
+import env from '../../../config/env.js'
+import AppError from '../../../shared/errors/AppError.js'
 import type {
   RequestResetDTO,
   ResendCodeDTO,
   ResetPasswordDTO,
   VerifyEmailDTO,
   VerifyResetDTO,
-} from './otp.types.js'
+} from '../../auth/auth.types.js'
+import identityService from '../services/identity.service.js'
 
-class OtpController {
-  #otpService: typeof otpService
+class IdentityController {
+  #identityService: typeof identityService
 
-  constructor(otpServiceInstance: typeof otpService) {
-    this.#otpService = otpServiceInstance
+  constructor(identityServiceInstance: typeof identityService) {
+    this.#identityService = identityServiceInstance
   }
 
   /**
@@ -25,7 +23,7 @@ class OtpController {
    * do token `passwordToken` (`200 OK`).
    */
   checkResetSession = (req: Request, res: Response): Response => {
-    const status = this.#otpService.getPasswordResetStatus(req.cookies.passwordToken)
+    const status = this.#identityService.getPasswordResetStatus(req.cookies.passwordToken)
     return res.status(200).json(status)
   }
 
@@ -38,9 +36,9 @@ class OtpController {
   ): Promise<Response> => {
     const { type } = req.body
 
-    const filter = type === 'VERIFY' ? { _id: req.user!.id } : { email: res.locals.reset['email'] }
+    const filter = type === 'VERIFY' ? req.user!.id : res.locals.reset['email']
 
-    await this.#otpService.resendOtpCode(type, filter)
+    await this.#identityService.resendOtpCode(type, filter)
     return res.status(200).json({
       message:
         type === 'VERIFY'
@@ -54,11 +52,11 @@ class OtpController {
    */
   requestEmailVerification = async (req: Request, res: Response): Promise<Response> => {
     const { id } = req.user!
-    await this.#otpService.sendEmailVerificationCode(id)
+    await this.#identityService.sendEmailVerificationCode(id)
 
     return res.status(200).json({
       nextStep: {
-        href: '/otps/email-verification/check',
+        href: '/auth/email-verification/check',
         method: 'POST',
       },
     })
@@ -72,8 +70,8 @@ class OtpController {
     res: Response,
   ): Promise<Response> => {
     const { id } = req.user!
-    const { otp } = req.body
-    await this.#otpService.confirmEmailVerification(id, otp)
+    const { code } = req.body
+    await this.#identityService.confirmEmailVerification(id, code)
     return res.status(204).end()
   }
 
@@ -90,7 +88,7 @@ class OtpController {
     const { email } = req.body
 
     try {
-      const resetEmailToken = await this.#otpService.sendPasswordResetCode({ email })
+      const resetEmailToken = await this.#identityService.sendPasswordResetCode(email)
 
       res.cookie('resetEmailToken', resetEmailToken, {
         httpOnly: true,
@@ -126,10 +124,10 @@ class OtpController {
     req: Request<{}, any, VerifyResetDTO>,
     res: Response,
   ): Promise<Response> => {
-    const { otp } = req.body
+    const { code } = req.body
     const { email } = res.locals.reset
 
-    const passwordToken = await this.#otpService.confirmPasswordResetCode({ email }, otp)
+    const passwordToken = await this.#identityService.confirmPasswordResetCode(email, code)
 
     res.clearCookie('resetEmailToken', {
       httpOnly: true,
@@ -146,7 +144,7 @@ class OtpController {
 
     return res.status(200).json({
       nextStep: {
-        href: '/otps/password-reset',
+        href: '/auth/password-reset',
         method: 'PATCH',
       },
     })
@@ -163,7 +161,7 @@ class OtpController {
     const { newPassword } = req.body
     const { email } = res.locals.reset
 
-    await this.#otpService.resetUserPassword({ email }, newPassword)
+    await this.#identityService.resetUserPassword(email, newPassword)
 
     res.clearCookie('passwordToken', {
       httpOnly: true,
@@ -180,4 +178,4 @@ class OtpController {
   }
 }
 
-export default new OtpController(otpService)
+export default new IdentityController(identityService)

@@ -37,15 +37,15 @@ export class VerifyReset {
         this.isLoading.set(false);
         this.otpInput.reset(); // limpa os campos se o código estiver errado
 
-        if (err.status === 401 || err.status === 403) {
-          this.router.navigate(['/']);
-          this.toastr.info('Your session has timed out. Please try again.');
+        if (err.status === 422 && err.error?.code === 'INVALID_CODE') {
+          this.toastr.error(err.error?.detail);
           return;
         }
 
-        if (err.status === 404) {
-          this.toastr.error('Invalid code');
-          return; // evita que o usuário saiba que o erro retorna "User not found"
+        if (err.status === 401) {
+          this.router.navigate(['/']);
+          this.toastr.info('Your session has timed out. Please try again.');
+          return;
         }
 
         this.toastr.error(err.error?.detail);
@@ -62,7 +62,7 @@ export class VerifyReset {
         this.resendAction.startTimer();
       },
       error: (err) => {
-        if (err.status === 401 || err.status === 403) {
+        if (err.status === 401) {
           this.router.navigate(['/']);
           this.toastr.info('Your session has timed out. Please try again.');
           return;

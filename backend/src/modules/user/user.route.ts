@@ -1,14 +1,14 @@
 import { Router } from 'express'
 
-import handleValidation from '../../shared/middlewares/handleValidation.js'
 import { authLimiter } from '../../shared/middlewares/rateLimiter.js'
+import validateSchema from '../../shared/middlewares/validateSchema.js'
 import { paramsIdSchema } from '../../shared/schemas/common.schema.js'
 
 import { isGuest } from '../auth/middlewares/isLoggedIn.js'
 import { fullLock, ownerOnly } from '../auth/middlewares/tollPlaza.js'
 
 import userController from './user.controller.js'
-import { registerSchema, updateSchema } from './user.schema.js'
+import { getAllUsersSchema, registerSchema, updateSchema } from './user.schema.js'
 
 const router = Router()
 
@@ -23,21 +23,21 @@ const router = Router()
  * @desc    Recupera a lista paginada de todos os usuários cadastrados.
  * @access  Público
  */
-router.get('/', userController.getAll)
+router.get('/', validateSchema(getAllUsersSchema), userController.getAll)
 
 /**
  * @route   POST /users
  * @desc    Cria uma nova conta de usuário no sistema.
  * @access  Público (Apenas convidados / Protegido por Rate Limiter)
  */
-router.post('/', authLimiter, isGuest, handleValidation(registerSchema), userController.create)
+router.post('/', authLimiter, isGuest, validateSchema(registerSchema), userController.create)
 
 /**
  * @route   GET /users/:id
  * @desc    Busca os detalhes públicos de um usuário específico através do ID.
  * @access  Público
  */
-router.get('/:id', handleValidation(paramsIdSchema), userController.getById)
+router.get('/:id', validateSchema(paramsIdSchema), userController.getById)
 
 /**
  * -----------------------------------------------------------------------------
@@ -50,7 +50,7 @@ router.get('/:id', handleValidation(paramsIdSchema), userController.getById)
  * @desc    Atualiza os dados cadastrais do perfil do usuário.
  * @access  Privado (Apenas o próprio dono da conta)
  */
-router.patch('/:id', ...ownerOnly, handleValidation(updateSchema), userController.update)
+router.patch('/:id', ...ownerOnly, validateSchema(updateSchema), userController.update)
 
 /**
  * @route   DELETE /users/:id

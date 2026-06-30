@@ -7,11 +7,11 @@ import AppError from '../../../shared/errors/AppError.js'
 import type { TokenResetPayload } from '../../../shared/types/auth.types.js'
 import normalizeJwtError from '../../../shared/utils/normalizeJwtError.js'
 
-const isEnvDev = env.NODE_ENV === 'dev' || env.NODE_ENV === 'development'
-
 /**
  * Middleware para gerenciar o fluxo de redefinição de senha.
  * Verifica se o cookie `resetEmailToken` (gerado após o usuário fornecer seu e-mail) é válido.
+ * @throws {AppError} Lança um erro `401 Unauthorized` se o token não for encontrado. Ou se ele for inválido, corrompido ou expirado.
+ * @throws {AppError} Envia um erro `500 Internal Server Error` se o token possuir erros de configuração interna.
  */
 const verifyResetEmailToken: RequestHandler = (
   req: Request,
@@ -20,7 +20,7 @@ const verifyResetEmailToken: RequestHandler = (
 ): void => {
   const { resetEmailToken } = req.cookies
 
-  if (!resetEmailToken) throw new AppError(401, isEnvDev ? 'Token not found' : 'Access denied')
+  if (!resetEmailToken) throw new AppError(401, ['Access denied', 'Token not found'])
 
   try {
     const payload = jwt.verify(resetEmailToken, env.JWT_RESET_SECRET) as TokenResetPayload
