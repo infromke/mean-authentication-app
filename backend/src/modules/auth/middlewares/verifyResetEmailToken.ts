@@ -10,6 +10,8 @@ import normalizeJwtError from '../../../shared/utils/normalizeJwtError.js'
 /**
  * Middleware para gerenciar o fluxo de redefinição de senha.
  * Verifica se o cookie `resetEmailToken` (gerado após o usuário fornecer seu e-mail) é válido.
+ * @throws {AppError} Lança um erro `401 Unauthorized` se o token não for encontrado. Ou se ele for inválido, corrompido ou expirado.
+ * @throws {AppError} Envia um erro `500 Internal Server Error` se o token possuir erros de configuração interna.
  */
 const verifyResetEmailToken: RequestHandler = (
   req: Request,

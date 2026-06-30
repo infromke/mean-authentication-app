@@ -5,6 +5,7 @@ import userService from '../../user/user.service.js'
 
 /**
  * Restringe o acesso apenas a usuários que realizaram a verificação de conta.
+ * @throws {AppError} Lança um erro `403 Forbidden` se a conta do usuário ainda não tiver sido verificada.
  */
 const isAccountVerified: RequestHandler = async (
   req: Request,

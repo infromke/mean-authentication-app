@@ -4,6 +4,7 @@ import AppError from '../../../shared/errors/AppError.js'
 
 /**
  * Impede que usuários já autenticados acessem a rota POST `/auth/login`.
+ * @throws {AppError} Lança um erro `400 Bad Request` se o cookie de sessão já estiver presente.
  */
 const isAuthenticated: RequestHandler = (
   req: Request,
@@ -16,6 +17,7 @@ const isAuthenticated: RequestHandler = (
 
 /**
  * Impede que usuários já autenticados acessem as rotas de POST `/users` e `/auth/password-reset/request`.
+ * @throws {AppError} Lança um erro `400 Bad Request` se o cookie de sessão já estiver presente.
  */
 const isGuest: RequestHandler = (req: Request, _res: Response, next: NextFunction): void => {
   if (req.cookies.accessToken) throw new AppError(400, 'Cannot proceed while logged in')

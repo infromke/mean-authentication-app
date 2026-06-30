@@ -39,6 +39,7 @@ class AuthService {
   /**
    * Executa a autenticação e mitiga ataques de temporização (Timing Attacks) gerando
    * um delay artificial com uma hash fixa quando o usuário não existe no banco.
+   * @throws {AppError} Lança um erro `401 Unauthorized` se o e-mail informado ou a senha fornecida forem inválidos.
    */
   authenticate = async (
     credentials: UserCredentials,

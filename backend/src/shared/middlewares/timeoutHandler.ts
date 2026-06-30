@@ -5,8 +5,9 @@ import AppError from '../errors/AppError.js'
 /**
  * Intercepta a requisição HTTP e impõe um limite estrito de tempo para a resposta.
  * Caso o servidor não responda dentro da janela estipulada, a requisição é cancelada
- * e um erro de `Service Unavailable (503)` é repassado para a pipeline de erros.
+ * e um erro de status 503 é repassado para a pipeline de erros.
  * @param seconds O tempo limite em segundos antes de disparar o timeout. Padrão 3.
+ * @throws {AppError} Envia um erro `503 Service Unavailable` via pipeline (next) se o tempo limite expirar sem resposta enviada.
  * @returns O middleware do Express para controle de tempo.
  */
 const timeoutHandler = (seconds: number = 3): RequestHandler => {

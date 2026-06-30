@@ -7,6 +7,8 @@ import AppError from '../errors/AppError.js'
 /**
  * Processa os resultados das validações do Zod.
  * Caso existam erros, interrompe a requisição e lança um erro formatado.
+ * @param schema O esquema do Zod que dita as regras de validação do formato e dados.
+ * @throws {AppError} Lança um erro `400 Bad Request` se o corpo, query ou parâmetros possuírem campos inválidos.
  */
 const validateSchema =
   <T extends ZodType>(schema: T): RequestHandler =>

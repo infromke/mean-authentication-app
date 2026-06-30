@@ -15,6 +15,7 @@ export class OtpService {
 
   /**
    * Gera de forma pseudo-aleatória uma sequência numérica de 6 dígitos.
+   * @returns O código gerado.
    */
   #generateCode = (): string => {
     let code = ''
@@ -31,6 +32,7 @@ export class OtpService {
    * Cria a estrutura inicial com os parâmetros padrão necessários para persistir um novo OTP. Define
    * de forma fixa o TTL (tempo de vida) de 15 minutos e converte a string do ID para o tipo
    * nativo do MongoDB.
+   * @returns O objeto de configuração estruturado com as propriedades do OTP.
    */
   #generateOtp = (userId: string, otpType: OtpType): OtpOptions => ({
     userId: new Types.ObjectId(userId),
@@ -39,11 +41,19 @@ export class OtpService {
     expiresAt: new Date(Date.now() + 15 * 60 * 1000), // 15 minutos
   })
 
+  /**
+   * Cria e persiste um novo código OTP no banco de dados para o usuário e contexto especificados.
+   */
   createOtp = async (userId: string, otpType: OtpType): Promise<IOtpPersistence> => {
     const otpData = this.#generateOtp(userId, otpType)
     return await this.#otpRepository.create(otpData)
   }
 
+  /**
+   * Valida o código OTP informado comparando-o com o registro em banco e deleta o token se for idêntico.
+   * @throws {AppError} Lança um erro `404 Not Found` se o código não for encontrado ou já tiver expirado.
+   * @throws {AppError} Lança um erro `422 Unprocessable Entity` com code "INVALID_CODE" se o código fornecido estiver incorreto.
+   */
   validateOtp = async (userId: string, userCode: string, otpType: OtpType): Promise<void> => {
     const otpDocument = await this.#otpRepository.findById(userId, otpType)
 
@@ -53,6 +63,10 @@ export class OtpService {
     await this.deleteOtp(userId, otpType)
   }
 
+  /**
+   * Remove de forma permanente o registro de OTP correspondente do banco de dados.
+   * Caso o documento não seja encontrado para exclusão, um aviso descritivo será registrado no console.
+   */
   deleteOtp = async (userId: string, otpType: OtpType): Promise<void> => {
     const result = await this.#otpRepository.deleteOne(userId, otpType)
 

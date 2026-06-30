@@ -80,6 +80,7 @@ export class UserService {
 
   /**
    * Recupera o documento original e mutável do usuário diretamente da camada de persistência.
+   * @throws {AppError} Lança um erro `404 Not Found` se o usuário com o ID especificado não for encontrado.
    */
   findEntityById = async (id: string): Promise<IUserPersistence> => {
     const user = await this.#userRepository.findById(id)
@@ -108,8 +109,9 @@ export class UserService {
   }
 
   /**
-   * Persiste o usuário, gera o token de acesso, dispara o e-mail de boas-vindas
-   * assincronamente e invalida o cache global de listagem.
+   * Persiste o usuário, gera o token de acesso, dispara o e-mail de boas-vindas assincronamente
+   * e invalida o cache global de listagem.
+   * @throws {AppError} Lança um erro `409 Conflict` com code "EMAIL_ALREADY_IN_USE" se o endereço de e-mail já estiver cadastrado.
    */
   createUser = async (
     data: CreateUserDTO,
@@ -129,6 +131,8 @@ export class UserService {
 
   /**
    * Atualiza parcialmente os dados do usuário e invalida seus caches específicos por ID.
+   * @throws {AppError} Lança um erro `409 Conflict` com code "EMAIL_ALREADY_IN_USE" se o novo e-mail já pertencer a outro usuário.
+   * @throws {AppError} Lança um erro `404 Not Found` se o usuário não for localizado para a atualização.
    */
   updateUser = async (id: string, data: Partial<IUser>): Promise<FormattedUser> => {
     // cópia do payload só pra gerenciar mutações de estado sem alterar o original
@@ -158,6 +162,7 @@ export class UserService {
 
   /**
    * Remove permanentemente o usuário do banco e limpa todas as suas entradas de cache ativas.
+   * @throws {AppError} Lança um erro `404 Not Found` se o usuário não existir na base de dados.
    */
   deleteUser = async (id: string): Promise<void> => {
     const deletedUser = await this.#userRepository.deleteById(id)

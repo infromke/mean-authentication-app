@@ -9,6 +9,8 @@ import normalizeJwtError from '../../../shared/utils/normalizeJwtError.js'
 
 /**
  * Verifica a integridade de um web token json lendo-o do cookie httpOnly de acordo com o ambiente.
+ * @throws {AppError} Lança um erro `401 Unauthorized` se o token não for encontrado. Ou se ele for inválido, corrompido ou expirado.
+ * @throws {AppError} Envia um erro `500 Internal Server Error` se o token possuir erros de configuração interna.
  */
 const verifyAccessToken: RequestHandler = (
   req: Request,

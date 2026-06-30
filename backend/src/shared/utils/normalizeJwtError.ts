@@ -3,6 +3,8 @@ import AppError from '../errors/AppError.js'
 /**
  * Normaliza erros disparados pela biblioteca jsonwebtoken, adicionando status HTTP
  * e mensagens semânticas baseadas no ambiente.
+ * @param error O erro capturado na interceptação ou validação do token JWT.
+ * @returns Uma nova instância mapeada de AppError pronta para ser lançada.
  */
 const normalizeJwtError = (error: unknown): AppError => {
   // se já for uma instância de Error (que o jsonwebtoken lança)

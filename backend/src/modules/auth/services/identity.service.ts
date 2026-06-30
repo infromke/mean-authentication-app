@@ -35,6 +35,8 @@ class IdentityService {
 
   /**
    * Encapsula a busca de usuários com projeção. Retorna a entidade bruta do usuário no banco de dados.
+   * @returns O documento mutável e completo do usuário obtido na persistência.
+   * @throws {AppError} Lança um erro `404 Not Found` se o e-mail não constar na base de dados.
    */
   #getUserByEmail = async (
     email: string,
@@ -49,10 +51,7 @@ class IdentityService {
 
   /**
    * Centraliza a criação de códigos OTP e o envio de e-mails transacionais.
-   * @param userId O ID de persistência do usuário no banco de dados.
-   * @param userEmail O endereço de e-mail do destinatário.
-   * @param otpType O propósito semântico do código ("VERIFY" ou "RESET").
-   * @param emailType O template correspondente para o serviço de e-mail.
+   * @throws {AppError} Lança um erro `409 Conflict` se um código ativo já existir para a conta.
    */
   #createOtpAndSendEmail = async (
     userId: string,
@@ -74,6 +73,7 @@ class IdentityService {
   /**
    * Checa a tipagem do objeto User e a reconhece em sua forma bruta (`IUserPersistence`)
    * ou higienizada (`FormattedUser`).
+   * @returns Um predicado de tipo indicando `true` se o objeto for da camada de persistência.
    */
   #isUserPersistenceEntity = (user: IUserPersistence | FormattedUser): user is IUserPersistence => {
     return '_id' in user
@@ -100,6 +100,7 @@ class IdentityService {
   /**
    * Reenvia o código OTP controlando concorrência através de trava curta de cooldown (60 segundos).
    * Silencia falhas de enumeração caso o fluxo em andamento seja o de redefinição de senha.
+   * @throws {AppError} Lança um erro `429 Too Many Requests` se o cooldown de 60 segundos ainda estiver ativo.
    */
   resendOtpCode = async (type: OtpType, identifier: string): Promise<void> => {
     try {
@@ -131,6 +132,7 @@ class IdentityService {
   /**
    * Envia o código de verificação para o usuário, somente desconsiderando a operação
    * se o e-mail já estiver verificado.
+   * @throws {AppError} Lança um erro `422 Unprocessable Entity` se a conta informada já constar como verificada.
    */
   sendEmailVerificationCode = async (id: string): Promise<void> => {
     const user = await this.#userService.getSummaryById(id)
@@ -142,6 +144,7 @@ class IdentityService {
 
   /**
    * Confirma a verificação do e-mail, altera o estado do usuário no banco e limpa caches de sessão antigos.
+   * @throws {AppError} Lança um erro `422 Unprocessable Entity` se a conta informada já constar como verificada.
    */
   confirmEmailVerification = async (id: string, otpCode: string): Promise<void> => {
     const user = await this.#userService.getSummaryById(id)
@@ -154,9 +157,9 @@ class IdentityService {
 
   /**
    * Envia o código de redefinição para o usuário e gera o token `resetEmailToken` (de 5 min).
-   * - `200 OK`: Retorna o token de redefinição gerado;
-   * - `404 Not Found`: Retorna um token fantasma (shadow token) para mitigar user enumeration;
-   * - `409 Conflict`: Anexa um novo token de redefinição aos metadados do erro.
+   * - `200 OK`: Retorna o token de e-mail gerado; ou
+   * - `404 Not Found`: Retorna um token fantasma (shadow token) para mitigar user enumeration.
+   * @throws {AppError} Lança um erro `409 Conflict` e anexa um novo token de e-mail caso o anterior tenha expirado e um código previamente enviado ainda esteja ativo sob o ID do usuário.
    */
   sendPasswordResetCode = async (email: string): Promise<string> => {
     let userEmailForToken = 'for_security@example.com' // fallback
@@ -196,6 +199,7 @@ class IdentityService {
 
   /**
    * Valida o código OTP e gera o token `passwordToken` (de 15 min) que libera a troca de senha.
+   * @throws {AppError} Lança um erro `422 Unprocessable Entity` com code "INVALID_CODE" se o código estiver incorreto ou se o usuário não existir.
    */
   confirmPasswordResetCode = async (email: string, otpCode: string): Promise<string> => {
     try {

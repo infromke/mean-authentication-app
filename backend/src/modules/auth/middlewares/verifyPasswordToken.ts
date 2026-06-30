@@ -10,6 +10,8 @@ import normalizeJwtError from '../../../shared/utils/normalizeJwtError.js'
 /**
  * Middleware para autorizar a redefinição de senha.
  * Verifica se o cookie `passwordToken` (gerado após validar o OTP) é válido.
+ * @throws {AppError} Lança um erro `401 Unauthorized` se o token não for encontrado. Ou se ele for inválido, corrompido ou expirado.
+ * @throws {AppError} Envia um erro `500 Internal Server Error` se o token possuir erros de configuração interna.
  */
 const verifyPasswordToken: RequestHandler = (
   req: Request,
